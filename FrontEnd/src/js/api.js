@@ -156,6 +156,157 @@ function updateContactInfo(profileData) {
     }
 }
 
+// 타임라인 정보를 가져오는 함수
+async function fetchTimelineData() {
+    try {
+        const response = await fetch(`${API_BASE_URL}/timeline/KwonHalim`);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        return data.result; // ApiResponse의 result 필드
+    } catch (error) {
+        console.error('타임라인 데이터를 가져오는 중 오류가 발생했습니다:', error);
+        return null;
+    }
+}
+
+// 타임라인 데이터를 동적으로 렌더링하는 함수
+async function loadTimelineData() {
+    console.log('타임라인 데이터 로드 시작...');
+    const timelineData = await fetchTimelineData();
+    
+    console.log('받은 타임라인 데이터:', timelineData);
+    
+    if (timelineData) {
+        // Education 섹션 업데이트
+        updateEducationSection(timelineData.educations);
+        
+        // Experience 섹션 업데이트
+        updateExperienceSection(timelineData.experiences);
+        
+        // 타임라인 기능 재초기화
+        if (window.reinitializeTimeline) {
+            window.reinitializeTimeline();
+        }
+    }
+}
+
+// Education 섹션을 동적으로 업데이트하는 함수
+function updateEducationSection(educations) {
+    const educationList = document.querySelector('.resume[data-page="timeline"] .timeline-list');
+    if (!educationList) {
+        console.log('Education timeline-list 요소를 찾을 수 없음');
+        return;
+    }
+    
+    // 기존 내용을 비우고 새로운 내용으로 교체
+    educationList.innerHTML = '';
+    
+    if (educations && educations.length > 0) {
+        educations.forEach((education, index) => {
+            const timelineItem = document.createElement('li');
+            timelineItem.className = 'timeline-item';
+            timelineItem.setAttribute('data-timeline-item', '');
+            
+            const startDate = education.startDate || '';
+            const endDate = education.endDate || '';
+            const dateRange = startDate && endDate ? `${startDate} — ${endDate}` : '';
+            
+            timelineItem.innerHTML = `
+                <div class="timeline-item-header">
+                    <div class="timeline-icon">
+                        ${education.iconPath ? `<img src="${education.iconPath}" alt="${education.place || 'Education'}" width="20" height="20">` : '<ion-icon name="library-outline"></ion-icon>'}
+                    </div>
+                    <div class="timeline-content">
+                        <h4 class="h4 timeline-item-title">${education.place || ''}</h4>
+                        <span>${dateRange}</span>
+                        <p class="timeline-text">
+                            ${education.simpleDescription || ''}
+                        </p>
+                    </div>
+                    <div class="timeline-click-hint">
+                        <ion-icon name="chevron-down-outline"></ion-icon>
+                    </div>
+                </div>
+                <div class="timeline-detail-content">
+                    <div class="timeline-detail-text">
+                        <h5 class="h5">
+                            <ion-icon name="information-circle-outline"></ion-icon>
+                            상세 정보
+                        </h5>
+                        <p>${education.detailDescription || ''}</p>
+                    </div>
+                </div>
+            `;
+            
+            educationList.appendChild(timelineItem);
+        });
+    }
+}
+
+// Experience 섹션을 동적으로 업데이트하는 함수
+function updateExperienceSection(experiences) {
+    // Experience 섹션은 두 번째 timeline 섹션에 있음
+    const timelineSections = document.querySelectorAll('.resume[data-page="timeline"] .timeline');
+    const experienceSection = timelineSections[1]; // 두 번째 섹션이 Experience
+    
+    if (!experienceSection) {
+        console.log('Experience 섹션을 찾을 수 없음');
+        return;
+    }
+    
+    const experienceList = experienceSection.querySelector('.timeline-list');
+    if (!experienceList) {
+        console.log('Experience timeline-list 요소를 찾을 수 없음');
+        return;
+    }
+    
+    // 기존 내용을 비우고 새로운 내용으로 교체
+    experienceList.innerHTML = '';
+    
+    if (experiences && experiences.length > 0) {
+        experiences.forEach((experience, index) => {
+            const timelineItem = document.createElement('li');
+            timelineItem.className = 'timeline-item';
+            timelineItem.setAttribute('data-timeline-item', '');
+            
+            const startDate = experience.startDate || '';
+            const endDate = experience.endDate || '';
+            const dateRange = startDate && endDate ? `${startDate} — ${endDate}` : '';
+            
+            timelineItem.innerHTML = `
+                <div class="timeline-item-header">
+                    <div class="timeline-icon">
+                        ${experience.iconPath ? `<img src="${experience.iconPath}" alt="${experience.place || 'Experience'}" width="20" height="20">` : '<ion-icon name="briefcase-outline"></ion-icon>'}
+                    </div>
+                    <div class="timeline-content">
+                        <h4 class="h4 timeline-item-title">${experience.place || ''}</h4>
+                        <span>${dateRange}</span>
+                        <p class="timeline-text">
+                            ${experience.simpleDescription || ''}
+                        </p>
+                    </div>
+                    <div class="timeline-click-hint">
+                        <ion-icon name="chevron-down-outline"></ion-icon>
+                    </div>
+                </div>
+                <div class="timeline-detail-content">
+                    <div class="timeline-detail-text">
+                        <h5 class="h5">
+                            <ion-icon name="information-circle-outline"></ion-icon>
+                            상세 정보
+                        </h5>
+                        <p>${experience.detailDescription || ''}</p>
+                    </div>
+                </div>
+            `;
+            
+            experienceList.appendChild(timelineItem);
+        });
+    }
+}
+
 // 페이지 로드 시 API 데이터 로드
 document.addEventListener('DOMContentLoaded', function() {
     // API 데이터 로드 시도
@@ -163,6 +314,11 @@ document.addEventListener('DOMContentLoaded', function() {
         console.error('API 데이터 로드 실패:', error);
         // API 호출 실패 시 기본값 설정
         setDefaultValues();
+    });
+    
+    // 타임라인 데이터 로드 시도
+    loadTimelineData().catch(error => {
+        console.error('타임라인 데이터 로드 실패:', error);
     });
 });
 

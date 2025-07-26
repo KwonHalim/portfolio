@@ -39,6 +39,7 @@ public class TimelineService {
                         .endDate(Education.getEndDate())
                         .detailDescription(Education.getDetailDescription())
                         .simpleDescription(Education.getSimpleDescription())
+                        .iconPath(Education.getIconPath())
                         .build()).toList();
 
 
@@ -53,6 +54,7 @@ public class TimelineService {
                         .simpleDescription(experience.getSimpleDescription())
                         .startDate(experience.getStartDate())
                         .endDate(experience.getEndDate())
+                        .iconPath(experience.getIconPath())
                         .build()).toList();
     }
 }

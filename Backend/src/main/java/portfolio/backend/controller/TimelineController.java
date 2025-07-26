@@ -7,7 +7,7 @@ import portfolio.backend.dto.TimelineResponse;
 import portfolio.backend.service.TimelineService;
 
 @RestController
-@RequestMapping("/api/tech-stacks")
+@RequestMapping("/api/timeline")
 @RequiredArgsConstructor
 public class TimelineController {
     private final TimelineService timelineService;

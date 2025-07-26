@@ -13,4 +13,5 @@ public class EducationC {
     LocalDate endDate;
     String simpleDescription;
     String detailDescription;
+    String iconPath;
 }

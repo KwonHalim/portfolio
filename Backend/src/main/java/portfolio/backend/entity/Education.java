@@ -28,7 +28,11 @@ public class Education extends BaseEntity {
     @Column
     private String DetailDescription;
 
-    @Column String SimpleDescription;
+    @Column
+    private String SimpleDescription;
+
+    @Column
+    private String iconPath;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "profile_id", nullable = false)

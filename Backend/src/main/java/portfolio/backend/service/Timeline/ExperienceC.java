@@ -13,4 +13,5 @@ public class ExperienceC {
     LocalDate endDate;
     String simpleDescription;
     String detailDescription;
+    String iconPath;
 }
