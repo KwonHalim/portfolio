@@ -3,6 +3,7 @@ package portfolio.backend.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -36,7 +37,7 @@ public class Profile extends BaseEntity{
     private String githubUsername;
     
     @Column
-    private String birthDate;
+    private LocalDate birthDate;
     
     @Column
     private String location;

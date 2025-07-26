@@ -14,7 +14,7 @@ public class ProfileController {
 
     @GetMapping("/KwonHalim")
     public ApiResponse<ProfileResponse> about_page() {
-        ProfileResponse profile = profileService.getProfile();
+        ProfileResponse profile = profileService.getProfilePageInfos();
         return ApiResponse.success(profile);
     }
 }

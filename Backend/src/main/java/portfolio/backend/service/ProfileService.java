@@ -21,8 +21,14 @@ public class ProfileService {
     private final ProfileRepository profileRepository;
     private final TechStackRepository techStackRepository;
 
+    public Long getProfileNum() {
+        Profile halim = profileRepository.findByName("권하림");
+        return halim.getId();
 
-    public ProfileResponse getProfile() {
+    }
+
+
+    public ProfileResponse getProfilePageInfos() {
         Profile profile = profileRepository.findByName("권하림");
         List<TechStack> techStacks = techStackRepository.findByProfileId(profile.getId());
         List<TechInfo> techInfos = techStacks.stream()
@@ -32,12 +38,6 @@ public class ProfileService {
                         .icon_path(techStack.getIconPath())
                         .build())
                 .toList();
-
-
-
-
-
-
 
         return ProfileResponse.builder()
                 .name(profile.getName())

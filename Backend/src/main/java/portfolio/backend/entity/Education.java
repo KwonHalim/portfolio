@@ -3,6 +3,8 @@ package portfolio.backend.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDate;
+
 @Entity
 @Getter @Setter
 @NoArgsConstructor
@@ -18,13 +20,15 @@ public class Education extends BaseEntity {
     private String institution;
 
     @Column
-    private String startDate;
+    private LocalDate startDate;
     
     @Column
-    private String endDate;
+    private LocalDate endDate;
     
     @Column
-    private String description;
+    private String DetailDescription;
+
+    @Column String SimpleDescription;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "profile_id", nullable = false)

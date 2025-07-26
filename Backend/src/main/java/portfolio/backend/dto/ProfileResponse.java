@@ -4,6 +4,7 @@ import lombok.Builder;
 import lombok.Getter;
 import portfolio.backend.service.ProfileService;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Builder
@@ -14,7 +15,7 @@ public class ProfileResponse {
     String github_url;
     String github_username;
     String location;
-    String birthday;
+    LocalDate birthday;
     String introduction;
     List<ProfileService.TechInfo> techInfos;
     String job_type;
