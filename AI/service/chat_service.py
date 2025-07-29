@@ -1,7 +1,6 @@
 # service/chat_service.py
 from typing import Dict, Any, List
 
-from AI.service.rag_service import rag_service
 
 
 class ChatService:
