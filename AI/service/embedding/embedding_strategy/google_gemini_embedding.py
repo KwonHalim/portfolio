@@ -15,11 +15,10 @@ class GoogleGeminiEmbedding(EmbeddingStrategy):
             model=model_name,
             google_api_key=settings.GENAI_API_KEY,  # 환경 변수에서 API 키 가져오기
         )
-        print(f"✅ GoogleGeminiEmbeddingStrategy 초기화 완료 (모델: {model_name})")
 
     def embed_documents(self, texts: List[str]) -> List[List[float]]: #문서 임베딩
         print(f"--- Google Gemini로 {len(texts)}개 문서 임베딩 중 ---")
-        batch_size = 20
+        batch_size = 15
         all_embeddings = []
         print(f"배치사이즈: {batch_size}로 진행합니다.")
         for i in range(0, len(texts), batch_size):
@@ -31,7 +30,7 @@ class GoogleGeminiEmbedding(EmbeddingStrategy):
             all_embeddings.extend(batch_embeddings)
 
             if i + batch_size < len(texts):
-                time.sleep(8)  # 1초 대기 (네트워크 상황에 따라 조절 가능)
+                time.sleep(10)  # 1초 대기 (네트워크 상황에 따라 조절 가능)
 
 
         return all_embeddings
