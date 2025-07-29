@@ -26,6 +26,17 @@ class RAGService:
         documents = self.chunk_service.chunk_documents(docs)
         print(f"--- 청킹 완료 ---")
         print(f"--- 생성된 청크 문서 개수: {len(documents)} ---")
+        # 3. 청킹된 문서 임베딩
+        print("--- 청크 문서 임베딩 시작 ---")
+        embedded_documents = self.embedding_service.embed_documents([doc.page_content for doc in documents])
+        print(f"--- 청크 문서 임베딩 완료 ---")
+        print(f"--- 임베딩된 청크 문서 개수: {len(embedded_documents)} ---")
+        # 4. 임베딩된 문서 저장
+        print("--- 청크 문서 저장 시작 ---")
+        self.chunk_service.save_chunks(documents, embedded_documents)
+        print("--- 청크 문서 저장 완료 ---")
+        print(f"--- 총 처리된 문서 개수: {len(docs)} ---")
+
 
 
 
