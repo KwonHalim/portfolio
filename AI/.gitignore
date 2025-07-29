@@ -1,5 +1,5 @@
 # Environment variables
-.env
+../.env
 .env.*
 !.env.example
 
@@ -30,7 +30,7 @@ venv/
 env/
 ENV/
 .venv/
-.env/
+../.env/
 fourkachip/
 
 # IDE
@@ -68,5 +68,8 @@ dmypy.json
 
 # pytest
 .pytest_cache/
-
-
+my_qa_data.jsonl
+my_qa_data.json
+my_qa_data.xlsx
+my_paragraph_data.txt
+my_rag_dataset.jsonl

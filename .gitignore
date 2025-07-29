@@ -1,5 +1,5 @@
 # Environment variables
-.env
+AI/.env
 .env.*
 !.env.example
 
@@ -63,7 +63,7 @@ venv/
 env/
 ENV/
 .venv/
-.env/
+AI/.env/
 fourkachip/
 
 # Jupyter Notebook
