@@ -1,5 +1,5 @@
+import time
 from typing import List
-import os
 
 from langchain_google_genai import GoogleGenerativeAIEmbeddings
 
@@ -19,7 +19,24 @@ class GoogleGeminiEmbedding(EmbeddingStrategy):
 
     def embed_documents(self, texts: List[str]) -> List[List[float]]: #문서 임베딩
         print(f"--- Google Gemini로 {len(texts)}개 문서 임베딩 중 ---")
-        return self._engine.embed_documents(texts)
+        batch_size = 20
+        all_embeddings = []
+        print(f"배치사이즈: {batch_size}로 진행합니다.")
+        for i in range(0, len(texts), batch_size):
+
+            batch_texts = texts[i:i + batch_size]
+            print(f"--- 임베딩 처리 중: {i + 1} ~ {i + len(batch_texts)} / {len(texts)} ---")
+
+            batch_embeddings = self._engine.embed_documents(batch_texts)
+            all_embeddings.extend(batch_embeddings)
+
+            if i + batch_size < len(texts):
+                time.sleep(8)  # 1초 대기 (네트워크 상황에 따라 조절 가능)
+
+
+        return all_embeddings
+
+
 
     def embed_query(self, text: str) -> List[float]: #하나의 질문 임베딩
         print(f"--- Google Gemini로 쿼리 임베딩 중: '{text}' ---")
