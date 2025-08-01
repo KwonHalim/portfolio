@@ -8,12 +8,12 @@ from AI.service.embedding.embedding_strategy.embedding_strategy import Embedding
 
 
 class GoogleGeminiEmbedding(EmbeddingStrategy):
-    def __init__(self, model_name: str):
+    def __init__(self, model_name: str, api_key: str = None):
         
         # 내부적으로 LangChain의 임베딩 클래스를 '엔진'으로 사용
         self._engine = GoogleGenerativeAIEmbeddings(
             model=model_name,
-            google_api_key=settings.GENAI_API_KEY,  # 환경 변수에서 API 키 가져오기
+            google_api_key=api_key,
         )
 
     def embed_documents(self, texts: List[str]) -> List[List[float]]: #문서 임베딩

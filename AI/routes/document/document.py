@@ -1,9 +1,7 @@
 from fastapi import APIRouter, Depends, UploadFile, File, HTTPException
-import os
-import io
 
-from AI.container.dependency import get_rag_service
 from AI.api_model.response_models import SuccessResponse
+from AI.container.dependency import get_rag_service
 from AI.service.rag_service import RAGService
 
 document_router = APIRouter(prefix="/documents", tags=["documents"])

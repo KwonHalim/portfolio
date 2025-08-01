@@ -1,4 +1,5 @@
 from pathlib import Path
+from typing import Optional
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -11,11 +12,14 @@ class Settings(BaseSettings):
         env_file=env_path,
         env_file_encoding="utf-8"
     )
-    VECTOR_DB_TYPE :str = "chroma"  # 사용할 벡터 DB 타입 (chroma 또는 pgvector)
+    VECTOR_DB_TYPE :str
     GENAI_API_KEY: str
     CHROMA_HOST: str
     CHROMA_PORT: int
     PGVECTOR_URL: str
+    LLM_TYPE: str
+    HUGGINGFACE_API_KEY: Optional[str] = None
+    HUGGINGFACE_ENDPOINT_URL: Optional[str] = None
 
 # 설정 객체 생성 (다른 파일에서 import하여 사용)
 settings = Settings()

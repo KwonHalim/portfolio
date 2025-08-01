@@ -3,7 +3,7 @@ import json
 from AI.database.vector.repository import VectorRepository
 from AI.service.chunk.service import ChunkService
 from AI.service.embedding.service import EmbeddingService
-from AI.service.rag.data_processor import DataProcessor
+from AI.service.data.data_processor import DataProcessor
 
 
 class RAGService:
@@ -44,12 +44,5 @@ class RAGService:
         print("--- 청크 문서 저장 시작 ---")
         # 3.청크 문서 저장 및 임베딩
         self.repository.add_documents(documents)
-
-
         print("--- 청크 문서 저장 완료 ---")
         print(f"--- 총 처리된 문서 개수: {len(docs)} ---")
-
-
-
-
-

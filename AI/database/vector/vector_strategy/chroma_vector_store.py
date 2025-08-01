@@ -22,5 +22,7 @@ class ChromaVectorStore(VectorStoreStrategy):
         self.vectorstore.add_documents(documents=chunks)
         print("💾 ChromaDB에 저장 완료")
 
-    def query(self, query_text: str, k: int = 3) -> List[Dict[str, Any]]:
+    def query(self, query_text: str, k: int = 3) -> list[tuple[Document, float]]:
         results = self.vectorstore.similarity_search_with_relevance_scores(query_text, k=k)
+        print(f"🔍 '{query_text}' 쿼리로 ChromaDB에서 유사 문서 검색 완료")
+        return results
