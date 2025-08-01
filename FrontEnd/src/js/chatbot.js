@@ -6,12 +6,14 @@ async function sendMessage() {
   const message = input.value.trim();
   
   if (message) {
+    input.value = '';
+
     try {
       // 사용자 메시지 표시
       addMessage('user', message);
       
       // 서버로 메시지 전송
-      const response = await fetch('http://localhost:8000/chat', {  // 실제 서버 URL로 변경 필요
+      const response = await fetch('http://localhost:8000/chat/message', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -24,9 +26,19 @@ async function sendMessage() {
       }
 
       const data = await response.json();
+      console.log('서버 응답:', data);
       
-      // 챗봇 응답 표시
-      addMessage('bot', data.response);
+      // 챗봇 응답 표시 - 서버 응답 구조에 맞게 수정
+      let botResponse = '응답을 받았습니다.';
+      if (data.result) {
+        botResponse = data.result;
+      } else if (data.message) {
+        botResponse = data.message;
+      } else if (data.response) {
+        botResponse = data.response;
+      }
+      
+      addMessage('bot', botResponse);
 
     } catch (error) {
       console.error('Error:', error);
@@ -34,7 +46,6 @@ async function sendMessage() {
     }
 
     // 입력창 초기화
-    input.value = '';
   }
 }
 
