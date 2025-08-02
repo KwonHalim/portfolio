@@ -7,11 +7,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import portfolio.backend.dto.ProfileResponse;
 import portfolio.backend.entity.Profile;
-import portfolio.backend.entity.TechStack;
+import portfolio.backend.entity.ProfileTechnology;
 import portfolio.backend.repository.ProfileRepository;
-import portfolio.backend.repository.TechStackRepository;
+import portfolio.backend.repository.ProfileTechnologyRepository;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -19,7 +18,7 @@ import java.util.List;
 @Transactional
 public class ProfileService {
     private final ProfileRepository profileRepository;
-    private final TechStackRepository techStackRepository;
+    private final ProfileTechnologyRepository profileTechnologyRepository;
 
     public Long getProfileNum() {
         Profile halim = profileRepository.findByName("권하림");
@@ -30,12 +29,12 @@ public class ProfileService {
 
     public ProfileResponse getProfilePageInfos() {
         Profile profile = profileRepository.findByName("권하림");
-        List<TechStack> techStacks = techStackRepository.findByProfileId(profile.getId());
+        List<ProfileTechnology> techStacks = profileTechnologyRepository.findByProfileId(profile.getId());
         List<TechInfo> techInfos = techStacks.stream()
-                .map(techStack -> TechInfo.builder()
-                        .stack(techStack.getTech())
-                        .description(techStack.getDescription())
-                        .icon_path(techStack.getIconPath())
+                .map(profileTechnology -> TechInfo.builder()
+                        .stack(String.valueOf(profileTechnology.getTechnology().getName()))
+                        .description(profileTechnology.getDescription())
+                        .icon_path(profileTechnology.getTechnology().getIconPath())
                         .build())
                 .toList();
 

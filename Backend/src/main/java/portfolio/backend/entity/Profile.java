@@ -58,6 +58,6 @@ public class Profile extends BaseEntity{
     private List<Project> project = new ArrayList<>();
 
     @OneToMany(mappedBy = "profile", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    private List<TechStack> techStack = new ArrayList<>();
+    private List<ProfileTechnology> profileTechnologies = new ArrayList<>();
 
 } 

@@ -3,6 +3,11 @@ package portfolio.backend.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 @Entity
 @Getter @Setter
 @NoArgsConstructor
@@ -33,15 +38,20 @@ public class Project extends BaseEntity{
     private String demoUrl;
     
     @Column
-    private String technologies;
-
-    @Column
     private Integer displayOrder;
     
-    @Column
-    private Boolean isActive = true; //현재 진행중인지 여부
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "profile_id", nullable = false)
     private Profile profile;
+
+    @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<ProjectImage> images = new ArrayList<>();
+
+    @ManyToMany
+    @JoinTable(
+            name = "project_technology", // 연결 테이블
+            joinColumns = @JoinColumn(name = "project_id"),
+            inverseJoinColumns = @JoinColumn(name = "technology_id") // Technology 테이블의 ID 참조
+    )
+    private Set<Technology> technologies = new HashSet<>();
 } 
