@@ -1,6 +1,5 @@
 package portfolio.backend.service;
 
-
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -23,38 +22,22 @@ public class TimelineService {
     private final ProfileService profileService;
 
     public TimelineResponse timeLinePage() {
-        return TimelineResponse.builder()
-                .experiences(findExperienceList())
-                .educations(findEducationList())
-                .build();
+        List<EducationC> educations = findEducationList();
+        List<ExperienceC> experiences = findExperienceList();
+        return TimelineResponse.of(educations, experiences);
     }
 
-
-    List<EducationC> findEducationList() {
+    private List<EducationC> findEducationList() {
         List<Education> educations = educationRepository.findByProfileId(profileService.getProfileNum());
         return educations.stream()
-                .map(Education -> EducationC.builder()
-                        .place(Education.getInstitution())
-                        .startDate(Education.getStartDate())
-                        .endDate(Education.getEndDate())
-                        .detailDescription(Education.getDetailDescription())
-                        .simpleDescription(Education.getSimpleDescription())
-                        .iconPath(Education.getIconPath())
-                        .build()).toList();
-
-
+                .map(education -> EducationC.from(education))
+                .toList();
     }
 
-    List<ExperienceC> findExperienceList() {
+    private List<ExperienceC> findExperienceList() {
         List<Experience> experiences = experienceRepository.findByProfileId(profileService.getProfileNum());
         return experiences.stream()
-                .map(experience -> ExperienceC.builder()
-                        .place(experience.getCompany())
-                        .detailDescription(experience.getDetailDescription())
-                        .simpleDescription(experience.getSimpleDescription())
-                        .startDate(experience.getStartDate())
-                        .endDate(experience.getEndDate())
-                        .iconPath(experience.getIconPath())
-                        .build()).toList();
+                .map(experience -> ExperienceC.from(experience))
+                .toList();
     }
 }

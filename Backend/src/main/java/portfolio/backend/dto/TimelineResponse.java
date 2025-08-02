@@ -13,4 +13,11 @@ import java.util.List;
 public class TimelineResponse {
     List<EducationC> educations;
     List<ExperienceC> experiences;
+
+    public static TimelineResponse of(List<EducationC> educations, List<ExperienceC> experiences) {
+        return TimelineResponse.builder()
+                .educations(educations)
+                .experiences(experiences)
+                .build();
+    }
 }
