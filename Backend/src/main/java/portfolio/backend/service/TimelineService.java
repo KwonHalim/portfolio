@@ -28,14 +28,14 @@ public class TimelineService {
     }
 
     private List<EducationC> findEducationList() {
-        List<Education> educations = educationRepository.findByProfileId(profileService.getProfileNum());
+        List<Education> educations = educationRepository.findByProfileIdOrderByStartDateDesc(profileService.getProfileNum());
         return educations.stream()
                 .map(education -> EducationC.from(education))
                 .toList();
     }
 
     private List<ExperienceC> findExperienceList() {
-        List<Experience> experiences = experienceRepository.findByProfileId(profileService.getProfileNum());
+        List<Experience> experiences = experienceRepository.findByProfileIdOrderByStartDateDesc(profileService.getProfileNum());
         return experiences.stream()
                 .map(experience -> ExperienceC.from(experience))
                 .toList();

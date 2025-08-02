@@ -12,6 +12,9 @@ async function sendMessage() {
       // 사용자 메시지 표시
       addMessage('user', message);
       
+      // 타이핑 효과 시작
+      const typingMessage = addTypingMessage();
+      
       // 서버로 메시지 전송
       const response = await fetch('http://localhost:8000/chat/message', {
         method: 'POST',
@@ -28,6 +31,9 @@ async function sendMessage() {
       const data = await response.json();
       console.log('서버 응답:', data);
       
+      // 타이핑 효과 제거
+      removeTypingMessage(typingMessage);
+      
       // 챗봇 응답 표시 - 서버 응답 구조에 맞게 수정
       let botResponse = '응답을 받았습니다.';
       if (data.result) {
@@ -42,6 +48,11 @@ async function sendMessage() {
 
     } catch (error) {
       console.error('Error:', error);
+      // 타이핑 효과 제거
+      const typingMessage = document.querySelector('.typing-message');
+      if (typingMessage) {
+        removeTypingMessage(typingMessage);
+      }
       addMessage('bot', '죄송합니다. 일시적인 오류가 발생했습니다.');
     }
 
@@ -56,6 +67,30 @@ function addMessage(type, text) {
   messageDiv.textContent = text;
   messagesDiv.appendChild(messageDiv);
   messagesDiv.scrollTop = messagesDiv.scrollHeight;
+}
+
+// 타이핑 효과 메시지 추가
+function addTypingMessage() {
+  const messagesDiv = document.getElementById('chatMessages');
+  const typingDiv = document.createElement('div');
+  typingDiv.className = 'message bot-message typing-message';
+  typingDiv.innerHTML = `
+    <div class="typing-indicator">
+      <span class="typing-dot"></span>
+      <span class="typing-dot"></span>
+      <span class="typing-dot"></span>
+    </div>
+  `;
+  messagesDiv.appendChild(typingDiv);
+  messagesDiv.scrollTop = messagesDiv.scrollHeight;
+  return typingDiv;
+}
+
+// 타이핑 효과 메시지 제거
+function removeTypingMessage(typingMessage) {
+  if (typingMessage && typingMessage.parentNode) {
+    typingMessage.parentNode.removeChild(typingMessage);
+  }
 }
 
 // 챗봇 초기화 함수

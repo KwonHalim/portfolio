@@ -101,6 +101,20 @@ temp/
 *.tmp
 *.temp
 
+# Excel temporary files
+*~$*.xlsx
+*~$*.xls
+
+# Test files
+FrontEnd/test-*.html
+
+# Video files (temporary)
+FrontEnd/assets/videos/*.mp4
+
+# Media files (temporary)
+FrontEnd/assets/videos/
+FrontEnd/assets/images/temp/
+
 # Database files
 *.db
 *.sqlite

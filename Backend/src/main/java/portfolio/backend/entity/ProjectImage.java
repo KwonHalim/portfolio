@@ -2,7 +2,6 @@ package portfolio.backend.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.springframework.lang.Nullable;
 
 @Entity
 @Getter @Setter

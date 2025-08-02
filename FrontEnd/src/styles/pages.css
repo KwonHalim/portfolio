@@ -335,7 +335,13 @@
   #PORTFOLIO
 \*-----------------------------------*/
 
-.filter-list { display: none; }
+.filter-list { 
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+}
 
 .filter-select-box {
   position: relative;
@@ -399,11 +405,20 @@
   margin-bottom: 10px;
 }
 
-.project-item { display: none; }
+.project-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 1.5rem;
+  padding: 2rem 0;
+}
 
-.project-item.active {
-  display: block;
+.project-item { 
+  display: block !important;
   animation: scaleUp 0.25s ease forwards;
+}
+
+.project-item.hidden {
+  display: none;
 }
 
 @keyframes scaleUp {
@@ -411,12 +426,19 @@
   100% { transform: scale(1); }
 }
 
-.project-item > a { width: 100%; }
+.project-item > a { 
+  width: 100%; 
+  display: block;
+  padding: 15px;
+  border-radius: 16px;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
 
 .project-img {
   position: relative;
   width: 100%;
-  height: 200px;
+  height: 15vh;
+  min-height: 120px;
   border-radius: 16px;
   overflow: hidden;
   margin-bottom: 15px;
@@ -461,13 +483,17 @@
 .project-item-icon-box ion-icon { --ionicon-stroke-width: 50px; }
 
 .project-img img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain !important;
+  max-height: 15vh !important;
   transition: var(--transition-1);
 }
 
-.project-item > a:hover img { transform: scale(1.1); }
+.project-item > a:hover img { 
+  transform: scale(1.15); 
+  filter: brightness(1.1) contrast(1.05);
+}
 
 .project-title,
 .project-category { margin-left: 10px; }
@@ -501,12 +527,35 @@
 
 .modal-content {
   background-color: var(--eerie-black-1);
-  margin: 5% auto;
-  width: 90%;
-  max-width: 1000px;
+  margin: 5vh auto;
+  width: 85%;
+  max-width: 70vw;
   border-radius: 20px;
   position: relative;
   animation: modalFadeIn 0.3s;
+  max-height: 85vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* 모달 스크롤바 스타일링 */
+.modal-content::-webkit-scrollbar {
+  width: 10px;
+}
+
+.modal-content::-webkit-scrollbar-track {
+  background: transparent;
+  margin: 0 2px;
+}
+
+.modal-content::-webkit-scrollbar-thumb {
+  background: var(--light-gray);
+  border-radius: 5px;
+  border: 1px solid var(--jet);
+}
+
+.modal-content::-webkit-scrollbar-thumb:hover {
+  background: var(--orange-yellow-crayola);
 }
 
 .close-modal {
@@ -522,37 +571,109 @@
 .modal-body {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 30px;
-  padding: 30px;
+  gap: 20px;
+  padding: 12px 15px;
+  height: 100%;
+  overflow: hidden;
 }
 
 .modal-img {
-  width: 100%;
-  height: auto;
+  width: 75%;
+  height: 50vh;
+  object-fit: contain;
   border-radius: 14px;
+  display: block;
+  margin: 0 auto;
 }
 
+.modal-video {
+  width: 75%;
+  height: 50vh;
+  object-fit: contain;
+  border-radius: 14px;
+  display: block;
+  margin: 0 auto;
+}
+
+.modal-media {
+  width: 100%;
+}
+
+.media-container {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.media-item {
+  width: 100%;
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.media-item img {
+  width: 70%;
+  height: 45vh;
+  object-fit: contain;
+  display: block;
+  margin: 0 auto;
+}
+
+.media-item video {
+  width: 70%;
+  height: 45vh;
+  object-fit: contain;
+  display: block;
+  margin: 0 auto;
+}
+
+
+
 .project-details {
-  padding: 20px 0;
+  padding: 10px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  max-height: 100%;
+  overflow-y: auto;
+}
+
+/* 스크롤바 스타일링 */
+.project-details::-webkit-scrollbar {
+  width: 8px;
+}
+
+.project-details::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.project-details::-webkit-scrollbar-thumb {
+  background: var(--jet);
+  border-radius: 4px;
+}
+
+.project-details::-webkit-scrollbar-thumb:hover {
+  background: var(--light-gray);
 }
 
 .project-description {
-  margin: 20px 0;
+  margin: 0;
 }
 
 .project-tech ul {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
-  margin: 15px 0;
+  gap: 8px;
+  margin: 10px 0;
 }
 
 .project-tech li {
   background: var(--jet);
-  padding: 5px 15px;
-  border-radius: 8px;
+  padding: 6px 12px;
+  border-radius: 6px;
   font-size: var(--fs-8);
   color: var(--orange-yellow-crayola);
+  border: 1px solid var(--jet);
 }
 
 .project-links {
@@ -567,6 +688,11 @@
   align-items: center;
   justify-content: center;
   min-width: 150px;
+  color: var(--light-gray) !important;
+}
+
+.project-links .form-btn:hover {
+  color: var(--light-gray) !important;
 }
 
 @keyframes modalFadeIn {
@@ -766,3 +892,94 @@ textarea.form-input::-webkit-resizer { display: none; }
 .form-btn:disabled:hover { background: var(--border-gradient-onyx); }
 
 .form-btn:disabled:hover::before { background: var(--bg-gradient-jet); } 
+
+.project-details .h3 {
+  color: var(--white-2);
+  font-size: var(--fs-2);
+  font-weight: var(--fw-500);
+  margin-bottom: 8px;
+  line-height: 1.2;
+}
+
+.project-details .project-category {
+  color: var(--orange-yellow-crayola);
+  font-size: var(--fs-7);
+  font-weight: var(--fw-400);
+  background: var(--onyx);
+  padding: 4px 12px;
+  border-radius: 6px;
+  width: max-content;
+  margin-bottom: 5px;
+}
+
+.project-description .h4,
+.project-tech .h4 {
+  color: var(--white-2);
+  font-size: var(--fs-4);
+  font-weight: var(--fw-500);
+  margin-bottom: 12px;
+}
+
+.project-description p {
+  color: var(--light-gray);
+  line-height: 1.7;
+  font-size: var(--fs-6);
+  margin-bottom: 15px;
+  text-align: left;
+  word-spacing: 0.5px;
+  letter-spacing: 0.2px;
+} 
+
+/* 반응형 미디어 조정 */
+@media (max-width: 1200px) {
+  .modal-img,
+  .modal-video {
+    height: 45vh;
+    width: 80%;
+  }
+  
+  .media-item img,
+  .media-item video {
+    height: 40vh;
+    width: 75%;
+  }
+}
+
+@media (max-width: 768px) {
+  .modal-content {
+    width: 90%;
+    max-width: 85vw;
+    margin: 3vh auto;
+  }
+  
+  .modal-body {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+  
+  .modal-img,
+  .modal-video {
+    height: 40vh;
+    width: 80%;
+  }
+  
+  .media-item img,
+  .media-item video {
+    height: 35vh;
+    width: 80%;
+  }
+}
+
+@media (max-width: 480px) {
+  .modal-img,
+  .modal-video {
+    height: 35vh;
+    width: 85%;
+  }
+  
+  .media-item img,
+  .media-item video {
+    height: 30vh;
+    width: 85%;
+  }
+} 

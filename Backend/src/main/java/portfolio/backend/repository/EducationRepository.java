@@ -8,5 +8,5 @@ import java.util.List;
 
 @Repository
 public interface EducationRepository extends JpaRepository<Education, Long> {
-    List<Education> findByProfileId(Long profileId);
+    List<Education> findByProfileIdOrderByStartDateDesc(Long profileId);
 } 

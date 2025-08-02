@@ -27,6 +27,20 @@ function initializeNavigation() {
         }
       });
 
+      // 프로젝트 페이지로 이동할 때 ProjectManager 초기화
+      if (clickedPage === 'projects') {
+        console.log('프로젝트 페이지로 이동됨');
+        setTimeout(() => {
+          if (!window.projectManager) {
+            console.log('ProjectManager 새로 초기화');
+            window.projectManager = new ProjectManager();
+          } else {
+            console.log('기존 ProjectManager 사용');
+            window.projectManager.loadProjects(true);
+          }
+        }, 100);
+      }
+
       window.scrollTo(0, 0);
     });
   });

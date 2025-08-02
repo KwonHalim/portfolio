@@ -50,7 +50,7 @@ async function initializePage() {
 function initializeAllEventListeners() {
   initializeSidebar();
   initializeNavigation();
-  initializeProjects();
+  // initializeProjects(); // projects.js에서 자체적으로 처리
   initializeChatbot();
   initializeAbout();
 } 

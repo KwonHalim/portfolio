@@ -8,15 +8,18 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Technology {
-
+public class Technology extends BaseEntity {
+    
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
+    
     @Column(nullable = false, unique = true)
     private String name;
-
+    
+    @Column
+    private String description;
+    
     @Column
     private String iconPath;
 }

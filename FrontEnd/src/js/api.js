@@ -307,6 +307,222 @@ function updateExperienceSection(experiences) {
     }
 }
 
+// 프로젝트 목록을 가져오는 함수
+async function fetchProjectsData() {
+    try {
+        const response = await fetch(`${API_BASE_URL}/projects`);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        return data.result; // ApiResponse의 result 필드
+    } catch (error) {
+        console.error('프로젝트 데이터를 가져오는 중 오류가 발생했습니다:', error);
+        return null;
+    }
+}
+
+// 개별 프로젝트 상세 정보를 가져오는 함수
+async function fetchProjectDetail(projectId) {
+    try {
+        const response = await fetch(`${API_BASE_URL}/projects/${projectId}`);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        return data.result; // ApiResponse의 result 필드
+    } catch (error) {
+        console.error(`프로젝트 ${projectId} 상세 정보를 가져오는 중 오류가 발생했습니다:`, error);
+        return null;
+    }
+}
+
+// 프로젝트 데이터를 동적으로 렌더링하는 함수
+async function loadProjectsData() {
+    console.log('프로젝트 데이터 로드 시작...');
+    const projectsData = await fetchProjectsData();
+    
+    console.log('받은 프로젝트 데이터:', projectsData);
+    
+    if (projectsData) {
+        updateProjectsSection(projectsData);
+    }
+}
+
+// 프로젝트 섹션을 동적으로 업데이트하는 함수
+function updateProjectsSection(projects) {
+    const projectList = document.querySelector('.project-list');
+    if (!projectList) {
+        console.log('project-list 요소를 찾을 수 없음');
+        return;
+    }
+    
+    // 기존 내용을 비우고 새로운 내용으로 교체
+    projectList.innerHTML = '';
+    
+    if (projects && projects.length > 0) {
+        projects.forEach((project, index) => {
+            const projectItem = document.createElement('li');
+            projectItem.className = 'project-item active';
+            projectItem.setAttribute('data-filter', project.category || 'all');
+            projectItem.setAttribute('data-category', project.category || 'all');
+            
+            projectItem.innerHTML = `
+                <figure class="project-img">
+                    <div class="project-item-icon-box">
+                        <ion-icon name="eye-outline"></ion-icon>
+                    </div>
+                    <img src="${project.imagePath || './assets/images/project-1.jpg'}" alt="${project.title || 'Project'}" loading="lazy">
+                </figure>
+                <h3 class="project-title">${project.title || 'Project Title'}</h3>
+                <p class="project-category">${project.category || 'Development'}</p>
+            `;
+            
+            // 프로젝트 클릭 이벤트 추가
+            projectItem.addEventListener('click', () => {
+                loadProjectDetail(project.id || index + 1);
+            });
+            
+            projectList.appendChild(projectItem);
+        });
+    }
+}
+
+// 프로젝트 상세 정보를 모달로 표시하는 함수
+async function loadProjectDetail(projectId) {
+    console.log(`프로젝트 ${projectId} 상세 정보 로드 시작...`);
+    const projectDetail = await fetchProjectDetail(projectId);
+    
+    console.log('받은 프로젝트 상세 정보:', projectDetail);
+    
+    if (projectDetail) {
+        showProjectModal(projectDetail);
+    } else {
+        alert('프로젝트 상세 정보를 불러올 수 없습니다.');
+    }
+}
+
+// 프로젝트 모달을 표시하는 함수
+function showProjectModal(project) {
+    // 기존 모달이 있다면 제거
+    const existingModal = document.querySelector('.project-modal');
+    if (existingModal) {
+        existingModal.remove();
+    }
+    
+    // 새로운 모달 생성
+    const modal = document.createElement('div');
+    modal.className = 'project-modal';
+    modal.innerHTML = `
+        <div class="modal-overlay"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>${project.title || 'Project Title'}</h2>
+                <button class="modal-close" onclick="closeProjectModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="project-image">
+                    <img src="${project.imagePath || './assets/images/project-1.jpg'}" alt="${project.title || 'Project'}" loading="lazy">
+                </div>
+                <div class="project-info">
+                    <h3>프로젝트 정보</h3>
+                    <p><strong>카테고리:</strong> ${project.category || 'Development'}</p>
+                    <p><strong>기술 스택:</strong> ${project.techStack || 'Not specified'}</p>
+                    <p><strong>기간:</strong> ${project.period || 'Not specified'}</p>
+                    <div class="project-description">
+                        <h4>프로젝트 설명</h4>
+                        <p>${project.description || '설명이 없습니다.'}</p>
+                    </div>
+                    ${project.githubUrl ? `<p><strong>GitHub:</strong> <a href="${project.githubUrl}" target="_blank">${project.githubUrl}</a></p>` : ''}
+                    ${project.demoUrl ? `<p><strong>Demo:</strong> <a href="${project.demoUrl}" target="_blank">${project.demoUrl}</a></p>` : ''}
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // 모달 스타일 추가
+    const style = document.createElement('style');
+    style.textContent = `
+        .project-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+        }
+        .modal-content {
+            position: relative;
+            background: white;
+            border-radius: 10px;
+            max-width: 800px;
+            max-height: 90vh;
+            overflow-y: auto;
+            margin: 20px;
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            border-bottom: 1px solid #eee;
+        }
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #666;
+        }
+        .modal-body {
+            padding: 20px;
+        }
+        .project-image img {
+            width: 100%;
+            height: auto;
+            border-radius: 5px;
+        }
+        .project-info {
+            margin-top: 20px;
+        }
+        .project-description {
+            margin-top: 15px;
+        }
+    `;
+    
+    document.head.appendChild(style);
+    document.body.appendChild(modal);
+    
+    // ESC 키로 모달 닫기
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            closeProjectModal();
+        }
+    });
+    
+    // 오버레이 클릭으로 모달 닫기
+    modal.querySelector('.modal-overlay').addEventListener('click', closeProjectModal);
+}
+
+// 프로젝트 모달을 닫는 함수
+function closeProjectModal() {
+    const modal = document.querySelector('.project-modal');
+    if (modal) {
+        modal.remove();
+    }
+}
+
 // 페이지 로드 시 API 데이터 로드
 document.addEventListener('DOMContentLoaded', function() {
     // API 데이터 로드 시도
@@ -319,6 +535,11 @@ document.addEventListener('DOMContentLoaded', function() {
     // 타임라인 데이터 로드 시도
     loadTimelineData().catch(error => {
         console.error('타임라인 데이터 로드 실패:', error);
+    });
+    
+    // 프로젝트 데이터 로드 시도
+    loadProjectsData().catch(error => {
+        console.error('프로젝트 데이터 로드 실패:', error);
     });
 });
 

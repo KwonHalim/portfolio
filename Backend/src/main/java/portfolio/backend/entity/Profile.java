@@ -2,6 +2,7 @@ package portfolio.backend.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.core.annotation.Order;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -49,6 +50,7 @@ public class Profile extends BaseEntity{
     private String aboutText;
 
     @OneToMany(mappedBy = "profile", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OrderBy("startDate ASC")
     private List<Education> education = new ArrayList<>();
 
     @OneToMany(mappedBy = "profile", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)

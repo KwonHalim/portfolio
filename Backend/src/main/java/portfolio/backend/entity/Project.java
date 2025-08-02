@@ -45,6 +45,7 @@ public class Project extends BaseEntity{
     private Profile profile;
 
     @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OrderBy("displayOrder ASC")
     private List<ProjectImage> images = new ArrayList<>();
 
     @ManyToMany
