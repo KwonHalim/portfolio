@@ -1,8 +1,6 @@
 package portfolio.backend.service;
 
 import jakarta.transaction.Transactional;
-import lombok.Builder;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import portfolio.backend.dto.ProfileResponse;
@@ -23,42 +21,14 @@ public class ProfileService {
     public Long getProfileNum() {
         Profile halim = profileRepository.findByName("권하림");
         return halim.getId();
-
     }
-
 
     public ProfileResponse getProfilePageInfos() {
+        // 1. 데이터 조회
         Profile profile = profileRepository.findByName("권하림");
         List<ProfileTechnology> techStacks = profileTechnologyRepository.findByProfileId(profile.getId());
-        List<TechInfo> techInfos = techStacks.stream()
-                .map(profileTechnology -> TechInfo.builder()
-                        .stack(String.valueOf(profileTechnology.getTechnology().getName()))
-                        .description(profileTechnology.getDescription())
-                        .icon_path(profileTechnology.getTechnology().getIconPath())
-                        .build())
-                .toList();
 
-        return ProfileResponse.builder()
-                .name(profile.getName())
-                .email(profile.getEmail())
-                .github_url(profile.getGithubUrl())
-                .introduction(profile.getAboutText())
-                .job_type(profile.getJob())
-                .location(profile.getLocation())
-                .title(profile.getTitle())
-                .birthday(profile.getBirthDate())
-                .techInfos(techInfos)
-                .github_username(profile.getGithubUsername())
-                .profile_path(profile.getProfileImagePath())
-                .build();
-    }
-
-
-    @Builder
-    @Getter
-    public static class TechInfo {
-        String stack;
-        String description;
-        String icon_path;
+        // 2. DTO의 정적 메서드를 호출하여 변환 및 반환 (서비스 로직이 깔끔해짐)
+        return ProfileResponse.of(profile, techStacks);
     }
 }
