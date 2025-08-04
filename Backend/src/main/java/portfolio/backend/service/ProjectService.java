@@ -10,6 +10,9 @@ import portfolio.backend.dto.ProjectSimpleResponse;
 import portfolio.backend.entity.Project;
 import portfolio.backend.repository.ProjectRepository;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -17,17 +20,23 @@ public class ProjectService {
 
     private final ProjectRepository projectRepository;
 
-    public Page<ProjectSimpleResponse> getProjects(Pageable pageable, String category) {
+    public List<ProjectSimpleResponse> getProjects(String category) {
 
-        Page<Project> projects;
+        List<Project> projects;
 
+        // 카테고리 유무에 따라 분기
         if (category != null && !category.equals("all")) {
-            projects = projectRepository.findByCategory(category, pageable);
+            // category를 기준으로 모든 프로젝트 조회
+            projects = projectRepository.findByCategory(category);
         } else {
-            projects = projectRepository.findAll(pageable);
+            // 모든 프로젝트 조회
+            projects = projectRepository.findAllByOrderByDisplayOrderAsc();
         }
 
-        return projects.map(project -> portfolio.backend.dto.ProjectSimpleResponse.from(project));
+        // 조회된 Project 리스트를 ProjectSimpleResponse 리스트로 변환하여 반환
+        return projects.stream()
+                .map(project -> portfolio.backend.dto.ProjectSimpleResponse.from(project))
+                .collect(Collectors.toList());
     }
 
     public ProjectDetailResponse getProjectDetail(Long id) {

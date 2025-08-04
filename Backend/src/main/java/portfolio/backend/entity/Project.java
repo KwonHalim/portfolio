@@ -26,7 +26,7 @@ public class Project extends BaseEntity{
     private String category; //어떤 종류의 프로젝트인지
     
     @Column(columnDefinition = "TEXT")
-    private String description;
+    private String description; //프로젝트 전체에 대한 설명
     
     @Column
     private String imagePath;
@@ -45,7 +45,7 @@ public class Project extends BaseEntity{
     private Profile profile;
 
     @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    @OrderBy("displayOrder ASC")
+    @OrderBy("displayOrder DESC")
     private List<ProjectImage> images = new ArrayList<>();
 
     @ManyToMany

@@ -20,6 +20,9 @@ public class ProjectImage extends BaseEntity{
     @Column(nullable = false)
      private int displayOrder;
 
+    @Column(columnDefinition = "TEXT")
+    private String description;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "project_id") // 외래 키
     private Project project;
