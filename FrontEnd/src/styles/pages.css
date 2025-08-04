@@ -34,7 +34,16 @@
   border-radius: 14px;
   box-shadow: var(--shadow-2);
   z-index: 1;
+  animation: fadeInUp 0.3s ease-out both;
+  opacity: 0;
 }
+
+.service-item:nth-child(1) { animation-delay: 0.1s; }
+.service-item:nth-child(2) { animation-delay: 0.2s; }
+.service-item:nth-child(3) { animation-delay: 0.3s; }
+.service-item:nth-child(4) { animation-delay: 0.4s; }
+.service-item:nth-child(5) { animation-delay: 0.5s; }
+.service-item:nth-child(6) { animation-delay: 0.6s; }
 
 .service-item::before {
   content: "";
@@ -87,6 +96,68 @@
 .timeline-item { 
   position: relative; 
   margin-bottom: 30px;
+  animation: slideInLeft 0.3s ease-out both;
+  opacity: 0;
+}
+
+.timeline-item:nth-child(1) { 
+  animation-delay: 0.1s; 
+}
+.timeline-item:nth-child(1)::before { 
+  animation-delay: 0.9s; 
+}
+.timeline-item:nth-child(1)::after { 
+  animation-delay: 0.2s; 
+}
+
+.timeline-item:nth-child(2) { 
+  animation-delay: 0.2s; 
+}
+.timeline-item:nth-child(2)::before { 
+  animation-delay: 1.0s; 
+}
+.timeline-item:nth-child(2)::after { 
+  animation-delay: 0.3s; 
+}
+
+.timeline-item:nth-child(3) { 
+  animation-delay: 0.3s; 
+}
+.timeline-item:nth-child(3)::before { 
+  animation-delay: 1.1s; 
+}
+.timeline-item:nth-child(3)::after { 
+  animation-delay: 0.4s; 
+}
+
+.timeline-item:nth-child(4) { 
+  animation-delay: 0.4s; 
+}
+.timeline-item:nth-child(4)::before { 
+  animation-delay: 1.2s; 
+}
+.timeline-item:nth-child(4)::after { 
+  animation-delay: 0.5s; 
+}
+
+.timeline-item:nth-child(5) { 
+  animation-delay: 0.5s; 
+}
+.timeline-item:nth-child(5)::before { 
+  animation-delay: 1.3s; 
+}
+.timeline-item:nth-child(5)::after { 
+  animation-delay: 0.6s; 
+}
+
+.timeline-item:nth-child(6) { 
+  animation-delay: 0.6s; 
+}
+.timeline-item:nth-child(6)::before { 
+  animation-delay: 1.4s; 
+}
+.timeline-item:nth-child(6)::after { 
+  animation-delay: 0.7s; 
 }
 
 .timeline-item:not(:last-child) { margin-bottom: 30px; }
@@ -107,22 +178,26 @@
   content: "";
   position: absolute;
   top: -25px;
-  left: -30px;
-  width: 1px;
-  height: calc(100% + 50px);
+  left: calc(-50% + 35px); /* 아이콘 중앙에 위치 (70px 아이콘의 절반) */
+  width: 3px;
+  height: 0;
   background: var(--jet);
+  animation: drawLine 0.8s ease-out 0.8s forwards;
 }
 
 .timeline-item::after {
   content: "";
   position: absolute;
   top: 15px;
-  left: -33px;
+  left: calc(-50% + 34px); /* 선과 약간 오프셋하여 정확한 중앙에 위치 */
   height: 6px;
   width: 6px;
   background: var(--text-gradient-yellow);
   border-radius: 50%;
   box-shadow: 0 0 0 4px var(--jet);
+  animation: scaleIn 0.4s ease-out 0.3s both;
+  opacity: 0;
+  transform: scale(0);
 }
 
 .timeline-text {
@@ -394,7 +469,15 @@
   width: 100%;
   padding: 8px 10px;
   border-radius: 8px;
+  animation: scaleIn 0.2s ease-out both;
+  opacity: 0;
 }
+
+.select-item:nth-child(1) button { animation-delay: 0.1s; }
+.select-item:nth-child(2) button { animation-delay: 0.15s; }
+.select-item:nth-child(3) button { animation-delay: 0.2s; }
+.select-item:nth-child(4) button { animation-delay: 0.25s; }
+.select-item:nth-child(5) button { animation-delay: 0.3s; }
 
 .select-item button:hover { --eerie-black-2: hsl(240, 2%, 20%); }
 
@@ -414,16 +497,56 @@
 
 .project-item { 
   display: block !important;
-  animation: scaleUp 0.25s ease forwards;
+  /* 기존 rotateIn3D 애니메이션 비활성화 - 9방향 슬라이드 인 애니메이션으로 대체 */
+  /* animation: rotateIn3D 0.6s ease-out forwards !important; */
+  animation-fill-mode: forwards !important;
+  opacity: 0;
+  /* transform: rotateY(-90deg) rotateX(20deg) scale(0.8); */
+}
+
+/* 애니메이션이 완료된 요소는 초기 상태로 되돌리지 않음 */
+.project-item.animated {
+  animation: none !important;
+  opacity: 1 !important;
+  transform: none !important;
+}
+
+/* 이미 애니메이션이 실행된 요소들은 다시 애니메이션하지 않음 */
+.project-item.animated,
+.project-item[data-animated="true"] {
+  animation: none !important;
+  opacity: 1 !important;
+  transform: none !important;
+}
+
+/* 이미 애니메이션이 실행된 요소들은 다시 애니메이션하지 않음 */
+.service-item.animated,
+.timeline-item.animated,
+.blog-post-item.animated {
+  animation: none !important;
+  opacity: 1 !important;
+  transform: none !important;
+}
+
+/* 모든 프로젝트 아이템에 대해 9방향 슬라이드 인 애니메이션 적용 */
+.project-item:not(.animated):not([data-animated="true"]) {
+  /* 9방향 슬라이드 인 애니메이션은 JavaScript에서 동적으로 적용됨 */
+  /* animation: rotateIn3D 0.6s ease-out forwards !important; */
 }
 
 .project-item.hidden {
   display: none;
 }
 
-@keyframes scaleUp {
-  0% { transform: scale(0.5); }
-  100% { transform: scale(1); }
+@keyframes fadeInSlideUp {
+  0% { 
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% { 
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .project-item > a { 
@@ -431,7 +554,13 @@
   display: block;
   padding: 15px;
   border-radius: 16px;
-  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  transition: all 0.3s ease-out;
+  transform: translateY(0);
+}
+
+.project-item > a:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
 }
 
 .project-img {
@@ -472,7 +601,7 @@
   border-radius: 12px;
   opacity: 0;
   z-index: 1;
-  transition: var(--transition-1);
+  transition: all 0.3s ease-out;
 }
 
 .project-item > a:hover .project-item-icon-box {
@@ -491,8 +620,9 @@
 }
 
 .project-item > a:hover img { 
-  transform: scale(1.15); 
-  filter: brightness(1.1) contrast(1.05);
+  transform: scale(1.1); 
+  filter: brightness(1.05) contrast(1.02);
+  transition: all 0.3s ease-out;
 }
 
 .project-title,
@@ -523,34 +653,36 @@
   height: 100%;
   background-color: rgba(0, 0, 0, 0.8);
   backdrop-filter: blur(5px);
+  cursor: pointer; /* 배경 클릭 시 커서 변경 */
 }
 
 .modal-content {
   background-color: var(--eerie-black-1);
   margin: 5vh auto;
   width: 85%;
-  max-width: 70vw;
+  max-width: 75vw;
   border-radius: 20px;
   position: relative;
-  animation: modalFadeIn 0.3s;
+  animation: modalFadeIn 0.3s ease-out;
   max-height: 85vh;
   overflow-y: auto;
   overflow-x: hidden;
+  cursor: default; /* 콘텐츠 영역에서는 기본 커서 사용 */
 }
 
 /* 모달 스크롤바 스타일링 */
 .modal-content::-webkit-scrollbar {
-  width: 10px;
+  width: clamp(4px, 0.6vw, 8px);
 }
 
 .modal-content::-webkit-scrollbar-track {
   background: transparent;
-  margin: 0 2px;
+  margin: 0 clamp(1px, 0.2vw, 3px);
 }
 
 .modal-content::-webkit-scrollbar-thumb {
   background: var(--light-gray);
-  border-radius: 5px;
+  border-radius: clamp(3px, 0.5vw, 6px);
   border: 1px solid var(--jet);
 }
 
@@ -559,29 +691,37 @@
 }
 
 .close-modal {
-  position: absolute;
-  right: 20px;
-  top: 20px;
-  font-size: 28px;
+  position: sticky;
+  top: 15px;
+  right: 15px;
+  float: right;
+  font-size: clamp(1.5rem, 4vw, 2rem);
   cursor: pointer;
   color: var(--light-gray-70);
-  z-index: 1;
+  z-index: 1000;
+  transition: color 0.3s ease;
+  margin: 15px;
+}
+
+.close-modal:hover {
+  color: var(--orange-yellow-crayola);
+  transform: scale(1.1);
 }
 
 .modal-body {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 20px;
-  padding: 12px 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 35px;
+  padding: 35px;
   height: 100%;
-  overflow: hidden;
+  overflow-y: auto;
 }
 
 .modal-img {
   width: 75%;
   height: 50vh;
   object-fit: contain;
-  border-radius: 14px;
+  border-radius: clamp(10px, 1.5vw, 18px);
   display: block;
   margin: 0 auto;
 }
@@ -590,41 +730,230 @@
   width: 75%;
   height: 50vh;
   object-fit: contain;
-  border-radius: 14px;
+  border-radius: clamp(10px, 1.5vw, 18px);
   display: block;
   margin: 0 auto;
 }
 
-.modal-media {
-  width: 100%;
+/* 프로젝트 헤더 스타일 */
+.project-header {
+  text-align: center;
+  margin-bottom: 45px;
+  padding-bottom: 45px;
+  position: relative;
+  animation: fadeInUp 0.3s ease-out 0.1s both;
 }
 
+.project-header::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: clamp(150px, 20vw, 250px);
+  height: clamp(1px, 0.2vw, 3px);
+  background: linear-gradient(90deg, transparent, var(--orange-yellow-crayola), transparent);
+  border-radius: clamp(0.5px, 0.1vw, 1.5px);
+}
+
+.project-header .project-title {
+  margin-bottom: 1.5rem;
+  color: var(--orange-yellow-crayola);
+  font-size: clamp(1.6rem, 4.5vw, 2.2rem);
+  font-weight: 600;
+  text-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.3);
+  letter-spacing: 0.5px;
+}
+
+.project-header .project-category {
+  margin-bottom: 1.5rem;
+  color: var(--orange-yellow-crayola);
+  font-size: clamp(0.9rem, 2.8vw, 1.2rem);
+  font-weight: 500;
+  background: var(--jet);
+  padding: 0.4rem 1.3rem;
+  border-radius: 1.5rem;
+  display: inline-block;
+  border: 1px solid var(--orange-yellow-crayola);
+}
+
+.project-header .project-tech {
+  margin-top: 2.5rem;
+}
+
+.project-header .project-tech .h4 {
+  margin-bottom: 1rem;
+  color: var(--light-gray);
+  font-size: clamp(0.9rem, 2.5vw, 1.1rem);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.project-header .project-tech ul {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.75rem;
+}
+
+.project-header .project-tech li {
+  background: var(--jet);
+  color: var(--light-gray);
+  padding: 0.3rem 0.6rem;
+  border-radius: clamp(0.75rem, 1.5vw, 1.1rem);
+  font-size: clamp(0.75rem, 2vw, 0.9rem);
+  font-weight: 500;
+  border: clamp(0.5px, 0.1vw, 1.5px) solid var(--light-gray-70);
+  transition: all 0.3s ease;
+}
+
+.project-header .project-tech li:hover {
+  background: var(--light-gray-70);
+  color: var(--white-2);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* 프로젝트 메인 설명 스타일 */
+.project-main-description {
+  margin-bottom: 3.5rem;
+  padding: clamp(2.2rem, 5.5vw, 2.8rem);
+  background: linear-gradient(135deg, var(--jet), var(--eerie-black-1));
+  border-radius: 1.25rem;
+  text-align: center;
+  border: 1px solid var(--orange-yellow-crayola);
+  box-shadow: 0 0.25rem 1.25rem rgba(0, 0, 0, 0.3);
+  animation: scaleIn 0.3s ease-out 0.2s both;
+}
+
+.project-main-description .h4 {
+  color: var(--orange-yellow-crayola);
+  margin-bottom: 1.25rem;
+  font-size: clamp(1rem, 2.8vw, 1.2rem);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  text-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.3);
+}
+
+.project-main-description p {
+  color: var(--light-gray);
+  line-height: 1.7;
+  font-size: clamp(0.9rem, 2.3vw, 1rem);
+  text-align: left;
+  font-weight: 400;
+  letter-spacing: 0.3px;
+}
+
+/* 미디어 컨테이너 스타일 */
 .media-container {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(2.5rem, 6vw, 3.5rem);
+  position: relative;
+  padding-top: clamp(2rem, 5vw, 2.5rem);
+  animation: fadeInUp 0.3s ease-out 0.3s both;
+}
+
+.media-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: clamp(150px, 20vw, 250px);
+  height: clamp(1px, 0.2vw, 3px);
+  background: linear-gradient(90deg, transparent, var(--orange-yellow-crayola), transparent);
+  border-radius: clamp(0.5px, 0.1vw, 1.5px);
+}
+
+/* 미디어 아이템 스타일 */
+.media-item {
+  display: grid;
+  grid-template-columns: 0.8fr 1.2fr;
+  gap: clamp(2rem, 5vw, 2.5rem);
+  align-items: start;
+  padding: clamp(1rem, 3vw, 1.5rem) 0;
+  animation: slideInLeft 0.3s ease-out 0.4s both;
+}
+
+.media-item:nth-child(even) {
+  animation: slideInRight 0.3s ease-out 0.4s both;
+}
+
+.media-item:not(:last-child) {
+  position: relative;
+  padding-bottom: clamp(2rem, 5vw, 3rem);
+}
+
+.media-item:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: clamp(150px, 25vw, 250px);
+  height: clamp(1px, 0.2vw, 3px);
+  background: linear-gradient(90deg, transparent, var(--orange-yellow-crayola), transparent);
+  border-radius: clamp(0.5px, 0.1vw, 1.5px);
+}
+
+.media-item .media-content {
   display: flex;
   flex-direction: column;
   gap: 15px;
 }
 
-.media-item {
-  width: 100%;
-  border-radius: 14px;
-  overflow: hidden;
+.media-item .media-image {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.media-item .media-description {
+  padding: clamp(1.25rem, 3vw, 1.75rem);
+  background: linear-gradient(135deg, var(--jet), var(--eerie-black-1));
+  border-radius: clamp(0.6rem, 1.2vw, 0.9rem);
+  color: var(--white-2);
+  border: clamp(0.5px, 0.1vw, 1.5px) solid var(--light-gray-70);
+  box-shadow: 0 clamp(0.15rem, 0.4vw, 0.25rem) clamp(0.75rem, 2vw, 1.2rem) rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+}
+
+.media-item .media-description:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 clamp(0.25rem, 0.6vw, 0.4rem) clamp(1rem, 2.5vw, 1.5rem) rgba(0, 0, 0, 0.3);
+}
+
+.media-item .media-description h4 {
+  color: var(--orange-yellow-crayola);
+  margin-bottom: 1rem;
+  font-size: clamp(0.9rem, 2.5vw, 1.1rem);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.media-item .media-description p {
+  line-height: 1.7;
+  font-size: clamp(0.85rem, 2.2vw, 1rem);
+  font-weight: 400;
+  letter-spacing: 0.2px;
 }
 
 .media-item img {
-  width: 70%;
-  height: 45vh;
+  width: 100%;
+  max-height: 400px;
   object-fit: contain;
-  display: block;
-  margin: 0 auto;
+  border-radius: clamp(8px, 1.2vw, 12px);
 }
 
 .media-item video {
-  width: 70%;
-  height: 45vh;
+  width: 100%;
+  max-height: 400px;
   object-fit: contain;
-  display: block;
-  margin: 0 auto;
+  border-radius: clamp(8px, 1.2vw, 12px);
 }
 
 
@@ -640,7 +969,7 @@
 
 /* 스크롤바 스타일링 */
 .project-details::-webkit-scrollbar {
-  width: 8px;
+  width: clamp(6px, 1vw, 10px);
 }
 
 .project-details::-webkit-scrollbar-track {
@@ -649,7 +978,7 @@
 
 .project-details::-webkit-scrollbar-thumb {
   background: var(--jet);
-  border-radius: 4px;
+  border-radius: clamp(3px, 0.5vw, 5px);
 }
 
 .project-details::-webkit-scrollbar-thumb:hover {
@@ -678,21 +1007,50 @@
 
 .project-links {
   display: flex;
-  gap: 15px;
-  margin-top: 25px;
+  gap: 2rem;
+  margin-top: clamp(2.5rem, 6vw, 3.5rem);
+  padding-top: clamp(2rem, 5vw, 2.5rem);
+  justify-content: flex-end;
+  position: relative;
+  animation: fadeInUp 0.3s ease-out 0.5s both;
+}
+
+.project-links::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: clamp(150px, 20vw, 250px);
+  height: clamp(1px, 0.2vw, 3px);
+  background: linear-gradient(90deg, transparent, var(--orange-yellow-crayola), transparent);
+  border-radius: clamp(0.5px, 0.1vw, 1.5px);
 }
 
 .project-links .form-btn {
   display: flex;
-  gap: 10px;
+  gap: clamp(0.5rem, 1.5vw, 0.8rem);
   align-items: center;
   justify-content: center;
-  min-width: 150px;
-  color: var(--light-gray) !important;
+  min-width: clamp(140px, 20vw, 180px);
+  padding: clamp(0.75rem, 2vw, 1rem) clamp(1rem, 3vw, 1.5rem);
+  color: var(--white-2) !important;
+  font-size: clamp(0.8rem, 2.2vw, 1rem);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: clamp(0.3px, 0.1vw, 0.7px);
+  border-radius: clamp(1.2rem, 2vw, 1.8rem);
+  background: var(--jet);
+  border: clamp(0.5px, 0.1vw, 1.5px) solid var(--light-gray-70);
+  transition: all 0.3s ease;
+  margin: 0;
 }
 
 .project-links .form-btn:hover {
-  color: var(--light-gray) !important;
+  color: var(--orange-yellow-crayola) !important;
+  background: var(--light-gray-70);
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
 }
 
 @keyframes modalFadeIn {
@@ -705,6 +1063,317 @@
     transform: translateY(0);
   }
 }
+
+/* 부드러운 페이드인 애니메이션 */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(15px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 스케일 애니메이션 */
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* 부드러운 슬라이드 애니메이션 */
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* 부드러운 슬라이드 애니메이션 (오른쪽) */
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* 타임라인 선 그리기 애니메이션 */
+@keyframes drawLine {
+  from {
+    height: 0;
+  }
+  to {
+    height: calc(100% + 70px);
+  }
+}
+
+/* 프로젝트 아이템 새로운 애니메이션 효과들 */
+@keyframes slideInFromBottom {
+  0% {
+    opacity: 0;
+    transform: translateY(30px) scale(0.9);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes fadeInScale {
+  0% {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes slideInFromRight {
+  0% {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* 특이한 3D 회전 애니메이션 */
+@keyframes rotateIn3D {
+  0% {
+    opacity: 0;
+    transform: rotateY(-90deg) rotateX(20deg) scale(0.8);
+  }
+  50% {
+    opacity: 0.7;
+    transform: rotateY(-45deg) rotateX(10deg) scale(0.9);
+  }
+  100% {
+    opacity: 1;
+    transform: rotateY(0deg) rotateX(0deg) scale(1);
+  }
+}
+
+/**
+ * ===================================================================
+ * 3열 그리드 아이템을 위한 동적 슬라이드 인 애니메이션 (9방향)
+ * -------------------------------------------------------------------
+ * JavaScript를 사용하여 그리드 아이템의 위치(인덱스)를 파악한 후,
+ * 각 위치에 맞는 애니메이션 클래스를 동적으로 할당하는 것을 전제로 합니다.
+ * ===================================================================
+ */
+
+/* 1. 맨 위, 왼쪽 (Top-Left) */
+@keyframes slide-in-fwd-tl {
+  0% {
+    transform: translateZ(-200px) translateY(-100px) translateX(-150px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateZ(0) translateY(0) translateX(0);
+    opacity: 1;
+  }
+}
+
+/* 2. 맨 위, 가운데 (Top-Center) */
+@keyframes slide-in-fwd-top {
+  0% {
+    transform: translateZ(-200px) translateY(-100px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateZ(0) translateY(0);
+    opacity: 1;
+  }
+}
+
+/* 3. 맨 위, 오른쪽 (Top-Right) */
+@keyframes slide-in-fwd-tr {
+  0% {
+    transform: translateZ(-200px) translateY(-100px) translateX(150px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateZ(0) translateY(0) translateX(0);
+    opacity: 1;
+  }
+}
+
+/* 4. 중간, 왼쪽 (Middle-Left) - [누락되었던 부분] */
+@keyframes slide-in-fwd-left {
+  0% {
+    transform: translateZ(-200px) translateX(-150px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateZ(0) translateX(0);
+    opacity: 1;
+  }
+}
+
+/* 5. 중간, 가운데 (Center) */
+@keyframes slide-in-fwd-center {
+  0% {
+    transform: translateZ(-200px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateZ(0);
+    opacity: 1;
+  }
+}
+
+/* 6. 중간, 오른쪽 (Middle-Right) */
+@keyframes slide-in-fwd-right {
+  0% {
+    transform: translateZ(-200px) translateX(150px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateZ(0) translateX(0);
+    opacity: 1;
+  }
+}
+
+/* 7. 맨 아래, 왼쪽 (Bottom-Left) */
+@keyframes slide-in-fwd-bl {
+  0% {
+    transform: translateZ(-200px) translateY(100px) translateX(-150px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateZ(0) translateY(0) translateX(0);
+    opacity: 1;
+  }
+}
+
+/* 8. 맨 아래, 가운데 (Bottom-Center) */
+@keyframes slide-in-fwd-bottom {
+  0% {
+    transform: translateZ(-200px) translateY(100px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateZ(0) translateY(0);
+    opacity: 1;
+  }
+}
+
+/* 9. 맨 아래, 오른쪽 (Bottom-Right) */
+@keyframes slide-in-fwd-br {
+  0% {
+    transform: translateZ(-200px) translateY(100px) translateX(150px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateZ(0) translateY(0) translateX(0);
+    opacity: 1;
+  }
+}
+
+/* 애니메이션 클래스들 - 지연 시간은 JavaScript에서 동적으로 적용 */
+.slide-in-fwd-tl { animation: slide-in-fwd-tl 0.3s ease-out both; }
+.slide-in-fwd-top { animation: slide-in-fwd-top 0.3s ease-out both; }
+.slide-in-fwd-tr { animation: slide-in-fwd-tr 0.3s ease-out both; }
+.slide-in-fwd-left { animation: slide-in-fwd-left 0.3s ease-out both; }
+.slide-in-fwd-center { animation: slide-in-fwd-center 0.3s ease-out both; }
+.slide-in-fwd-right { animation: slide-in-fwd-right 0.3s ease-out both; }
+.slide-in-fwd-bl { animation: slide-in-fwd-bl 0.3s ease-out both; }
+.slide-in-fwd-bottom { animation: slide-in-fwd-bottom 0.3s ease-out both; }
+.slide-in-fwd-br { animation: slide-in-fwd-br 0.3s ease-out both; }
+
+/* 바운스 효과가 있는 애니메이션 */
+@keyframes bounceIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.05);
+  }
+  70% {
+    transform: scale(0.9);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* 프로젝트 모달 열기 애니메이션 */
+@keyframes modal-open {
+  0% {
+    opacity: 0;
+    transform: scale(0.8) translateY(-20px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* 프로젝트 모달 닫기 애니메이션 */
+@keyframes modal-close {
+  0% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.8) translateY(-20px);
+  }
+}
+
+/* 모달 애니메이션 클래스들 */
+.modal-open {
+  animation: modal-open 0.3s ease-out both;
+}
+
+.modal-close {
+  animation: modal-close 0.3s ease-out both;
+}
+
+/* 플립 효과 애니메이션 */
+@keyframes flipIn {
+  0% {
+    opacity: 0;
+    transform: perspective(400px) rotateY(90deg);
+  }
+  40% {
+    transform: perspective(400px) rotateY(-20deg);
+  }
+  60% {
+    transform: perspective(400px) rotateY(10deg);
+  }
+  80% {
+    transform: perspective(400px) rotateY(-5deg);
+  }
+  100% {
+    opacity: 1;
+    transform: perspective(400px) rotateY(0deg);
+  }
+}
+
+
 
 /*-----------------------------------*\
   #BLOG
@@ -725,7 +1394,14 @@
   box-shadow: var(--shadow-4);
   border-radius: 16px;
   z-index: 1;
+  animation: fadeInUp 0.3s ease-out both;
+  opacity: 0;
 }
+
+.blog-post-item:nth-child(1) { animation-delay: 0.1s; }
+.blog-post-item:nth-child(2) { animation-delay: 0.2s; }
+.blog-post-item:nth-child(3) { animation-delay: 0.3s; }
+.blog-post-item:nth-child(4) { animation-delay: 0.4s; }
 
 .blog-post-item > a::before {
   content: "";
@@ -832,7 +1508,14 @@
   border: 1px solid var(--jet);
   border-radius: 14px;
   outline: none;
+  animation: slideInLeft 0.3s ease-out both;
+  opacity: 0;
 }
+
+.input-wrapper:nth-child(1) .form-input { animation-delay: 0.1s; }
+.input-wrapper:nth-child(2) .form-input { animation-delay: 0.2s; }
+.input-wrapper:nth-child(3) .form-input { animation-delay: 0.3s; }
+.input-wrapper:nth-child(4) .form-input { animation-delay: 0.4s; }
 
 .form-input::placeholder { font-weight: var(--fw-500); }
 
@@ -866,6 +1549,8 @@ textarea.form-input::-webkit-resizer { display: none; }
   box-shadow: var(--shadow-3);
   z-index: 1;
   transition: var(--transition-1);
+  animation: fadeInUp 0.3s ease-out 0.5s both;
+  opacity: 0;
 }
 
 .form-btn::before {
@@ -932,54 +1617,165 @@ textarea.form-input::-webkit-resizer { display: none; }
 
 /* 반응형 미디어 조정 */
 @media (max-width: 1200px) {
-  .modal-img,
-  .modal-video {
-    height: 45vh;
-    width: 80%;
-  }
-  
   .media-item img,
   .media-item video {
-    height: 40vh;
-    width: 75%;
+    max-height: 350px;
   }
 }
 
 @media (max-width: 768px) {
   .modal-content {
-    width: 90%;
-    max-width: 85vw;
+    width: 92%;
+    max-width: 92vw;
     margin: 3vh auto;
+    max-height: 92vh;
   }
   
   .modal-body {
-    grid-template-columns: 1fr;
-    gap: 15px;
+    padding: 25px;
+    gap: 30px;
   }
   
-  .modal-img,
-  .modal-video {
-    height: 40vh;
-    width: 80%;
+  .media-item {
+    grid-template-columns: 1fr;
+    gap: 25px;
   }
   
   .media-item img,
   .media-item video {
-    height: 35vh;
-    width: 80%;
+    max-height: 300px;
+  }
+  
+  .project-header {
+    margin-bottom: 35px;
+    padding-bottom: 35px;
+  }
+  
+  .project-main-description {
+    margin-bottom: 30px;
+    padding: 1.8rem;
+  }
+  
+  .media-container {
+    padding-top: 1.5rem;
+  }
+  
+  /* 모바일에서는 애니메이션 지속시간 단축 */
+  .project-header,
+  .project-main-description,
+  .media-container,
+  .project-links {
+    animation-duration: 0.25s;
+  }
+  
+  .media-item {
+    animation-duration: 0.2s;
+  }
+  
+  /* 서비스, 타임라인, 블로그 아이템 애니메이션 단축 */
+  .service-item,
+  .blog-post-item {
+    animation-duration: 0.2s;
+  }
+  
+  /* 타임라인 아이템 애니메이션 단축 */
+  .timeline-item {
+    animation-duration: 0.2s;
+  }
+  
+  .timeline-item::before {
+    animation-duration: 0.6s;
+  }
+  
+  .timeline-item::after {
+    animation-duration: 0.3s;
+  }
+  
+  /* 프로젝트 아이템 애니메이션 단축 */
+  .project-item {
+    animation-duration: 0.5s;
+  }
+  
+  /* 폼 요소 애니메이션 단축 */
+  .form-input,
+  .form-btn {
+    animation-duration: 0.2s;
+  }
+  
+  .select-item button {
+    animation-duration: 0.15s;
   }
 }
 
 @media (max-width: 480px) {
-  .modal-img,
-  .modal-video {
-    height: 35vh;
-    width: 85%;
+  .modal-content {
+    width: 95%;
+    max-width: 95vw;
+    margin: 2vh auto;
+    max-height: 95vh;
+  }
+  
+  .modal-body {
+    padding: 20px;
+    gap: 25px;
   }
   
   .media-item img,
   .media-item video {
-    height: 30vh;
-    width: 85%;
+    max-height: 250px;
+  }
+  
+  .project-header {
+    margin-bottom: 30px;
+    padding-bottom: 30px;
+  }
+  
+  .project-main-description {
+    margin-bottom: 25px;
+    padding: 1.5rem;
+  }
+  
+  .media-container {
+    padding-top: 1.2rem;
+  }
+  
+  /* 작은 화면에서는 애니메이션 지속시간 더 단축 */
+  .project-header,
+  .project-main-description,
+  .media-container,
+  .project-links {
+    animation-duration: 0.2s;
+  }
+  
+  .media-item {
+    animation-duration: 0.15s;
+  }
+  
+  /* 서비스, 타임라인, 블로그 아이템 애니메이션 더 단축 */
+  .service-item,
+  .timeline-item,
+  .blog-post-item {
+    animation-duration: 0.15s;
+  }
+  
+  /* 프로젝트 아이템 애니메이션 더 단축 */
+  .project-item {
+    animation-duration: 0.4s;
+  }
+  
+  /* 폼 요소 애니메이션 더 단축 */
+  .form-input,
+  .form-btn {
+    animation-duration: 0.15s;
+  }
+  
+  .select-item button {
+    animation-duration: 0.1s;
+  }
+  
+  .close-modal {
+    right: 1.2rem;
+    top: 1.2rem;
+    font-size: 1.3rem;
   }
 } 

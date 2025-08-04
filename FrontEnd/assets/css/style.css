@@ -950,7 +950,7 @@ main {
 
 .project-item.active {
   display: block;
-  animation: scaleUp 0.25s ease forwards;
+  /* animation: scaleUp 0.25s ease forwards; */
 }
 
 @keyframes scaleUp {

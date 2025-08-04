@@ -280,9 +280,18 @@
         -->
 
         <section class="ChatBot">
-          <h3 class="h3 clients-title">Talk to ME!</h3>
+          <div class="chatbot-header">
+            <h3 class="h3 clients-title">Talk to ME!</h3>
+            <div class="chatbot-toggle" title="AI 챗봇과 대화하기">
+              <ion-icon name="help-circle-outline"></ion-icon>
+            </div>
+            <div class="toggle-tooltip">
+              <p>저에 대해 질문이나 궁금한 점이 있으시면 언제든 물어보세요.</p>
+              <p>답변이 맘에 드셨다면 좋아요, 별로였다면 싫어요와 채팅 보내기 버튼 옆 피드백을 통해 싫은 점을 알려주세요!</p>
+            </div>
+          </div>
 
-          <div class="chatbot-container">
+          <div class="chatbot-container" id="chatbotContainer">
             <div class="chat-messages" id="chatMessages">
               <!-- 메시지들이 여기에 표시됩니다 -->
             </div>
@@ -290,8 +299,29 @@
             <div class="chat-input-area">
               <input type="text" id="chatInput" class="chat-input" placeholder="메시지를 입력하세요...">
               <button class="chat-send-btn" onclick="sendMessage()">
-                <ion-icon name="send-outline"></ion-icon>
+                <ion-icon name="chatbubble-ellipses-outline"></ion-icon>
               </button>
+              <button class="chat-feedback-btn" onclick="showFeedbackModal()" title="피드백 남기기">
+                <ion-icon name="close-circle-outline"></ion-icon>
+              </button>
+            </div>
+          </div>
+          
+          <!-- 피드백 모달 -->
+          <div id="feedbackModal" class="feedback-modal">
+            <div class="feedback-content">
+              <div class="feedback-header">
+                <h3>피드백 남기기</h3>
+                <button class="feedback-close" onclick="closeFeedbackModal()">&times;</button>
+              </div>
+              <div class="feedback-body">
+                <p>챗봇의 응답이 만족스럽지 않거나, 답변하지 못한 질문이 있으시면 알려주세요.</p>
+                <textarea id="feedbackText" placeholder="질문이나 피드백을 입력해주세요..." rows="4"></textarea>
+                <div class="feedback-actions">
+                  <button class="feedback-submit" onclick="submitFeedback()">피드백 전송</button>
+                  <button class="feedback-cancel" onclick="closeFeedbackModal()">취소</button>
+                </div>
+              </div>
             </div>
           </div>
         </section>
@@ -357,25 +387,30 @@
             <div class="modal-content">
               <span class="close-modal">&times;</span>
               <div class="modal-body">
-                <div id="modalMedia" class="modal-media">
-                  <div id="mediaContainer" class="media-container">
-                    <!-- 동적으로 생성될 미디어들이 여기에 들어갑니다 -->
-                  </div>
-                </div>
-                <div class="project-details">
-                  <h3 id="modalTitle" class="h3"></h3>
+                <!-- 프로젝트 헤더 섹션 -->
+                <div class="project-header">
+                  <h3 id="modalTitle" class="h3 project-title"></h3>
                   <p id="modalCategory" class="project-category"></p>
-                  <div class="project-description">
-                    <h4 class="h4">Project Description</h4>
-                    <p id="modalDescription"></p>
-                  </div>
                   <div class="project-tech">
                     <h4 class="h4">Technologies Used</h4>
                     <ul id="modalTechList"></ul>
                   </div>
-                  <div class="project-links">
-                    <!-- 동적으로 생성될 링크 버튼들 -->
-                  </div>
+                </div>
+                
+                <!-- 프로젝트 메인 설명 섹션 -->
+                <div class="project-main-description">
+                  <h4 class="h4">Project Description</h4>
+                  <p id="modalDescription"></p>
+                </div>
+                
+                <!-- 미디어와 설명 섹션 -->
+                <div id="mediaContainer" class="media-container">
+                  <!-- 동적으로 생성될 미디어와 설명들이 여기에 들어갑니다 -->
+                </div>
+                
+                <!-- 프로젝트 링크 -->
+                <div class="project-links">
+                  <!-- 동적으로 생성될 링크 버튼들 -->
                 </div>
               </div>
             </div>
@@ -422,6 +457,18 @@
   <!--
     - custom js links
   -->
+  <script>
+    // 환경변수 설정 (실제 배포 시에는 서버에서 동적으로 생성)
+    window.__ENV__ = {
+      VITE_API_BASE_URL: 'http://localhost:8080',
+      VITE_API_PROJECTS_ENDPOINT: '/api/projects',
+      VITE_AI_API_URL: '',
+      VITE_AI_API_KEY: '',
+      VITE_APP_NAME: 'Portfolio Website',
+      VITE_APP_VERSION: '1.0.0'
+    };
+  </script>
+  <script src="./src/js/config.js"></script>
   <script src="./src/js/utils.js"></script>
   <script src="./src/js/sidebar.js"></script>
   <script src="./src/js/navigation.js"></script>

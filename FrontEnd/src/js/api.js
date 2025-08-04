@@ -1,5 +1,5 @@
 // API 관련 함수들
-const API_BASE_URL = 'http://localhost:8080/api';
+const API_BASE_URL = window.appConfig ? window.appConfig.getApiUrl('/api') : 'http://localhost:8080/api';
 
 // 프로필 정보를 가져오는 함수
 async function fetchProfileData() {

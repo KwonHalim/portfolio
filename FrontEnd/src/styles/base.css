@@ -174,6 +174,7 @@ article {
   color: var(--orange-yellow-crayola);
   box-shadow: var(--shadow-1);
   z-index: 1;
+  margin-left: 0.144rem; /* 더 왼쪽으로 조정 */
 }
 
 .icon-box::before {
