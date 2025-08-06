@@ -29,5 +29,8 @@ class ChatService:
         """
         미리 조립된 RAG 체인을 실행하여 질문에 대한 답변을 생성합니다.
         """
+        if len(question) > 200:
+            return "질문이 너무 깁니다. 200자 이하로 줄여주세요."
+
         print(f"\n--- 🗣️ 질문: {question} ---")
         return self.rag_chain.invoke(question)
