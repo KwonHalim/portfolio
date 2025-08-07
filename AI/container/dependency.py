@@ -5,6 +5,9 @@ from langchain_core.prompts import ChatPromptTemplate
 from langchain_google_genai import ChatGoogleGenerativeAI
 
 from AI.config import settings
+from AI.database.chat.chat_strategy.chat_store_strategy import ChatStrategy
+from AI.database.chat.chat_strategy.langchain_mongo_repository import MongoChatStrategy
+from AI.database.chat.repository import ChatRepository
 from AI.database.vector.repository import VectorRepository
 from AI.database.vector.vector_strategy.chroma_vector_store import ChromaVectorStore
 from AI.database.vector.vector_strategy.pg_vector_store import PGVectorStore
@@ -24,21 +27,15 @@ from AI.service.rag_service import RAGService
 
 # ----------------------------------------------------------------
 # 1. 전략 (Strategies) 및 모델 (LLM) 생성
-# - 가장 기본적인 동작 방식을 정의하는 '부품'들을 생성합니다.
 # ----------------------------------------------------------------
 
-# 청킹 방법 선택
-async def get_chunk_strategy() -> ChunkStrategy:
+def get_chunk_strategy() -> ChunkStrategy:
     return RecursiveCharacterSplitter(chunk_size=500, chunk_overlap=100)
-    # return SemanticSplitter(model_name="all-MiniLM-L6-v2")
 
-# 임베딩 모델 선택
 async def get_embedding_strategy() -> EmbeddingStrategy:
-    return GoogleGeminiEmbedding(model_name="gemini-embedding-001",
-                                 api_key=settings.GENAI_API_KEY)
+    return GoogleGeminiEmbedding(model_name="gemini-embedding-001", api_key=settings.GENAI_API_KEY)
 
-# 채팅 LLM 모델 선택
-async def get_llm() -> BaseLanguageModel:
+def get_llm() -> BaseLanguageModel:
     """설정에 따라 적절한 LLM을 생성하여 반환합니다."""
     if settings.LLM_TYPE == "huggingface":
         if not settings.HUGGINGFACE_ENDPOINT_URL:
@@ -56,86 +53,87 @@ async def get_llm() -> BaseLanguageModel:
     else:
         raise ValueError(f"지원하지 않는 LLM 타입입니다: {settings.LLM_TYPE}")
 
+def get_chat_db_strategy() -> ChatStrategy:
+    return MongoChatStrategy(mongo_uri=settings.MONGO_DB_URL)
 
-# ----------------------------------------------------------------
-# 2. 데이터 접근 계층 (Repository) 생성
-# - 데이터베이스와의 통신을 책임지는 객체들을 생성합니다.
-# ----------------------------------------------------------------
-
-# DB 선택
-async def get_vector_store_strategy() -> VectorStoreStrategy:
-    embedding_strategy = await get_embedding_strategy()
-
+async def get_vector_store_strategy(
+    embedding_strategy: EmbeddingStrategy = Depends(get_embedding_strategy)
+) -> VectorStoreStrategy:
     if settings.VECTOR_DB_TYPE == "pgvector":
-        return PGVectorStore(
-            connection_string=settings.PGVECTOR_DB_URL,
-            embedding_strategy=embedding_strategy
-        )
+        return PGVectorStore(connection_string=settings.PGVECTOR_DB_URL, embedding_strategy=embedding_strategy)
     elif settings.VECTOR_DB_TYPE == "chroma":
-        return ChromaVectorStore(
-            host=settings.CHROMA_HOST,
-            port=settings.CHROMA_PORT,
-            embedding_strategy=embedding_strategy
-        )
+        return ChromaVectorStore(host=settings.CHROMA_HOST, port=settings.CHROMA_PORT, embedding_strategy=embedding_strategy)
     else:
         raise ValueError(f"지원하지 않는 DB 타입입니다: {settings.VECTOR_DB_TYPE}")
 
-# 벡터 레포지토리 생성
-async def get_vector_repository() -> VectorRepository:
-    return VectorRepository(vector_store_strategy=await get_vector_store_strategy())
+
+# ----------------------------------------------------------------
+# 2. 데이터 접근 계층 (Repository) 생성
+# ----------------------------------------------------------------
+
+async def get_vector_repository(
+    vector_store_strategy: VectorStoreStrategy = Depends(get_vector_store_strategy)
+) -> VectorRepository:
+    return VectorRepository(vector_store_strategy=vector_store_strategy)
+
+def get_chat_repository(
+    chat_strategy: ChatStrategy = Depends(get_chat_db_strategy)
+) -> ChatRepository:
+    return ChatRepository(chat_strategy=chat_strategy)
 
 
 # ----------------------------------------------------------------
 # 3. 핵심 서비스 (Core Services) 생성
-# - 주입받은 전략을 사용하여 실제 비즈니스 로직을 수행하는 서비스들을 생성합니다.
 # ----------------------------------------------------------------
 
-# txt(문단 데이터), Q&A.csv,xslx(질의응답) 데이터를 처리하는 데이터 프로세서
-async def get_data_processor() -> DataProcessor:
+def get_data_processor() -> DataProcessor:
     return DataProcessor()
 
-# 청크 서비스 생성
-async def get_chunk_service() -> ChunkService:
-    return ChunkService(chunk_strategy=await get_chunk_strategy())
+def get_chunk_service(
+    chunk_strategy: ChunkStrategy = Depends(get_chunk_strategy)
+) -> ChunkService:
+    return ChunkService(chunk_strategy=chunk_strategy)
 
-# 임베딩 서비스 생성
-async def get_embedding_service() -> EmbeddingService:
-    return EmbeddingService(embedding_model=await get_embedding_strategy())
+async def get_embedding_service(
+    embedding_strategy: EmbeddingStrategy = Depends(get_embedding_strategy)
+) -> EmbeddingService:
+    return EmbeddingService(embedding_model=embedding_strategy)
 
 
 # ----------------------------------------------------------------
 # 4. LangChain RAG 구성 요소 생성
-# - RAG 체인을 만드는 데 필요한 LangChain 관련 부품들을 생성합니다.
 # ----------------------------------------------------------------
 
-# 참고할 문서 검색기 생성
-def get_document_retriever(
+async def get_document_retriever(
     vector_repository: VectorRepository = Depends(get_vector_repository)
 ) -> DocumentRetriever:
     return DocumentRetriever(vector_repository=vector_repository)
 
-# 사용할 프롬프트 입력
 def get_prompt() -> ChatPromptTemplate:
     return create_prompt()
 
 
 # ----------------------------------------------------------------
 # 5. 최종 서비스 조립 (Final Services)
-# - 모든 하위 서비스와 구성 요소를 조립하여 최종적으로 사용할 서비스를 생성합니다.
 # ----------------------------------------------------------------
 
-# 최종 질의응답 서비스
 async def get_chat_service(
-        retriever: DocumentRetriever = Depends(get_document_retriever),
-        prompt: ChatPromptTemplate = Depends(create_prompt),
-        llm: BaseLanguageModel = Depends(get_llm)
+    retriever: DocumentRetriever = Depends(get_document_retriever),
+    prompt: ChatPromptTemplate = Depends(get_prompt),
+    llm: BaseLanguageModel = Depends(get_llm),
+    chat_repository: ChatRepository = Depends(get_chat_repository)
 ) -> ChatService:
-    return ChatService(retriever=retriever, prompt=prompt, llm=llm)
+    return ChatService(retriever=retriever, prompt=prompt, llm=llm, chat_repository=chat_repository)
 
-# 최종 문서 처리 서비스
-async def get_rag_service() -> RAGService:
-    return RAGService(chunk_service=await get_chunk_service(),
-                      embedding_service=await get_embedding_service(),
-                      data_processor=await get_data_processor(),
-                      vector_repository=await get_vector_repository(),
-                      )
+async def get_rag_service(
+    chunk_service: ChunkService = Depends(get_chunk_service),
+    embedding_service: EmbeddingService = Depends(get_embedding_service),
+    data_processor: DataProcessor = Depends(get_data_processor),
+    vector_repository: VectorRepository = Depends(get_vector_repository)
+) -> RAGService:
+    return RAGService(
+        chunk_service=chunk_service,
+        embedding_service=embedding_service,
+        data_processor=data_processor,
+        vector_repository=vector_repository,
+    )

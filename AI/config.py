@@ -20,6 +20,7 @@ class Settings(BaseSettings):
     LLM_TYPE: str
     HUGGINGFACE_API_KEY: Optional[str] = None
     HUGGINGFACE_ENDPOINT_URL: Optional[str] = None
+    MONGO_DB_URL: str
 
 # 설정 객체 생성 (다른 파일에서 import하여 사용)
 settings = Settings()

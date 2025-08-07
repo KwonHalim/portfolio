@@ -11,7 +11,8 @@ chat_router = APIRouter(prefix="/chat", tags=["chat"])
 @chat_router.post("/message", response_model=SuccessResponse)
 async def chat_message(
     message_data: MessageDTO,
-    chat_service: ChatService = Depends(get_chat_service)):
+    chat_service: ChatService = Depends(get_chat_service)
+):
     """채팅 메시지 처리"""
-    result = chat_service.ask(question=message_data.message)
+    result = chat_service.ask(question=message_data.message, session_id = message_data.sessionId)
     return SuccessResponse(result=result)

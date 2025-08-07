@@ -1,5 +1,29 @@
 'use strict';
 
+// UUID 생성 함수
+function generateUUID() {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    const r = Math.random() * 16 | 0;
+    const v = c == 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
+}
+
+// 채팅 세션 ID 관리
+function getChatSessionId() {
+  let sessionId = localStorage.getItem('chatSessionId');
+  
+  if (!sessionId) {
+    sessionId = generateUUID();
+    localStorage.setItem('chatSessionId', sessionId);
+    console.log('새로운 채팅 세션 생성:', sessionId);
+  } else {
+    console.log('기존 채팅 세션 사용:', sessionId);
+  }
+  
+  return sessionId;
+}
+
 // Chatbot functionality
 async function sendMessage() {
   const input = document.getElementById('chatInput');
@@ -15,13 +39,20 @@ async function sendMessage() {
       // 타이핑 효과 시작
       const typingMessage = addTypingMessage();
       
+      // 채팅 세션 ID 가져오기
+      const sessionId = getChatSessionId();
+      
       // 서버로 메시지 전송
       const response = await fetch('http://localhost:8000/chat/message', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ message: message })
+        body: JSON.stringify({ 
+          message: message,
+          sessionId: sessionId,
+          timestamp: new Date().toISOString()
+        })
       });
 
       if (!response.ok) {
@@ -279,6 +310,28 @@ async function sendPendingFeedback() {
   } catch (error) {
     console.error('저장된 피드백 처리 실패:', error);
   }
+}
+
+// 채팅 세션 초기화 (새로운 대화 시작)
+function resetChatSession() {
+  localStorage.removeItem('chatSessionId');
+  console.log('채팅 세션이 초기화되었습니다.');
+  
+  // 채팅 메시지도 초기화
+  const messagesDiv = document.getElementById('chatMessages');
+  if (messagesDiv) {
+    messagesDiv.innerHTML = '';
+  }
+  
+  // 새로운 세션 ID 생성
+  getChatSessionId();
+}
+
+// 채팅 세션 정보 표시 (디버깅용)
+function showSessionInfo() {
+  const sessionId = localStorage.getItem('chatSessionId');
+  console.log('현재 채팅 세션 ID:', sessionId);
+  return sessionId;
 }
 
 // 챗봇 토글 기능 (호버 전용으로 변경)

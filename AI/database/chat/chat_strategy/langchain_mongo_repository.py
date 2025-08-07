@@ -1,0 +1,85 @@
+from datetime import timezone, datetime
+from typing import Optional, Dict, Any, List
+
+from pymongo import MongoClient, ASCENDING
+from bson import ObjectId
+
+from AI.database.chat.chat_strategy.chat_store_strategy import ChatStrategy
+
+
+class MongoChatStrategy(ChatStrategy):
+    """
+    ChatStrategy 인터페이스의 MongoDB 구현체입니다.
+    사용자 세션과 채팅 기록을 MongoDB에 저장하고 관리합니다.
+    """
+
+    def __init__(self, mongo_uri: str):
+        """
+        MongoChatStoreStrategy를 초기화합니다.
+
+        Args:
+            mongo_uri (str): MongoDB 연결 URI.        """
+        self.client = MongoClient(mongo_uri)
+        # URI에 명시된 default database 자동 추출
+        self.db = self.client.get_default_database()
+        self.messages_collection = self.db["chats"]
+        print(f"✅ MongoDB Chat Store 초기화 완료 (DB: {self.db.name})")
+
+    def get_or_create_session(self, user_identifier: str) -> str:
+        """
+        사용자 식별자를 기반으로 세션을 찾거나 새로 생성하고 세션 ID를 반환합니다.
+        """
+        session = self.sessions_collection.find_one({"user_identifier": user_identifier})
+
+        if session:
+            return str(session["_id"])
+        else:
+            from datetime import datetime
+            new_session = {
+                "user_identifier": user_identifier,
+                "start_time": datetime.now(timezone.utc)
+            }
+            result = self.sessions_collection.insert_one(new_session)
+            return str(result.inserted_id)
+
+    def save_chats(
+            self,
+            session_id: str,
+            human_message: str,
+            ai_message: str,
+            metadata: Optional[Dict[str, Any]] = None
+    ) -> str:
+        """
+        한 번의 사용자-AI 상호작용을 MongoDB에 저장합니다.
+        """
+        if metadata is None:
+            metadata = {}
+
+        message_doc = {
+            "session_id": session_id,
+            "interaction": {
+                "human": human_message,
+                "ai": ai_message,
+            },
+            "metadata": metadata,  # 예: {'retrieved_source_ids': [...]}
+            "timestamp": datetime.now(timezone.utc)
+        }
+        result = self.messages_collection.insert_one(message_doc)
+        return str(result.inserted_id)
+
+    def get_history(self, session_id: str) -> List[Dict[str, Any]]:
+        """
+        특정 세션의 전체 대화 기록을 시간순으로 정렬하여 가져옵니다.
+        """
+        from bson import ObjectId
+        messages = self.messages_collection.find(
+            {"session_id": ObjectId(session_id)}
+        ).sort("timestamp", ASCENDING)
+        # ObjectId를 문자열로 변환하여 반환 (JSON 직렬화 용이)
+        history = []
+        for msg in messages:
+            msg["_id"] = str(msg["_id"])
+            msg["session_id"] = str(msg["session_id"])
+            history.append(msg)
+        return history
+
