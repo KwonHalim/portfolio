@@ -19,13 +19,26 @@ class RAGService:
         self.repository = vector_repository
         print("✅ RAGService 초기화 완료")
 
-    def process(self, paragraph_data: str | None, qa_data: str | None):
+    def process(self, paragraph_data: str, paragraph_file_name: str, qa_data: str, qa_file_name: str):
         # 1. TXT(자기소개) 데이터와 Q&A(질의응답) 데이터를 받아서 langchain Document 객체로 변환합니다.
         print("--- 문서 변환 시작 ---")
         docs = []
-        docs.extend(self.data_processor.process_paragraphs([paragraph_data]))
+
+        if paragraph_data:
+            # 1. 전달받은 전체 텍스트를 빈 줄('\n\n') 기준으로 나누어 리스트를 만듭니다. (두 줄 이상 띄어져 있으면 다른 내용이라고 간주하는 것)
+            paragraphs_list = [p.strip() for p in paragraph_data.split('\n\n') if p.strip()]
+
+            # 2. 이제 나누어진 '문단 리스트'를 다음 함수로 전달합니다.
+            docs.extend(self.data_processor.process_paragraphs(
+                paragraphs=paragraphs_list,
+                source_identifier=paragraph_file_name
+            ))
+        print(f"--- 문단 데이터 변환 완료 ---")
+        print(f"--- 변환된 문단 데이터 개수: {len(docs)} ---")
         qa_data = [json.loads(line) for line in qa_data.strip().split('\n')]
-        docs.extend(self.data_processor.process_qa_json(qa_data))
+        print(f"--- Q&A 데이터 변환 시작 ---")
+        print(f"--- Q&A 데이터 개수: {len(qa_data)} ---")
+        docs.extend(self.data_processor.process_qa_json(qa_data=qa_data, source_identifier=qa_file_name))
         print(f"--- 문서 변환 완료 ---")
         print(f"--- 변환된 문서 개수: {len(docs)} ---")
         # 2. 문서 청킹
@@ -43,6 +56,6 @@ class RAGService:
         '''
         print("--- 청크 문서 저장 시작 ---")
         # 3.청크 문서 저장 및 임베딩
-        self.repository.add_documents(documents)
+        self.repository.add_documents(documents) #이 부분에서 임베딩이 자동으로 처리됨
         print("--- 청크 문서 저장 완료 ---")
         print(f"--- 총 처리된 문서 개수: {len(docs)} ---")
