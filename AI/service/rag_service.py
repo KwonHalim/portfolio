@@ -56,6 +56,6 @@ class RAGService:
         '''
         print("--- 청크 문서 저장 시작 ---")
         # 3.청크 문서 저장 및 임베딩
-        self.repository.add_documents(documents) #이 부분에서 임베딩이 자동으로 처리됨(내부적 처리)
+        self.repository.add_documents(documents) #이 부분에서 임베딩이 자동으로 처리됨(내부적 처리) -> chroma_vector_store.py에서 처리됨.embedding_function참고
         print("--- 청크 문서 저장 완료 ---")
         print(f"--- 총 처리된 문서 개수: {len(docs)} ---")
