@@ -51,7 +51,9 @@ async def process_documents(
     # RAG 서비스를 통한 문서 처리
     result = rag_service.process(
         paragraph_data=paragraph_content_str,
-        qa_data=qa_content_str
+        paragraph_file_name = paragraph_file.filename,
+        qa_data=qa_content_str,
+        qa_file_name = qa_file.filename
     )
 
     return SuccessResponse(result=result)
