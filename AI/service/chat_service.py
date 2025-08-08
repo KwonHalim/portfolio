@@ -1,14 +1,12 @@
 # Langchain 메모리 관련 클래스들을 임포트합니다.
-from langchain.memory import ConversationBufferWindowMemory
-from langchain_core import memory
+from typing import Dict
+
 from langchain_core.language_models import BaseLanguageModel
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import ChatPromptTemplate
-from langchain_core.runnables import RunnableLambda
 
 # 기존에 정의한 Repository와 Retriever를 사용합니다.
 from AI.database.chat.repository import ChatRepository
-from AI.service.langchain.chat_history import ChatHistory
 from AI.service.langchain.document_retriever import DocumentRetriever
 
 
@@ -31,7 +29,7 @@ class ChatService:
         self.repository = chat_repository
         print("✅ ChatService 초기화 (Langchain 메모리 사용)")
 
-    def ask(self, question: str, session_id: str) -> str:
+    def ask(self, question: str, session_id: str) -> Dict[str, str]:
         """
         대화 기록을 바탕으로 RAG 체인을 실행하고, 결과를 저장한 후 답변을 반환합니다.
         """
@@ -58,8 +56,16 @@ class ChatService:
             "retrieved_documents": [doc.to_json() for doc in source_docs],
         }
 
-        self.repository.save_chat(answer, question, session_id, metadata)
+        chat_id = self.repository.save_chat(answer, question, session_id, metadata)
 
-        # 7. 결과 반환
-        return answer
+        return {"llm_answer" : answer,"chat_id": chat_id}
 
+    def feedback(self, chat_id: str, is_good: bool):
+        """
+        채팅 메시지에 대한 피드백을 저장합니다.
+        :param chat_repository: 채팅 레포지토리 인스턴스
+        :param chat_id: 피드백을 남길 채팅 메시지 ID
+        :param is_good: 피드백이 긍정적인지 여부 (True/False)
+        """
+        print(f"--- 피드백 저장 시작 (채팅 ID: {chat_id}, 긍정적: {is_good}) ---")
+        return self.repository.update_feedback(chat_id, is_good)

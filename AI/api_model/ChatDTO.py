@@ -1,6 +1,10 @@
 from pydantic import BaseModel
 
 
-class MessageDTO(BaseModel):
+class RequestMessageDTO(BaseModel):
     message: str
     sessionId: str | None = None
+
+class RequestFeedbackDTO(BaseModel):
+    chatId: str
+    isGood: bool

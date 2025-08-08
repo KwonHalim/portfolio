@@ -59,3 +59,15 @@ class ChatStrategy(ABC):
             List[Dict[str, Any]]: 해당 세션의 메시지 목록.
         """
         pass
+
+    @abstractmethod
+    def update_feedback(self, chat_id: str, is_good: bool):
+        """
+        채팅 메시지에 대한 피드백을 업데이트합니다.
+        사용자가 AI의 답변이 유용했는지 여부를 기록합니다.
+
+        Args:
+            chat_id (str): 피드백을 업데이트할 채팅 메시지의 ID.
+            is_good (bool): 피드백 값 (좋은 답변이면 True, 그렇지 않으면 False).
+        """
+        pass
