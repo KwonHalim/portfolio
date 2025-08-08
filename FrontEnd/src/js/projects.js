@@ -4,8 +4,8 @@
         constructor() {
             this.currentCategory = 'all';
             this.isLoading = false;
-            // 환경변수에서 API URL 설정 가져오기
-            this.apiBaseUrl = window.appConfig ? window.appConfig.getProjectsApiUrl() : 'http://localhost:8080/api/projects';
+            // 환경변수에서 API URL 설정 가져오기 (기본값)
+            this.apiBaseUrl = 'http://localhost:8080/api/projects';
             this.currentMediaIndex = 0;
             this.currentMediaPaths = [];
             this.categories = new Set();
@@ -16,8 +16,15 @@
             this.init();
         }
         
-        init() {
+        async init() {
             console.log('ProjectManager 초기화 시작');
+            
+            // 환경변수 초기화 대기
+            if (window.appConfig) {
+                await window.appConfig.waitForInit();
+                this.apiBaseUrl = window.appConfig.getProjectsApiUrl();
+                console.log('ProjectManager API URL 설정:', this.apiBaseUrl);
+            }
             
             const projectGrid = document.getElementById('projectGrid');
             if (!projectGrid) {
@@ -445,6 +452,9 @@
                     mediaImage.appendChild(img);
                 }
                 
+                // 리사이즈 핸들 추가
+                this.addResizeHandles(mediaImage);
+                
                 // 설명 섹션
                 const mediaDescription = document.createElement('div');
                 mediaDescription.className = 'media-description';
@@ -497,6 +507,140 @@
                 `;
                 projectLinks.appendChild(demoLink);
             }
+        }
+        
+        // 리사이즈 기능 추가 함수
+        addResizeHandles(mediaImage) {
+            // 미디어 이미지에 직접 리사이즈 이벤트 리스너 추가
+            this.setupResizeListener(mediaImage);
+        }
+        
+        // 리사이즈 이벤트 리스너 설정
+        setupResizeListener(mediaImage) {
+            let isResizing = false;
+            let startX, startY, startWidth, startHeight;
+            let resizeDirection = '';
+            
+            const startResize = (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                const rect = mediaImage.getBoundingClientRect();
+                const clientX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
+                const clientY = e.type.includes('touch') ? e.touches[0].clientY : e.clientY;
+                
+                // 클릭 위치에 따라 리사이즈 방향 결정
+                const x = clientX - rect.left;
+                const y = clientY - rect.top;
+                const width = rect.width;
+                const height = rect.height;
+                
+                // 테두리 영역 감지 (40px로 확장)
+                const borderSize = 50;
+                
+                let direction = '';
+                
+                // 모서리 영역
+                if (x < borderSize && y < borderSize) direction = 'nw';
+                else if (x > width - borderSize && y < borderSize) direction = 'ne';
+                else if (x < borderSize && y > height - borderSize) direction = 'sw';
+                else if (x > width - borderSize && y > height - borderSize) direction = 'se';
+                // 가장자리 영역
+                else if (y < borderSize) direction = 'n';
+                else if (y > height - borderSize) direction = 's';
+                else if (x < borderSize) direction = 'w';
+                else if (x > width - borderSize) direction = 'e';
+                else return; // 테두리 영역이 아니면 리사이즈하지 않음
+                
+                isResizing = true;
+                resizeDirection = direction;
+                mediaImage.classList.add('resizing');
+                
+                startX = clientX;
+                startY = clientY;
+                startWidth = width;
+                startHeight = height;
+                
+                // 마우스와 터치 이벤트 모두 추가
+                document.addEventListener('mousemove', resize);
+                document.addEventListener('mouseup', stopResize);
+                document.addEventListener('touchmove', resize, { passive: false });
+                document.addEventListener('touchend', stopResize);
+            };
+            
+            const resize = (e) => {
+                if (!isResizing) return;
+                
+                const clientX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
+                const clientY = e.type.includes('touch') ? e.touches[0].clientY : e.clientY;
+                
+                const deltaX = clientX - startX;
+                const deltaY = clientY - startY;
+                
+                let newWidth = startWidth;
+                let newHeight = startHeight;
+                
+                // 방향에 따라 크기 조절
+                switch (resizeDirection) {
+                    case 'e':
+                        newWidth = startWidth + deltaX;
+                        break;
+                    case 'w':
+                        newWidth = startWidth - deltaX;
+                        break;
+                    case 's':
+                        newHeight = startHeight + deltaY;
+                        break;
+                    case 'n':
+                        newHeight = startHeight - deltaY;
+                        break;
+                    case 'se':
+                        newWidth = startWidth + deltaX;
+                        newHeight = startHeight + deltaY;
+                        break;
+                    case 'sw':
+                        newWidth = startWidth - deltaX;
+                        newHeight = startHeight + deltaY;
+                        break;
+                    case 'ne':
+                        newWidth = startWidth + deltaX;
+                        newHeight = startHeight - deltaY;
+                        break;
+                    case 'nw':
+                        newWidth = startWidth - deltaX;
+                        newHeight = startHeight - deltaY;
+                        break;
+                }
+                
+                // 최소 크기 제한
+                const minSize = 100;
+                newWidth = Math.max(newWidth, minSize);
+                newHeight = Math.max(newHeight, minSize);
+                
+                // 미디어 요소 크기 조절
+                const mediaElement = mediaImage.querySelector('img, video');
+                if (mediaElement) {
+                    mediaElement.style.width = newWidth + 'px';
+                    mediaElement.style.height = newHeight + 'px';
+                    mediaElement.style.maxWidth = 'none';
+                    mediaElement.style.maxHeight = 'none';
+                }
+            };
+            
+            const stopResize = () => {
+                isResizing = false;
+                resizeDirection = '';
+                mediaImage.classList.remove('resizing');
+                
+                document.removeEventListener('mousemove', resize);
+                document.removeEventListener('mouseup', stopResize);
+                document.removeEventListener('touchmove', resize);
+                document.removeEventListener('touchend', stopResize);
+            };
+            
+            // 마우스와 터치 이벤트 모두 추가
+            mediaImage.addEventListener('mousedown', startResize);
+            mediaImage.addEventListener('touchstart', startResize, { passive: false });
         }
         
 
@@ -696,6 +840,8 @@
             }
             this.hasMoreData = true;
         }
+        
+
     }
 
     // 초기화
