@@ -981,15 +981,6 @@
   max-height: 400px;
   object-fit: contain;
   border-radius: clamp(8px, 1.2vw, 12px);
-  cursor: pointer;
-  transition: all 0.3s ease;
-  border: 2px solid transparent;
-}
-
-.media-item img:hover {
-  border-color: #5B7A9A;
-  box-shadow: 0 0 10px rgba(91, 122, 154, 0.6);
-  transform: scale(1.02);
 }
 
 .media-item video {
@@ -997,18 +988,7 @@
   max-height: 400px;
   object-fit: contain;
   border-radius: clamp(8px, 1.2vw, 12px);
-  cursor: pointer;
-  transition: all 0.3s ease;
-  border: 2px solid transparent;
 }
-
-.media-item video:hover {
-  border-color: #5B7A9A;
-  box-shadow: 0 0 10px rgba(91, 122, 154, 0.6);
-  transform: scale(1.02);
-}
-
-
 
 
 
@@ -1344,15 +1324,15 @@
 }
 
 /* 애니메이션 클래스들 - 지연 시간은 JavaScript에서 동적으로 적용 */
-.slide-in-fwd-tl { animation: slide-in-fwd-tl 0.8s ease-out both; }
-.slide-in-fwd-top { animation: slide-in-fwd-top 0.8s ease-out both; }
-.slide-in-fwd-tr { animation: slide-in-fwd-tr 0.8s ease-out both; }
-.slide-in-fwd-left { animation: slide-in-fwd-left 0.8s ease-out both; }
-.slide-in-fwd-center { animation: slide-in-fwd-center 0.8s ease-out both; }
-.slide-in-fwd-right { animation: slide-in-fwd-right 0.8s ease-out both; }
-.slide-in-fwd-bl { animation: slide-in-fwd-bl 0.8s ease-out both; }
-.slide-in-fwd-bottom { animation: slide-in-fwd-bottom 0.8s ease-out both; }
-.slide-in-fwd-br { animation: slide-in-fwd-br 0.8s ease-out both; }
+.slide-in-fwd-tl { animation: slide-in-fwd-tl 0.3s ease-out both; }
+.slide-in-fwd-top { animation: slide-in-fwd-top 0.3s ease-out both; }
+.slide-in-fwd-tr { animation: slide-in-fwd-tr 0.3s ease-out both; }
+.slide-in-fwd-left { animation: slide-in-fwd-left 0.3s ease-out both; }
+.slide-in-fwd-center { animation: slide-in-fwd-center 0.3s ease-out both; }
+.slide-in-fwd-right { animation: slide-in-fwd-right 0.3s ease-out both; }
+.slide-in-fwd-bl { animation: slide-in-fwd-bl 0.3s ease-out both; }
+.slide-in-fwd-bottom { animation: slide-in-fwd-bottom 0.3s ease-out both; }
+.slide-in-fwd-br { animation: slide-in-fwd-br 0.3s ease-out both; }
 
 /* 바운스 효과가 있는 애니메이션 */
 @keyframes bounceIn {
@@ -1399,7 +1379,7 @@
 
 /* 모달 애니메이션 클래스들 */
 .modal-open {
-  animation: modal-open 0.2s ease-out both;
+  animation: modal-open 0.3s ease-out both;
 }
 
 .modal-close {
@@ -1831,51 +1811,5 @@ textarea.form-input::-webkit-resizer { display: none; }
     right: 1.2rem;
     top: 1.2rem;
     font-size: 1.3rem;
-  }
-} 
-
-/* 미디어 요소 리사이즈 */
-.media-image {
-  position: relative;
-}
-
-.media-image img,
-.media-image video {
-  position: relative;
-  z-index: 1;
-}
-
-/* 호버 시 리사이즈 커서 표시 */
-.media-image:hover {
-  cursor: se-resize;
-}
-
-/* 리사이즈 중일 때 스타일 */
-.media-image.resizing {
-  user-select: none;
-}
-
-.media-image.resizing img,
-.media-image.resizing video {
-  pointer-events: none;
-}
-
-.media-image.resizing::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  border: 3px solid rgba(255, 255, 255, 0.8);
-  border-radius: 6px;
-  z-index: 5;
-  pointer-events: none;
-}
-
-/* 모바일에서 테두리 두께 조정 */
-@media (max-width: 768px) {
-  .media-image.resizing::before {
-    border-width: 4px;
   }
 } 
