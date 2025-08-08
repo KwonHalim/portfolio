@@ -55,6 +55,9 @@
   --light-gray: hsl(0, 0%, 84%);
   --light-gray-70: hsla(0, 0%, 84%, 0.7);
   --bittersweet-shimmer: hsl(0, 43%, 51%);
+  
+  /* 호버 효과용 새로운 색상 */
+  --hover-accent: #5B7A9A;
 
   /**
    * typography

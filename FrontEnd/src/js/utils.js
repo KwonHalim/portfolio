@@ -54,3 +54,45 @@ function initializeAllEventListeners() {
   initializeChatbot();
   initializeAbout();
 } 
+
+// 3D 회전 효과를 위한 함수들
+function init3DEffect() {
+  const serviceItems = document.querySelectorAll('.service-item');
+  
+  serviceItems.forEach(item => {
+    item.addEventListener('mousemove', handleMouseMove);
+    item.addEventListener('mouseenter', handleMouseEnter);
+    item.addEventListener('mouseleave', handleMouseLeave);
+  });
+}
+
+function handleMouseMove(e) {
+  const item = e.currentTarget;
+  const rect = item.getBoundingClientRect();
+  const x = e.clientX - rect.left;
+  const y = e.clientY - rect.top;
+  
+  // 마우스 위치를 -1에서 1 사이의 값으로 정규화
+  const centerX = rect.width / 2;
+  const centerY = rect.height / 2;
+  const rotateX = ((y - centerY) / centerY) * -15;
+  const rotateY = ((x - centerX) / centerX) * 20;
+  
+  item.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateZ(30px)`;
+}
+
+function handleMouseEnter(e) {
+  const item = e.currentTarget;
+  item.style.transition = 'transform 0.3s ease';
+}
+
+function handleMouseLeave(e) {
+  const item = e.currentTarget;
+  item.style.transition = 'transform 0.6s cubic-bezier(0.23, 1, 0.32, 1)';
+  item.style.transform = 'rotateX(0deg) rotateY(0deg) translateZ(0px)';
+}
+
+// 페이지 로드 시 3D 효과 초기화
+document.addEventListener('DOMContentLoaded', function() {
+  init3DEffect();
+}); 
