@@ -67,21 +67,15 @@ async function sendMessage() {
       
       // 챗봇 응답 표시 - 서버 응답 구조에 맞게 수정
       let botResponse = '응답을 받았습니다.';
-      let chatId = null;
-      
-      if (data.result && data.result.llm_answer) {
-        botResponse = data.result.llm_answer;
-        chatId = data.result.chat_id;
-      } else if (data.result) {
+      if (data.result) {
         botResponse = data.result;
-        chatId = data.result.chat_id;
       } else if (data.message) {
         botResponse = data.message;
       } else if (data.response) {
         botResponse = data.response;
       }
       
-      addMessage('bot', botResponse, chatId);
+      addMessage('bot', botResponse);
 
     } catch (error) {
       console.error('Error:', error);
@@ -97,7 +91,7 @@ async function sendMessage() {
   }
 }
 
-function addMessage(type, text, chatId = null) {
+function addMessage(type, text) {
   const messagesDiv = document.getElementById('chatMessages');
   const messageDiv = document.createElement('div');
   messageDiv.className = `message ${type}-message`;
@@ -107,19 +101,14 @@ function addMessage(type, text, chatId = null) {
     messageDiv.innerHTML = `
       <div class="message-content">${text}</div>
       <div class="message-feedback">
-        <button class="feedback-like" onclick="rateMessage(this, 'like', '${chatId}')" title="좋아요">
+        <button class="feedback-like" onclick="rateMessage(this, 'like')" title="좋아요">
           <ion-icon name="thumbs-up-outline"></ion-icon>
         </button>
-        <button class="feedback-dislike" onclick="rateMessage(this, 'dislike', '${chatId}')" title="싫어요">
+        <button class="feedback-dislike" onclick="rateMessage(this, 'dislike')" title="싫어요">
           <ion-icon name="thumbs-down-outline"></ion-icon>
         </button>
       </div>
     `;
-    
-    // chat_id를 데이터 속성으로 저장
-    if (chatId) {
-      messageDiv.setAttribute('data-chat-id', chatId);
-    }
   } else {
     // 사용자 메시지인 경우 텍스트만
     messageDiv.textContent = text;
@@ -214,95 +203,6 @@ function closeFeedbackModal() {
     modal.style.display = 'none';
     // 텍스트 영역 초기화
     document.getElementById('feedbackText').value = '';
-  }
-}
-
-// 메시지 평가 함수 (좋아요/싫어요)
-async function rateMessage(button, rating, chatId) {
-  if (!chatId) {
-    console.warn('chat_id가 없어서 피드백을 전송할 수 없습니다.');
-    return;
-  }
-  
-  try {
-    // 버튼 비활성화
-    const feedbackDiv = button.closest('.message-feedback');
-    const likeBtn = feedbackDiv.querySelector('.feedback-like');
-    const dislikeBtn = feedbackDiv.querySelector('.feedback-dislike');
-    
-    likeBtn.disabled = true;
-    dislikeBtn.disabled = true;
-    
-    // 평가 데이터 준비 (FastAPI RequestFeedbackDTO 구조에 맞춤)
-    const feedbackData = {
-      chatId: chatId,
-      isGood: rating === 'like' // true: 좋아요, false: 싫어요
-    };
-    
-    console.log('피드백 전송:', feedbackData);
-    
-    // 서버로 피드백 전송
-    const response = await fetch('http://localhost:8000/chat/feedback', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(feedbackData)
-    });
-    
-    if (response.ok) {
-      const result = await response.json();
-      console.log('피드백 전송 성공:', result);
-      
-      // 시각적 피드백
-      if (rating === 'like') {
-        likeBtn.style.color = '#4CAF50';
-        likeBtn.innerHTML = '<ion-icon name="thumbs-up"></ion-icon>';
-      } else {
-        dislikeBtn.style.color = '#f44336';
-        dislikeBtn.innerHTML = '<ion-icon name="thumbs-down"></ion-icon>';
-      }
-      
-      // 성공 메시지
-      const messageDiv = button.closest('.message');
-      const successDiv = document.createElement('div');
-      successDiv.className = 'feedback-success';
-      successDiv.textContent = '피드백이 전송되었습니다.';
-      successDiv.style.cssText = 'color: #4CAF50; font-size: 12px; margin-top: 5px;';
-      messageDiv.appendChild(successDiv);
-      
-      // 3초 후 성공 메시지 제거
-      setTimeout(() => {
-        if (successDiv.parentNode) {
-          successDiv.remove();
-        }
-      }, 3000);
-      
-    } else {
-      throw new Error('서버 응답 오류');
-    }
-    
-  } catch (error) {
-    console.error('피드백 전송 실패:', error);
-    
-    // 버튼 다시 활성화
-    likeBtn.disabled = false;
-    dislikeBtn.disabled = false;
-    
-    // 에러 메시지
-    const messageDiv = button.closest('.message');
-    const errorDiv = document.createElement('div');
-    errorDiv.className = 'feedback-error';
-    errorDiv.textContent = '피드백 전송에 실패했습니다.';
-    errorDiv.style.cssText = 'color: #f44336; font-size: 12px; margin-top: 5px;';
-    messageDiv.appendChild(errorDiv);
-    
-    // 3초 후 에러 메시지 제거
-    setTimeout(() => {
-      if (errorDiv.parentNode) {
-        errorDiv.remove();
-      }
-    }, 3000);
   }
 }
 
