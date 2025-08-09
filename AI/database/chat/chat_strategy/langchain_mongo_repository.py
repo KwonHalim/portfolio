@@ -83,3 +83,17 @@ class MongoChatStrategy(ChatStrategy):
             history.append(msg)
         return history
 
+    def update_feedback(self, chat_id: str, is_good: bool):
+        """
+        채팅 메시지에 대한 피드백을 업데이트합니다.
+        :param chat_id: 채팅 메시지 ID
+        :param is_good: 피드백 (좋은 답변이면 True, 그렇지 않으면 False)
+        """
+        feedback = "good" if is_good else "bad"
+        self.messages_collection.update_one(
+            {"_id": ObjectId(chat_id)},
+            {"$set": {"feedback": feedback}}
+        )
+        print(f"✅ 채팅 ID {chat_id}에 대한 피드백 '{feedback}' 저장 완료.")
+        return chat_id
+

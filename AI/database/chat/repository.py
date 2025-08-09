@@ -20,7 +20,7 @@ class ChatRepository:
         print(f"  - 메타데이터: {metadata}")
         print("--- 채팅 메시지 저장 완료 ---")
 
-        self.chat_repository.save_chats(session, human_message, ai_message, metadata)
+        return self.chat_repository.save_chats(session, human_message, ai_message, metadata)
 
     def get_history(self, session: str):
         """
@@ -29,3 +29,12 @@ class ChatRepository:
         :return: 채팅 메시지 리스트
         """
         return self.chat_repository.get_history(session)
+
+    def update_feedback(self, chat_id: str, is_good: bool):
+        """
+        채팅 메시지에 대한 피드백을 업데이트합니다.
+        :param chat_id: 채팅 메시지 ID
+        :param is_good: 피드백 (좋은 답변이면 True, 그렇지 않으면 False)
+        """
+        print(f"--- 채팅 ID {chat_id}에 대한 피드백 업데이트 시작 ---")
+        return self.chat_repository.update_feedback(chat_id, is_good)
