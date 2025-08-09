@@ -14,10 +14,8 @@ public class Feedback extends BaseEntity{
     private Long id;
 
     @Column
-    private String ip;
+    private String session;
 
     @Column
-    private String metadata;
-
-
+    private String feedback;
 }

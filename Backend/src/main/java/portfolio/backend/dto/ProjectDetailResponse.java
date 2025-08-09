@@ -2,20 +2,18 @@ package portfolio.backend.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import portfolio.backend.entity.Project;
-import portfolio.backend.entity.ProjectImage;
 import portfolio.backend.entity.Technology;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Getter
 public class ProjectDetailResponse {
 
     private Long id;
