@@ -22,11 +22,11 @@ cp -r assets dist/
 echo "➡️ Copied 'src' and 'assets' directories to dist/"
 
 # 4. (핵심!) dist 폴더 안의 index.html 파일에서 플레이스홀더를 실제 환경 변수 값으로 교체합니다.
-#    - 로컬 테스트 시에는 환경 변수가 없으므로, ":-" 뒤에 지정된 localhost 주소를 기본값으로 사용합니다.
+#    - Cloudflare Tunnel URL을 기본값으로 사용합니다.
 #    - 's|찾을문자열|바꿀문자열|g' 는 sed 명령어의 기본 형식입니다.
-sed -i.bak "s|__API_BASE_URL__|${VITE_API_BASE_URL:-http://localhost:8080}|g" dist/index.html
-sed -i.bak "s|__AI_API_URL__|${VITE_AI_API_URL:-http://localhost:8000}|g" dist/index.html
-echo "🔄 Replaced placeholders with local development values."
+sed -i.bak "s|__API_BASE_URL__|${VITE_API_BASE_URL:-https://api-mac.mydomain.com}|g" dist/index.html
+sed -i.bak "s|__AI_API_URL__|${VITE_AI_API_URL:-https://chatbot-mac.mydomain.com}|g" dist/index.html
+echo "🔄 Replaced placeholders with Cloudflare Tunnel URLs."
 
 # 5. sed가 만든 백업 파일(.bak)을 삭제하여 깔끔하게 정리합니다.
 rm dist/index.html.bak
