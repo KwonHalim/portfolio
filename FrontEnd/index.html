@@ -460,9 +460,9 @@
   <script>
     // 환경변수 설정 (환경에 따라 동적으로 설정 가능)
     window.__ENV__ = {
-      // Cloudflare Tunnel을 통한 접근
-      VITE_API_BASE_URL: 'https://api-mac.mydomain.com',  // 백엔드 서버
-      VITE_AI_API_URL: 'https://chatbot-mac.mydomain.com',   // AI 서버
+      // 배포 시 이 값들을 Cloudflare Tunnel URL로 변경
+      VITE_API_BASE_URL: 'http://localhost:8080',  // 백엔드 서버
+      VITE_AI_API_URL: 'http://localhost:8000',   // AI 서버
       VITE_API_PROJECTS_ENDPOINT: '/api/projects',
       VITE_APP_NAME: 'Portfolio Website',
       VITE_APP_VERSION: '1.0.0'
@@ -473,15 +473,7 @@
       if (apiBaseUrl) window.__ENV__.VITE_API_BASE_URL = apiBaseUrl;
       if (aiApiUrl) window.__ENV__.VITE_AI_API_URL = aiApiUrl;
       console.log('환경변수가 업데이트되었습니다:', window.__ENV__);
-      
-      // 페이지 새로고침 없이 API URL 업데이트
-      if (window.updateApiUrls) {
-        window.updateApiUrls();
-      }
     };
-    
-    // 현재 환경변수 상태 출력
-    console.log('현재 환경변수 설정:', window.__ENV__);
   </script>
   <script src="./src/js/config.js"></script>
   <script src="./src/js/utils.js"></script>

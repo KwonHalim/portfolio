@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# --- Cloudflare Tunnel을 통한 배포용 빌드 스크립트 ---
+# --- 로컬 테스트용 빌드 스크립트 ---
 
 # 스크립트가 시작되었음을 알림
 echo "🚀 Starting local build process..."
@@ -22,17 +22,15 @@ cp -r assets dist/
 echo "➡️ Copied 'src' and 'assets' directories to dist/"
 
 # 4. (핵심!) dist 폴더 안의 index.html 파일에서 플레이스홀더를 실제 환경 변수 값으로 교체합니다.
-#    - Cloudflare Tunnel 사용 시 기본값으로 설정된 도메인을 사용합니다.
-#    - 환경변수가 설정되어 있다면 해당 값으로 오버라이드합니다.
-sed -i.bak "s|__API_BASE_URL__|${VITE_API_BASE_URL:-https://api-mac.mydomain.com}|g" dist/index.html
-sed -i.bak "s|__AI_API_URL__|${VITE_AI_API_URL:-https://chatbot-mac.mydomain.com}|g" dist/index.html
-echo "🔄 Replaced placeholders with Cloudflare Tunnel URLs."
+#    - 로컬 테스트 시에는 환경 변수가 없으므로, ":-" 뒤에 지정된 localhost 주소를 기본값으로 사용합니다.
+#    - 's|찾을문자열|바꿀문자열|g' 는 sed 명령어의 기본 형식입니다.
+sed -i.bak "s|__API_BASE_URL__|${VITE_API_BASE_URL:-http://localhost:8080}|g" dist/index.html
+sed -i.bak "s|__AI_API_URL__|${VITE_AI_API_URL:-http://localhost:8000}|g" dist/index.html
+echo "🔄 Replaced placeholders with local development values."
 
 # 5. sed가 만든 백업 파일(.bak)을 삭제하여 깔끔하게 정리합니다.
 rm dist/index.html.bak
 echo "🧹 Cleaned up backup files."
 
 # 모든 과정이 완료되었음을 알림
-echo "🎉 Build finished successfully! Your app is now configured for Cloudflare Tunnel."
-echo "📡 Backend API: https://api-mac.mydomain.com"
-echo "🤖 AI Chatbot: https://chatbot-mac.mydomain.com"
+echo "🎉 Build finished successfully! You can now test the 'dist' folder."

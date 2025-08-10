@@ -1,12 +1,10 @@
 // API 관련 함수들
-import { ABOUT_API_URL, TIMELINE_API_URL, PROJECTS_API_URL } from '../../config.js';
-
-
-
+// 💡 이렇게 한 줄로 단순화하세요.
+const API_BASE_URL = `${window.__ENV__.VITE_API_BASE_URL}/api`;
 // 프로필 정보를 가져오는 함수
 async function fetchProfileData() {
     try {
-        const response = await fetch(ABOUT_API_URL);
+        const response = await fetch(`${API_BASE_URL}/about/KwonHalim`);
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -161,7 +159,7 @@ function updateContactInfo(profileData) {
 // 타임라인 정보를 가져오는 함수
 async function fetchTimelineData() {
     try {
-        const response = await fetch(TIMELINE_API_URL);
+        const response = await fetch(`${API_BASE_URL}/timeline/KwonHalim`);
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -312,7 +310,7 @@ function updateExperienceSection(experiences) {
 // 프로젝트 목록을 가져오는 함수
 async function fetchProjectsData() {
     try {
-        const response = await fetch(PROJECTS_API_URL);
+        const response = await fetch(`${API_BASE_URL}/projects`);
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -327,7 +325,7 @@ async function fetchProjectsData() {
 // 개별 프로젝트 상세 정보를 가져오는 함수
 async function fetchProjectDetail(projectId) {
     try {
-        const response = await fetch(`PROJECTS_API_URL/${projectId}`);
+        const response = await fetch(`${API_BASE_URL}/projects/${projectId}`);
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }

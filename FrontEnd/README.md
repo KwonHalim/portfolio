@@ -33,46 +33,12 @@ cd FrontEnd
 http-server
 ```
 
-## 🌐 Cloudflare Tunnel 설정
-
-프로덕션 환경에서는 Cloudflare Tunnel을 통해 백엔드와 AI 서버에 접근합니다.
-
-### 도메인 설정
-- **백엔드 API**: `https://api-mac.mydomain.com`
-- **AI 챗봇**: `https://chatbot-mac.mydomain.com`
-
-### 빌드 및 배포
-```bash
-cd FrontEnd
-./build.sh
-```
-
-빌드 스크립트는 자동으로 Cloudflare Tunnel URL을 설정합니다.
-
-### 환경변수 오버라이드
-런타임에 API URL을 변경하려면 브라우저 콘솔에서:
-
-```javascript
-// 백엔드 API URL 변경
-window.setEnvironment('https://new-api-domain.com', null);
-
-// AI 서버 URL 변경
-window.setEnvironment(null, 'https://new-ai-domain.com');
-
-// 둘 다 변경
-window.setEnvironment('https://new-api-domain.com', 'https://new-ai-domain.com');
-```
-
 ## 🔗 API 연결
 
 이 프로젝트는 백엔드 API와 연결되어 동적으로 콘텐츠를 로드합니다.
 
 ### API 엔드포인트
 - **프로필 정보**: `GET /api/about/KwonHalim`
-- **프로젝트 목록**: `GET /api/projects`
-- **타임라인**: `GET /api/tech-stacks/KwonHalim`
-- **피드백**: `POST /api/feedback`
-- **챗봇**: `POST /chat/message`
 
 ### 연결된 데이터
 - **페이지 제목**: `job_type` + `name`
@@ -91,8 +57,6 @@ API 연결을 테스트하려면 `test-api.html` 파일을 브라우저에서 �
 ```
 FrontEnd/
 ├── index.html              # 메인 페이지
-├── build.sh                # 빌드 스크립트
-├── config.js               # 환경 설정
 ├── test-api.html           # API 테스트 페이지
 ├── assets/                 # 정적 리소스
 │   ├── images/            # 이미지 파일들
@@ -120,19 +84,12 @@ FrontEnd/
 
 ## 🔧 개발 환경 설정
 
-### 로컬 개발
 1. 백엔드 서버가 실행 중인지 확인
 2. 프론트엔드 서버 실행
 3. 브라우저에서 `http://localhost:8000` (또는 해당 포트) 접속
-
-### 프로덕션 배포
-1. `./build.sh` 실행하여 빌드
-2. `dist/` 폴더의 내용을 웹 서버에 배포
-3. Cloudflare Tunnel을 통해 백엔드와 AI 서버에 접근
 
 ## 📝 주의사항
 
 - 백엔드 서버가 실행되지 않으면 기본값이 표시됩니다
 - CORS 설정이 되어 있어야 API 호출이 가능합니다
-- API 호출 실패 시 콘솔에 오류 메시지가 표시됩니다
-- Cloudflare Tunnel 사용 시 HTTPS 프로토콜을 사용합니다 
+- API 호출 실패 시 콘솔에 오류 메시지가 표시됩니다 
