@@ -83,6 +83,23 @@ export function initializeAllEventListeners() {
   console.log('이벤트 리스너 초기화 완료');
 }
 
+// 프로젝트 초기화 함수
+export function initializeProjects() {
+  if (typeof window.initializeProjects === 'function') {
+    window.initializeProjects();
+  }
+}
+
+// 연락처 초기화 함수
+export function initializeContact() {
+  console.log('연락처 초기화 - 현재는 구현되지 않음');
+}
+
+// About 초기화 함수
+export function initializeAbout() {
+  console.log('About 초기화 - 현재는 구현되지 않음');
+}
+
 // 컴포넌트 로드 함수들
 export async function loadSidebar() {
   await loadComponent('sidebar-container', './src/components/sidebar.html');

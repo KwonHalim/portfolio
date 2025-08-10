@@ -494,15 +494,23 @@
 
   <!-- 페이지 초기화 -->
   <script type="module">
-    import { initializeAllEventListeners } from './src/js/utils.js';
+    import { initializeAllEventListeners, initializeProjects, initializeContact, initializeAbout } from './src/js/utils.js';
     import { initializeTimeline } from './src/js/timeline.js';
     import { initializeChatbot } from './src/js/chatbot.js';
     
     document.addEventListener('DOMContentLoaded', function() {
       console.log('페이지 초기화 시작...');
+      
+      // 기본 이벤트 리스너 초기화
       initializeAllEventListeners();
+      
+      // 페이지별 초기화
       initializeTimeline();
+      initializeProjects();
+      initializeContact();
+      initializeAbout();
       initializeChatbot();
+      
       console.log('페이지 초기화 완료');
     });
   </script>
