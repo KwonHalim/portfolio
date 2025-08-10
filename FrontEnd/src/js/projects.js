@@ -1,14 +1,12 @@
     'use strict';
 
-    import { PROJECTS_API_URL } from './config.js';
+    import { API_BASE_URL} from '../../config.js';
 
 
     class ProjectManager {
         constructor() {
             this.currentCategory = 'all';
             this.isLoading = false;
-            // API URL 설정
-            this.apiBaseUrl = PROJECTS_API_URL;
             // 환경변수에서 API URL 설정 가져오기
             this.currentMediaIndex = 0;
             this.currentMediaPaths = [];
@@ -419,7 +417,7 @@
                     
                     let videoPath = image.imagePath;
                     if (videoPath && !videoPath.startsWith('http') && !videoPath.startsWith('./')) {
-                        const baseUrl = window.appConfig ? window.appConfig.getApiUrl() : PROJECTS_API_URL;
+                        const baseUrl = window.appConfig ? window.appConfig.getApiUrl() : API_BASE_URL;
                         videoPath = `${baseUrl}/${videoPath}`;
                     }
                     
@@ -436,7 +434,7 @@
                     
                     let imagePath = image.imagePath;
                     if (imagePath && !imagePath.startsWith('http') && !imagePath.startsWith('./')) {
-                        const baseUrl = window.appConfig ? window.appConfig.getApiUrl() : PROJECTS_API_URL;
+                        const baseUrl = window.appConfig ? window.appConfig.getApiUrl() : VITE_API_BASE_URL;
                         imagePath = `${baseUrl}/${imagePath}`;
                     }
                     
@@ -778,24 +776,3 @@
             console.log('프로젝트 네비게이션 클릭됨 (페이지 전환은 pageChanged 이벤트가 처리)');
         }
     });
-
-// 프로젝트 초기화 함수
-export function initializeProjects() {
-    console.log('프로젝트 초기화 시작...');
-    
-    // 'projects' 페이지가 기본 페이지일 경우에만 인스턴스를 생성합니다.
-    const projectPage = document.querySelector('article.projects[data-page="projects"]');
-    if (projectPage && projectPage.classList.contains('active')) {
-        if (!window.projectManager) {
-            console.log('프로젝트 페이지 발견, ProjectManager 인스턴스를 생성합니다.');
-            window.projectManager = new ProjectManager();
-        }
-    } else {
-        console.log('현재 페이지는 프로젝트 페이지가 아니므로 초기화를 건너뜁니다.');
-    }
-    
-    console.log('프로젝트 초기화 완료');
-}
-
-// window 객체에도 할당 (기존 코드와의 호환성을 위해)
-window.initializeProjects = initializeProjects;
