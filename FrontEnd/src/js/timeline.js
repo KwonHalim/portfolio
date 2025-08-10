@@ -2,20 +2,18 @@
  * Timeline functionality
  */
 
-function initializeTimeline() {
-  const timelineItems = document.querySelectorAll('[data-timeline-item]');
+// 타임라인 초기화 함수
+export function initializeTimeline() {
+  console.log('타임라인 초기화 시작...');
   
-  timelineItems.forEach(item => {
-    const header = item.querySelector('.timeline-item-header');
-    const detailContent = item.querySelector('.timeline-detail-content');
-    
-    if (header && detailContent) {
-      header.addEventListener('click', (e) => {
-        e.stopPropagation();
-        toggleTimelineDetail(item, header, detailContent);
-      });
-    }
-  });
+  // 페이지 로드 시 타임라인 데이터 로드
+  if (typeof loadTimelineData === 'function') {
+    loadTimelineData();
+  } else {
+    console.log('loadTimelineData 함수를 찾을 수 없습니다.');
+  }
+  
+  console.log('타임라인 초기화 완료');
 }
 
 function toggleTimelineDetail(item, header, content) {
@@ -68,3 +66,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // 전역 함수로 노출 (API에서 호출할 수 있도록)
 window.reinitializeTimeline = reinitializeTimeline; 
+
+// window 객체에도 할당 (기존 코드와의 호환성을 위해)
+window.initializeTimeline = initializeTimeline; 

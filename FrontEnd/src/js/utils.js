@@ -27,72 +27,83 @@ async function loadComponent(elementId, componentPath) {
   }
 }
 
-// 페이지 초기화 함수
-async function initializePage() {
-  // 사이드바 컴포넌트 로드
-  await loadComponent('sidebar-container', './src/components/sidebar.html');
+// 모든 이벤트 리스너 초기화 함수
+export function initializeAllEventListeners() {
+  console.log('이벤트 리스너 초기화 시작...');
   
-  // 네비게이션 바 컴포넌트 로드
-  await loadComponent('navbar-container', './src/components/navbar.html');
+  // 사이드바 토글
+  const sidebarToggle = document.querySelector("[data-nav-toggler]");
+  const sidebar = document.querySelector("[data-sidebar]");
   
-  // 페이지 컴포넌트들 로드
-  await loadComponent('about-container', './src/pages/about.html');
-  await loadComponent('resume-container', './src/pages/resume.html');
-  await loadComponent('projects-container', './src/pages/projects.html');
-  await loadComponent('blog-container', './src/pages/blog.html');
-  await loadComponent('contact-container', './src/pages/contact.html');
+  if (sidebarToggle && sidebar) {
+    sidebarToggle.addEventListener("click", function () { elementToggleFunc(sidebar); });
+  }
   
-  // 모든 컴포넌트 로드 후 이벤트 리스너 초기화
-  initializeAllEventListeners();
-}
-
-// 모든 이벤트 리스너 초기화
-function initializeAllEventListeners() {
-  initializeSidebar();
-  initializeNavigation();
-  // initializeProjects(); // projects.js에서 자체적으로 처리
-  initializeChatbot();
-  // initializeAbout(); // about 관련 초기화는 별도로 처리
-} 
-
-// 3D 회전 효과를 위한 함수들
-function init3DEffect() {
-  const serviceItems = document.querySelectorAll('.service-item');
+  // 모바일 메뉴 토글
+  const mobileMenuToggle = document.querySelector("[data-nav-toggler]");
+  const mobileMenu = document.querySelector("[data-sidebar]");
   
-  serviceItems.forEach(item => {
-    item.addEventListener('mousemove', handleMouseMove);
-    item.addEventListener('mouseenter', handleMouseEnter);
-    item.addEventListener('mouseleave', handleMouseLeave);
+  if (mobileMenuToggle && mobileMenu) {
+    mobileMenuToggle.addEventListener("click", function () { elementToggleFunc(mobileMenu); });
+  }
+  
+  // 스크롤 이벤트
+  const header = document.querySelector("[data-header]");
+  if (header) {
+    window.addEventListener("scroll", function () {
+      if (window.scrollY > 100) {
+        header.classList.add("active");
+      } else {
+        header.classList.remove("active");
+      }
+    });
+  }
+  
+  // 스무스 스크롤
+  const links = document.querySelectorAll("[data-nav-link]");
+  links.forEach(link => {
+    link.addEventListener("click", function (e) {
+      e.preventDefault();
+      const targetId = this.getAttribute("href");
+      const targetSection = document.querySelector(targetId);
+      if (targetSection) {
+        targetSection.scrollIntoView({ behavior: "smooth" });
+      }
+    });
   });
-}
-
-function handleMouseMove(e) {
-  const item = e.currentTarget;
-  const rect = item.getBoundingClientRect();
-  const x = e.clientX - rect.left;
-  const y = e.clientY - rect.top;
   
-  // 마우스 위치를 -1에서 1 사이의 값으로 정규화
-  const centerX = rect.width / 2;
-  const centerY = rect.height / 2;
-  const rotateX = ((y - centerY) / centerY) * -15;
-  const rotateY = ((x - centerX) / centerX) * 20;
+  // 사이드바와 네비게이션 초기화
+  if (typeof window.initializeSidebar === 'function') {
+    window.initializeSidebar();
+  }
+  if (typeof window.initializeNavigation === 'function') {
+    window.initializeNavigation();
+  }
   
-  item.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateZ(30px)`;
+  console.log('이벤트 리스너 초기화 완료');
 }
 
-function handleMouseEnter(e) {
-  const item = e.currentTarget;
-  item.style.transition = 'transform 0.3s ease';
+// 컴포넌트 로드 함수들
+export async function loadSidebar() {
+  await loadComponent('sidebar-container', './src/components/sidebar.html');
 }
 
-function handleMouseLeave(e) {
-  const item = e.currentTarget;
-  item.style.transition = 'transform 0.6s cubic-bezier(0.23, 1, 0.32, 1)';
-  item.style.transform = 'rotateX(0deg) rotateY(0deg) translateZ(0px)';
+export async function loadNavbar() {
+  await loadComponent('navbar-container', './src/components/navbar.html');
 }
 
-// 페이지 로드 시 3D 효과 초기화
-document.addEventListener('DOMContentLoaded', function() {
-  init3DEffect();
-}); 
+export async function loadProjects() {
+  await loadComponent('projects-container', './src/pages/projects.html');
+}
+
+export async function loadContact() {
+  await loadComponent('contact-container', './src/pages/contact.html');
+}
+
+export async function loadAbout() {
+  await loadComponent('about-container', './src/pages/about.html');
+}
+
+// 전역 함수들 (기존 코드와의 호환성을 위해)
+window.elementToggleFunc = elementToggleFunc;
+window.loadComponent = loadComponent; 

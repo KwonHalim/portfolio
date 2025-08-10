@@ -155,25 +155,34 @@ function removeTypingMessage(typingMessage) {
 }
 
 // 챗봇 초기화 함수
-function initializeChatbot() {
-  console.log('챗봇 초기화 시작');
-  const chatInput = document.getElementById('chatInput');
-  console.log('챗봇 입력창 찾음:', chatInput);
+export function initializeChatbot() {
+  console.log('챗봇 초기화 시작...');
   
+  // 채팅 토글 버튼 이벤트 리스너
+  const chatbotToggle = document.querySelector('.chatbot-toggle');
+  if (chatbotToggle) {
+    chatbotToggle.addEventListener('click', function() {
+      const container = document.getElementById('chatbotContainer');
+      if (container) {
+        container.style.display = container.style.display === 'none' ? 'block' : 'none';
+      }
+    });
+  }
+  
+  // Enter 키 이벤트 리스너
+  const chatInput = document.getElementById('chatInput');
   if (chatInput) {
-    // 기존 이벤트 리스너 제거 (중복 방지)
-    chatInput.removeEventListener('keypress', handleEnterKey);
-    
-    // 새로운 이벤트 리스너 추가
     chatInput.addEventListener('keypress', handleEnterKey);
-    console.log('엔터키 이벤트 리스너 추가됨');
-  } else {
-    console.error('챗봇 입력창을 찾을 수 없습니다!');
   }
   
   // 저장된 피드백 전송 시도
   sendPendingFeedback();
+  
+  console.log('챗봇 초기화 완료');
 }
+
+// window 객체에도 할당 (기존 코드와의 호환성을 위해)
+window.initializeChatbot = initializeChatbot;
 
 // 엔터키 처리 함수
 function handleEnterKey(e) {

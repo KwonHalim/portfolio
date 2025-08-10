@@ -1,7 +1,7 @@
 'use strict';
 
 // 네비게이션 초기화 함수
-function initializeNavigation() {
+export function initializeNavigation() {
   // page navigation variables
   const navigationLinks = document.querySelectorAll("[data-nav-link]");
   const pages = document.querySelectorAll("[data-page]");
@@ -40,4 +40,7 @@ function initializeNavigation() {
       window.scrollTo(0, 0);
     });
   });
-} 
+}
+
+// window 객체에도 할당 (기존 코드와의 호환성을 위해)
+window.initializeNavigation = initializeNavigation; 

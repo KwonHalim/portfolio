@@ -475,15 +475,16 @@
       console.log('환경변수가 업데이트되었습니다:', window.__ENV__);
     };
   </script>
-  <script src="./src/js/config.js"></script>
-  <script src="./src/js/utils.js"></script>
-  <script src="./src/js/sidebar.js"></script>
-  <script src="./src/js/navigation.js"></script>
-  <script src="./src/js/projects.js"></script>
-  <script src="./src/js/api.js"></script>
-  <script src="./src/js/timeline.js"></script>
-
-  <script src="./src/js/chatbot.js"></script>
+  
+  <!-- ES6 모듈로 변경 -->
+  <script type="module" src="./src/js/config.js"></script>
+  <script type="module" src="./src/js/utils.js"></script>
+  <script type="module" src="./src/js/sidebar.js"></script>
+  <script type="module" src="./src/js/navigation.js"></script>
+  <script type="module" src="./src/js/projects.js"></script>
+  <script type="module" src="./src/js/api.js"></script>
+  <script type="module" src="./src/js/timeline.js"></script>
+  <script type="module" src="./src/js/chatbot.js"></script>
 
   <!--
     - ionicon link
@@ -492,11 +493,17 @@
   <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
 
   <!-- 페이지 초기화 -->
-  <script>
+  <script type="module">
+    import { initializeAllEventListeners } from './src/js/utils.js';
+    import { initializeTimeline } from './src/js/timeline.js';
+    import { initializeChatbot } from './src/js/chatbot.js';
+    
     document.addEventListener('DOMContentLoaded', function() {
+      console.log('페이지 초기화 시작...');
       initializeAllEventListeners();
-      initializeTimeline(); // 타임라인 초기화 추가
-      initializeChatbot(); // 챗봇 초기화 추가
+      initializeTimeline();
+      initializeChatbot();
+      console.log('페이지 초기화 완료');
     });
   </script>
 
