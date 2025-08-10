@@ -43,7 +43,7 @@ async function sendMessage() {
       const sessionId = getChatSessionId();
       
       // 서버로 메시지 전송
-      const response = await fetch('http://localhost:8000/chat/message', {
+      const response = await fetch(`${window.__ENV__.VITE_AI_API_URL}/chat/message`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -242,7 +242,7 @@ async function rateMessage(button, rating, chatId) {
     console.log('피드백 전송:', feedbackData);
     
     // 서버로 피드백 전송
-    const response = await fetch('http://localhost:8000/chat/feedback', {
+    const response = await fetch(`${window.__ENV__.VITE_AI_API_URL}/chat/feedback`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -326,7 +326,7 @@ async function submitFeedback() {
     };
     
     // 서버로 피드백 전송
-    const response = await fetch('http://localhost:8080/api/feedback', {
+    const response = await fetch(`${window.__ENV__.VITE_API_BASE_URL}/api/feedback`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -382,7 +382,7 @@ async function sendPendingFeedback() {
     
     for (const feedback of pendingFeedback) {
       try {
-        const response = await fetch('http://localhost:8080/api/feedback', {
+        const response = await fetch(`${window.__ENV__.VITE_AI_API_URL}/api/feedback`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

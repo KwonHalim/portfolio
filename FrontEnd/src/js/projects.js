@@ -5,7 +5,7 @@
             this.currentCategory = 'all';
             this.isLoading = false;
             // 환경변수에서 API URL 설정 가져오기
-            this.apiBaseUrl = window.appConfig ? window.appConfig.getProjectsApiUrl() : 'http://localhost:8080/api/projects';
+            this.apiBaseUrl = window.appConfig ? window.appConfig.getProjectsApiUrl() : `${window.__ENV__.VITE_API_BASE_URL}/api/projects`;
             this.currentMediaIndex = 0;
             this.currentMediaPaths = [];
             this.categories = new Set();
@@ -415,7 +415,7 @@
                     
                     let videoPath = image.imagePath;
                     if (videoPath && !videoPath.startsWith('http') && !videoPath.startsWith('./')) {
-                        const baseUrl = window.appConfig ? window.appConfig.getApiUrl() : 'http://localhost:8080';
+                        const baseUrl = window.appConfig ? window.appConfig.getApiUrl() : `${window.__ENV__.VITE_API_BASE_URL}`;
                         videoPath = `${baseUrl}/${videoPath}`;
                     }
                     
@@ -432,7 +432,7 @@
                     
                     let imagePath = image.imagePath;
                     if (imagePath && !imagePath.startsWith('http') && !imagePath.startsWith('./')) {
-                        const baseUrl = window.appConfig ? window.appConfig.getApiUrl() : 'http://localhost:8080';
+                        const baseUrl = window.appConfig ? window.appConfig.getApiUrl() : `${window.__ENV__.VITE_API_BASE_URL}`;
                         imagePath = `${baseUrl}/${imagePath}`;
                     }
                     

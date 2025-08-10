@@ -52,7 +52,7 @@ function initializeAllEventListeners() {
   initializeNavigation();
   // initializeProjects(); // projects.js에서 자체적으로 처리
   initializeChatbot();
-  initializeAbout();
+  // initializeAbout(); // about 관련 초기화는 별도로 처리
 } 
 
 // 3D 회전 효과를 위한 함수들
