@@ -1,6 +1,6 @@
 // 환경 설정 및 API URL 상수들
-export const API_BASE_URL = window.__ENV__?.VITE_API_BASE_URL || 'http://localhost:8080';
-export const AI_API_URL = window.__ENV__?.VITE_AI_API_URL || 'http://localhost:8000';
+export const API_BASE_URL = window.__ENV__?.VITE_API_BASE_URL || 'https://api-mac.mydomain.com';
+export const AI_API_URL = window.__ENV__?.VITE_AI_API_URL || 'https://chatbot-mac.mydomain.com';
 
 // 백엔드 API 엔드포인트
 export const ABOUT_API_URL = `${API_BASE_URL}/api/profile/about`;
