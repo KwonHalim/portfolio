@@ -1,4 +1,5 @@
 'use strict';
+import { CHATBOT_API_URL, CHATBOT_FEEDBACK_URL, BACKEND_FEEDBACK_URL } from '../../config.js';
 
 // UUID 생성 함수
 function generateUUID() {
@@ -43,7 +44,7 @@ async function sendMessage() {
       const sessionId = getChatSessionId();
       
       // 서버로 메시지 전송
-      const response = await fetch(`${window.__ENV__.VITE_AI_API_URL}/chat/message`, {
+      const response = await fetch(CHATBOT_API_URL, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -242,7 +243,7 @@ async function rateMessage(button, rating, chatId) {
     console.log('피드백 전송:', feedbackData);
     
     // 서버로 피드백 전송
-    const response = await fetch(`${window.__ENV__.VITE_AI_API_URL}/chat/feedback`, {
+    const response = await fetch(CHATBOT_FEEDBACK_URL, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -326,7 +327,7 @@ async function submitFeedback() {
     };
     
     // 서버로 피드백 전송
-    const response = await fetch(`${window.__ENV__.VITE_API_BASE_URL}/api/feedback`, {
+    const response = await fetch(BACKEND_FEEDBACK_URL, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
