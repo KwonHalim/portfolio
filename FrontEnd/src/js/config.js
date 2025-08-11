@@ -1,45 +1,31 @@
-// 환경 설정
+// FrontEnd/config.js
+
 window.appConfig = {
-  // 환경 감지 함수
+  // 환경 감지 함수는 개발/프로덕션 UI를 다르게 보여주는 등 다른 용도로 여전히 유용할 수 있습니다.
   isDevelopment: function() {
     return window.location.hostname === 'localhost' || 
-           window.location.hostname === '127.0.0.1' ||
-           window.location.hostname.includes('192.168.');
+           window.location.hostname === '127.0.0.1';
   },
 
-  // API 기본 URL (환경에 따라 동적 설정)
+  // API URL 함수는 이제 플레이스홀더만 반환합니다.
+  // 이 값은 build.sh 스크립트에 의해 실제 URL로 교체됩니다.
   getApiBaseUrl: function() {
-    // 환경변수가 명시적으로 설정되었을 때만 사용
-    if (window.__ENV__ && window.__ENV__.VITE_API_BASE_URL && window.__ENV__.VITE_API_BASE_URL !== 'http://localhost:8080') {
-      return window.__ENV__.VITE_API_BASE_URL;
-    }
-    
-    // 기본값은 항상 localhost
-    return 'http://localhost:8080';
+    return "__VITE_API_BASE_URL__";
   },
   
-  // AI API URL (환경에 따라 동적 설정)
   getAiApiUrl: function() {
-    // 환경변수가 명시적으로 설정되었을 때만 사용
-    if (window.__ENV__ && window.__ENV__.VITE_AI_API_URL && window.__ENV__.VITE_AI_API_URL !== 'http://localhost:8000') {
-      return window.__ENV__.VITE_AI_API_URL;
-    }
-    
-    // 기본값은 항상 localhost
-    return 'http://localhost:8000';
+    return "__VITE_AI_API_URL__";
   },
   
-  // 프로젝트 API URL
+  // 아래 함수들은 getApiBaseUrl()의 반환 값에 의존하므로 수정할 필요가 없습니다.
   getProjectsApiUrl: function() {
     return `${this.getApiBaseUrl()}/api/projects`;
   },
   
-  // About API URL
   getAboutApiUrl: function() {
     return `${this.getApiBaseUrl()}/api/about/KwonHalim`;
   },
   
-  // 타임라인 API URL
   getTimelineApiUrl: function() {
     return `${this.getApiBaseUrl()}/api/timeline/KwonHalim`;
   }

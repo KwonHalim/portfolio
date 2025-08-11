@@ -1,40 +1,52 @@
 #!/bin/bash
 
-# --- 로컬 테스트용 빌드 스크립트 ---
+# --- Cloudflare 배포용 빌드 스크립트 ---
 
-# 스크립트가 시작되었음을 알림
-echo "🚀 Starting local build process..."
+# 1. 환경변수 검증 및 알림
+if [ -n "$VITE_API_BASE_URL" ] && [ -n "$VITE_AI_API_URL" ]; then
+    # ✅ 환경변수가 모두 설정된 경우
+    echo "✅ 환경변수가 감지되었습니다. 빌드 프로세스를 시작합니다."
+    echo "   - VITE_API_BASE_URL: $VITE_API_BASE_URL"
+    echo "   - VITE_AI_API_URL:   $VITE_AI_API_URL"
+    echo ""
+else
+    # ❌ 환경변수가 하나라도 설정되지 않은 경우
+    echo "❌ 필수 환경변수가 설정되지 않았습니다. 빌드를 중단합니다."
+    echo "   Cloudflare Pages 또는 로컬 환경에 다음 변수를 설정해주세요:"
+    echo "   - VITE_API_BASE_URL"
+    echo "   - VITE_AI_API_URL"
+    exit 1
+fi
 
-# 1. 'dist' 폴더가 이미 있다면 지우고, 새로 깨끗하게 만듭니다.
-#    이것은 이전 빌드 결과물이 남지 않게 하기 위함입니다.
+# --- 빌드 프로세스 ---
+echo "🚀 Starting build process..."
+
+# 2. 'dist' 폴더 정리 및 생성
 rm -rf dist && mkdir dist
-echo "✅ Cleaned up and created 'dist' directory."
+echo "✅ Cleaned up 'dist' directory."
 
-# 2. 웹사이트의 기본이 되는 index.html 파일을 dist 폴더로 복사합니다.
+# 3. 필수 파일 및 폴더를 dist로 복사
 cp index.html dist/
-echo "➡️ Copied index.html to dist/"
-
-# 3. config.js 파일을 dist 폴더로 복사합니다.
-cp src/js/config.js dist/
-echo "➡️ Copied config.js to dist/"
-
-# 4. 웹사이트에 필요한 다른 모든 폴더(src, assets 등)도 dist 폴더로 복사합니다.
-#    -r 옵션은 폴더 전체를 복사하라는 의미입니다.
-#    프로젝트에 다른 폴더가 있다면 여기에 cp -r 폴더명 dist/ 형태로 추가하세요.
 cp -r src dist/
 cp -r assets dist/
-echo "➡️ Copied 'src' and 'assets' directories to dist/"
+echo "➡️ Copied necessary files and directories to dist/"
 
-# 5. (핵심!) dist 폴더 안의 config.js 파일에서 localhost URL을 실제 환경 변수 값으로 교체합니다.
-#    - 로컬 테스트 시에는 환경 변수가 없으므로, ":-" 뒤에 지정된 localhost 주소를 기본값으로 사용합니다.
-#    - 's|찾을문자열|바꿀문자열|g' 는 sed 명령어의 기본 형식입니다.
-sed -i.bak "s|http://localhost:8080|${VITE_API_BASE_URL:-http://localhost:8080}|g" dist/config.js
-sed -i.bak "s|http://localhost:8000|${VITE_AI_API_URL:-http://localhost:8000}|g" dist/config.js
-echo "🔄 Replaced localhost URLs with environment variable values."
+# 4. (핵심!) dist 폴더 안의 config.js 파일에서 localhost URL을 실제 환경 변수 값으로 교체
+# config.js의 경로는 'dist/src/js/config.js'가 됩니다.
+CONFIG_PATH="dist/src/js/config.js"
+echo "🔄 Replacing localhost URLs in $CONFIG_PATH..."
+sed -i.bak "s|http://localhost:8080|$VITE_API_BASE_URL|g" "$CONFIG_PATH"
+sed -i.bak "s|http://localhost:8000|$VITE_AI_API_URL|g" "$CONFIG_PATH"
+echo "✅ URLs replaced successfully."
 
-# 6. sed가 만든 백업 파일(.bak)을 삭제하여 깔끔하게 정리합니다.
-rm dist/config.js.bak
+# 5. sed가 만든 백업 파일(.bak)을 삭제
+rm "${CONFIG_PATH}.bak"
 echo "🧹 Cleaned up backup files."
 
-# 모든 과정이 완료되었음을 알림
-echo "🎉 Build finished successfully! You can now test the 'dist' folder."
+# 6. 빌드된 config.js 파일의 URL 변경 여부 확인
+echo "🔍 Verifying replaced URLs..."
+grep -E "$VITE_API_BASE_URL|$VITE_AI_API_URL" "$CONFIG_PATH"
+
+echo ""
+echo "🎉 Build finished successfully!"
+echo "📁 Build output is ready in the 'dist/' folder."
