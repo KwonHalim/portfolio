@@ -22,6 +22,10 @@ window.appConfig = {
     return `${this.getApiBaseUrl()}/api/projects`;
   },
   
+  getProjectDetailApiUrl: function(projectId) {
+    return `${this.getApiBaseUrl()}/api/projects/${projectId}`;
+  },
+  
   getAboutApiUrl: function() {
     return `${this.getApiBaseUrl()}/api/about/KwonHalim`;
   },

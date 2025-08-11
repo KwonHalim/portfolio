@@ -356,6 +356,31 @@
             document.getElementById('modalTitle').textContent = project.title;
             document.getElementById('modalCategory').textContent = project.category;
             
+            // 프로젝트 메인 이미지 업데이트
+            const modalImage = document.getElementById('modalImage');
+            if (modalImage) {
+                let imagePath = '';
+                if (project.images && project.images.length > 0) {
+                    imagePath = project.images[0].imagePath || project.images[0];
+                } else if (project.imagePath) {
+                    imagePath = project.imagePath;
+                } else {
+                    imagePath = './assets/images/project-1.jpg';
+                }
+                
+                // 상대 경로인 경우 API 베이스 URL 추가
+                if (imagePath && !imagePath.startsWith('http') && !imagePath.startsWith('./')) {
+                    const baseUrl = window.appConfig.getApiBaseUrl();
+                    imagePath = `${baseUrl}/${imagePath}`;
+                }
+                
+                modalImage.src = imagePath;
+                modalImage.alt = project.title;
+                modalImage.onerror = function() {
+                    this.src = './assets/images/project-1.jpg';
+                };
+            }
+            
             // 기술 스택 렌더링
             const techList = document.getElementById('modalTechList');
             techList.innerHTML = '';
@@ -379,123 +404,127 @@
             
             // 미디어 컨테이너 초기화
             const mediaContainer = document.getElementById('mediaContainer');
-            mediaContainer.innerHTML = '';
-            
-            // API 응답 구조에 맞게 images 배열 처리
-            let images = [];
-            if (project.images && Array.isArray(project.images)) {
-                images = project.images;
-            } else if (project.imagePath) {
-                // 기존 imagePath가 있는 경우 호환성 유지
-                if (Array.isArray(project.imagePath)) {
-                    images = project.imagePath.map(path => ({ imagePath: path, description: '' }));
+            if (mediaContainer) {
+                mediaContainer.innerHTML = '';
+                
+                // API 응답 구조에 맞게 images 배열 처리
+                let images = [];
+                if (project.images && Array.isArray(project.images)) {
+                    images = project.images;
+                } else if (project.imagePath) {
+                    // 기존 imagePath가 있는 경우 호환성 유지
+                    if (Array.isArray(project.imagePath)) {
+                        images = project.imagePath.map(path => ({ imagePath: path, description: '' }));
+                    } else {
+                        images = [{ imagePath: project.imagePath, description: '' }];
+                    }
                 } else {
-                    images = [{ imagePath: project.imagePath, description: '' }];
+                    images = [{ imagePath: './assets/images/project-1.jpg', description: '기본 이미지' }];
                 }
-            } else {
-                images = [{ imagePath: './assets/images/project-1.jpg', description: '기본 이미지' }];
+                
+                // 모든 이미지를 생성
+                images.forEach((image, index) => {
+                    const isVideo = image.imagePath.toLowerCase().match(/\.(mp4|webm|ogg|mov)$/);
+                    const mediaItem = document.createElement('div');
+                    mediaItem.className = 'media-item';
+                    
+                    // 미디어 이미지/비디오 섹션
+                    const mediaImage = document.createElement('div');
+                    mediaImage.className = 'media-image';
+                    
+                    if (isVideo) {
+                        // 영상인 경우
+                        const video = document.createElement('video');
+                        video.controls = true;
+                        video.preload = 'metadata';
+                        video.crossOrigin = 'anonymous';
+                        
+                        let videoPath = image.imagePath;
+                        if (videoPath && !videoPath.startsWith('http') && !videoPath.startsWith('./')) {
+                            const baseUrl = window.appConfig.getApiBaseUrl();
+                            videoPath = `${baseUrl}/${videoPath}`;
+                        }
+                        
+                        video.src = videoPath;
+                        video.onerror = function() {
+                            this.style.display = 'none';
+                        };
+                        
+                        mediaImage.appendChild(video);
+                    } else {
+                        // 이미지인 경우
+                        const img = document.createElement('img');
+                        img.alt = `Project Image ${index + 1}`;
+                        
+                        let imagePath = image.imagePath;
+                        if (imagePath && !imagePath.startsWith('http') && !imagePath.startsWith('./')) {
+                            const baseUrl = window.appConfig.getApiBaseUrl();
+                            imagePath = `${baseUrl}/${imagePath}`;
+                        }
+                        
+                        img.src = imagePath;
+                        img.onerror = function() {
+                            this.onerror = null;
+                            this.src = './assets/images/project-1.jpg';
+                        };
+                        
+                        mediaImage.appendChild(img);
+                    }
+                    
+                    // 설명 섹션
+                    const mediaDescription = document.createElement('div');
+                    mediaDescription.className = 'media-description';
+                    
+                    const descriptionText = document.createElement('p');
+                    // API에서 받은 설명이 있으면 사용, 없으면 기본 설명
+                    if (image.description) {
+                        descriptionText.innerHTML = image.description;
+                    } else {
+                        descriptionText.textContent = '이 이미지에 대한 상세한 설명이 없습니다.';
+                    }
+                    
+                    mediaDescription.appendChild(descriptionText);
+                    
+                    // 미디어 아이템에 이미지와 설명 추가
+                    mediaItem.appendChild(mediaImage);
+                    mediaItem.appendChild(mediaDescription);
+                    
+                    mediaContainer.appendChild(mediaItem);
+                });
             }
-            
-            // 모든 이미지를 생성
-            images.forEach((image, index) => {
-                const isVideo = image.imagePath.toLowerCase().match(/\.(mp4|webm|ogg|mov)$/);
-                const mediaItem = document.createElement('div');
-                mediaItem.className = 'media-item';
-                
-                // 미디어 이미지/비디오 섹션
-                const mediaImage = document.createElement('div');
-                mediaImage.className = 'media-image';
-                
-                if (isVideo) {
-                    // 영상인 경우
-                    const video = document.createElement('video');
-                    video.controls = true;
-                    video.preload = 'metadata';
-                    video.crossOrigin = 'anonymous';
-                    
-                    let videoPath = image.imagePath;
-                    if (videoPath && !videoPath.startsWith('http') && !videoPath.startsWith('./')) {
-                        const baseUrl = window.appConfig.getApiBaseUrl();
-                        videoPath = `${baseUrl}/${videoPath}`;
-                    }
-                    
-                    video.src = videoPath;
-                    video.onerror = function() {
-                        this.style.display = 'none';
-                    };
-                    
-                    mediaImage.appendChild(video);
-                } else {
-                    // 이미지인 경우
-                    const img = document.createElement('img');
-                    img.alt = `Project Image ${index + 1}`;
-                    
-                    let imagePath = image.imagePath;
-                    if (imagePath && !imagePath.startsWith('http') && !imagePath.startsWith('./')) {
-                        const baseUrl = window.appConfig.getApiBaseUrl();
-                        imagePath = `${baseUrl}/${imagePath}`;
-                    }
-                    
-                    img.src = imagePath;
-                    img.onerror = function() {
-                        this.onerror = null;
-                        this.src = './assets/images/project-1.jpg';
-                    };
-                    
-                    mediaImage.appendChild(img);
-                }
-                
-                // 설명 섹션
-                const mediaDescription = document.createElement('div');
-                mediaDescription.className = 'media-description';
-                
-                const descriptionText = document.createElement('p');
-                // API에서 받은 설명이 있으면 사용, 없으면 기본 설명
-                if (image.description) {
-                    descriptionText.innerHTML = image.description;
-                } else {
-                    descriptionText.textContent = '이 이미지에 대한 상세한 설명이 없습니다.';
-                }
-                
-                mediaDescription.appendChild(descriptionText);
-                
-                // 미디어 아이템에 이미지와 설명 추가
-                mediaItem.appendChild(mediaImage);
-                mediaItem.appendChild(mediaDescription);
-                
-                mediaContainer.appendChild(mediaItem);
-            });
             
             // 프로젝트 링크 설정
             const projectLinks = document.querySelector('.project-links');
-            projectLinks.innerHTML = '';
-            
-            // GitHub 링크가 있으면 버튼 생성
-            if (project.githubUrl) {
-                const githubLink = document.createElement('a');
-                githubLink.id = 'modalGithub';
-                githubLink.href = project.githubUrl;
-                githubLink.target = '_blank';
-                githubLink.className = 'form-btn';
-                githubLink.innerHTML = `
-                    <ion-icon name="logo-github"></ion-icon>
-                    <span>View Source</span>
-                `;
-                projectLinks.appendChild(githubLink);
-            }
-            
-            // Demo 링크가 있으면 버튼 생성
-            if (project.demoUrl) {
-                const demoLink = document.createElement('a');
-                demoLink.id = 'modalDemo';
-                demoLink.href = project.demoUrl;
-                demoLink.target = '_blank';
-                demoLink.className = 'form-btn';
-                demoLink.innerHTML = `
-                    <ion-icon name="open-outline"></ion-icon>
-                    <span>Live Demo</span>
-                `;
-                projectLinks.appendChild(demoLink);
+            if (projectLinks) {
+                projectLinks.innerHTML = '';
+                
+                // GitHub 링크가 있으면 버튼 생성
+                if (project.githubUrl) {
+                    const githubLink = document.createElement('a');
+                    githubLink.id = 'modalGithub';
+                    githubLink.href = project.githubUrl;
+                    githubLink.target = '_blank';
+                    githubLink.className = 'form-btn';
+                    githubLink.innerHTML = `
+                        <ion-icon name="logo-github"></ion-icon>
+                        <span>View Source</span>
+                    `;
+                    projectLinks.appendChild(githubLink);
+                }
+                
+                // Demo 링크가 있으면 버튼 생성
+                if (project.demoUrl) {
+                    const demoLink = document.createElement('a');
+                    demoLink.id = 'modalDemo';
+                    demoLink.href = project.demoUrl;
+                    demoLink.target = '_blank';
+                    demoLink.className = 'form-btn';
+                    demoLink.innerHTML = `
+                        <ion-icon name="open-outline"></ion-icon>
+                        <span>Live Demo</span>
+                    `;
+                    projectLinks.appendChild(demoLink);
+                }
             }
         }
         
