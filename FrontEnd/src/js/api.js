@@ -1,6 +1,6 @@
 // API 관련 함수들
 // 💡 이렇게 한 줄로 단순화하세요.
-const API_BASE_URL = `${window.__ENV__.VITE_API_BASE_URL}/api`;
+const API_BASE_URL = `${window.appConfig.getApiBaseUrl()}/api`;
 // 프로필 정보를 가져오는 함수
 async function fetchProfileData() {
     try {

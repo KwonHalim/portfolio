@@ -1,38 +1,46 @@
-// 환경 설정 및 API URL 상수들
-export const API_BASE_URL = window.__ENV__?.VITE_API_BASE_URL || 'https://api-mac.mydomain.com';
-export const AI_API_URL = window.__ENV__?.VITE_AI_API_URL || 'https://chatbot-mac.mydomain.com';
+// 환경 설정
+window.appConfig = {
+  // 환경 감지 함수
+  isDevelopment: function() {
+    return window.location.hostname === 'localhost' || 
+           window.location.hostname === '127.0.0.1' ||
+           window.location.hostname.includes('192.168.');
+  },
 
-// 백엔드 API 엔드포인트
-export const ABOUT_API_URL = `${API_BASE_URL}/api/profile/about`;
-export const TIMELINE_API_URL = `${API_BASE_URL}/api/tech-stacks/KwonHalim`;
-export const PROJECTS_API_URL = `${API_BASE_URL}/api/projects`;
-export const BACKEND_FEEDBACK_URL = `${API_BASE_URL}/api/feedback`;
-
-// AI 서비스 API 엔드포인트
-export const CHATBOT_API_URL = `${AI_API_URL}/chat/message`;
-export const CHATBOT_FEEDBACK_URL = `${AI_API_URL}/feedback`;
-
-// 앱 설정
-export const APP_NAME = window.__ENV__?.VITE_APP_NAME || 'Portfolio Website';
-export const APP_VERSION = window.__ENV__?.VITE_APP_VERSION || '1.0.0';
-
-// 디버그 모드
-export const DEBUG_MODE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-
-// 로깅 함수
-export const log = (message, data = null) => {
-  if (DEBUG_MODE) {
-    console.log(`[${APP_NAME}] ${message}`, data);
-  }
-};
-
-// 에러 로깅 함수
-export const logError = (message, error = null) => {
-  if (DEBUG_MODE) {
-    if (error) {
-      console.error(`[${APP_NAME}] ${message}`, error);
-    } else {
-      console.error(`[${APP_NAME}] ${message}`);
+  // API 기본 URL (환경에 따라 동적 설정)
+  getApiBaseUrl: function() {
+    // 환경변수가 명시적으로 설정되었을 때만 사용
+    if (window.__ENV__ && window.__ENV__.VITE_API_BASE_URL && window.__ENV__.VITE_API_BASE_URL !== 'http://localhost:8080') {
+      return window.__ENV__.VITE_API_BASE_URL;
     }
+    
+    // 기본값은 항상 localhost
+    return 'http://localhost:8080';
+  },
+  
+  // AI API URL (환경에 따라 동적 설정)
+  getAiApiUrl: function() {
+    // 환경변수가 명시적으로 설정되었을 때만 사용
+    if (window.__ENV__ && window.__ENV__.VITE_AI_API_URL && window.__ENV__.VITE_AI_API_URL !== 'http://localhost:8000') {
+      return window.__ENV__.VITE_AI_API_URL;
+    }
+    
+    // 기본값은 항상 localhost
+    return 'http://localhost:8000';
+  },
+  
+  // 프로젝트 API URL
+  getProjectsApiUrl: function() {
+    return `${this.getApiBaseUrl()}/api/projects`;
+  },
+  
+  // About API URL
+  getAboutApiUrl: function() {
+    return `${this.getApiBaseUrl()}/api/about/KwonHalim`;
+  },
+  
+  // 타임라인 API URL
+  getTimelineApiUrl: function() {
+    return `${this.getApiBaseUrl()}/api/timeline/KwonHalim`;
   }
 };

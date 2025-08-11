@@ -1,5 +1,8 @@
 'use strict';
 
+const API_BASE_URL = `${window.appConfig.getAiApiUrl()}`;
+
+
 // UUID 생성 함수
 function generateUUID() {
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
@@ -43,7 +46,7 @@ async function sendMessage() {
       const sessionId = getChatSessionId();
       
       // 서버로 메시지 전송
-      const response = await fetch(`${window.__ENV__.VITE_AI_API_URL}/chat/message`, {
+      const response = await fetch(`${API_BASE_URL}chat/message`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -326,7 +329,7 @@ async function submitFeedback() {
     };
     
     // 서버로 피드백 전송
-    const response = await fetch(`${window.__ENV__.VITE_API_BASE_URL}/api/feedback`, {
+          const response = await fetch(`${window.appConfig.getApiBaseUrl()}/api/feedback`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -382,7 +385,7 @@ async function sendPendingFeedback() {
     
     for (const feedback of pendingFeedback) {
       try {
-        const response = await fetch(`${window.__ENV__.VITE_AI_API_URL}/api/feedback`, {
+        const response = await fetch(`${window.appConfig.getApiBaseUrl()}/api/feedback`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

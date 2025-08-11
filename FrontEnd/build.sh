@@ -14,22 +14,26 @@ echo "✅ Cleaned up and created 'dist' directory."
 cp index.html dist/
 echo "➡️ Copied index.html to dist/"
 
-# 3. 웹사이트에 필요한 다른 모든 폴더(src, assets 등)도 dist 폴더로 복사합니다.
+# 3. config.js 파일을 dist 폴더로 복사합니다.
+cp src/js/config.js dist/
+echo "➡️ Copied config.js to dist/"
+
+# 4. 웹사이트에 필요한 다른 모든 폴더(src, assets 등)도 dist 폴더로 복사합니다.
 #    -r 옵션은 폴더 전체를 복사하라는 의미입니다.
 #    프로젝트에 다른 폴더가 있다면 여기에 cp -r 폴더명 dist/ 형태로 추가하세요.
 cp -r src dist/
 cp -r assets dist/
 echo "➡️ Copied 'src' and 'assets' directories to dist/"
 
-# 4. (핵심!) dist 폴더 안의 index.html 파일에서 플레이스홀더를 실제 환경 변수 값으로 교체합니다.
+# 5. (핵심!) dist 폴더 안의 config.js 파일에서 localhost URL을 실제 환경 변수 값으로 교체합니다.
 #    - 로컬 테스트 시에는 환경 변수가 없으므로, ":-" 뒤에 지정된 localhost 주소를 기본값으로 사용합니다.
 #    - 's|찾을문자열|바꿀문자열|g' 는 sed 명령어의 기본 형식입니다.
-sed -i.bak "s|__API_BASE_URL__|${VITE_API_BASE_URL:-http://localhost:8080}|g" dist/index.html
-sed -i.bak "s|__AI_API_URL__|${VITE_AI_API_URL:-http://localhost:8000}|g" dist/index.html
-echo "🔄 Replaced placeholders with local development values."
+sed -i.bak "s|http://localhost:8080|${VITE_API_BASE_URL:-http://localhost:8080}|g" dist/config.js
+sed -i.bak "s|http://localhost:8000|${VITE_AI_API_URL:-http://localhost:8000}|g" dist/config.js
+echo "🔄 Replaced localhost URLs with environment variable values."
 
-# 5. sed가 만든 백업 파일(.bak)을 삭제하여 깔끔하게 정리합니다.
-rm dist/index.html.bak
+# 6. sed가 만든 백업 파일(.bak)을 삭제하여 깔끔하게 정리합니다.
+rm dist/config.js.bak
 echo "🧹 Cleaned up backup files."
 
 # 모든 과정이 완료되었음을 알림
