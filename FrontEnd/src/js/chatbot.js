@@ -245,7 +245,7 @@ async function rateMessage(button, rating, chatId) {
     console.log('피드백 전송:', feedbackData);
     
     // 서버로 피드백 전송
-    const response = await fetch(`${VITE_AI_API_URL}/chat/feedback`, {
+    const response = await fetch(`${AI_API_BASE_URL}/chat/feedback`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
