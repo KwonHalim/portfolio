@@ -32,7 +32,6 @@ cp -r assets dist/
 echo "➡️ Copied necessary files and directories to dist/"
 
 # 4. (핵심!) dist 폴더 안의 config.js 파일에서 플레이스홀더를 실제 환경 변수 값으로 교체
-# config.js의 경로는 'dist/src/js/config.js'가 됩니다.
 CONFIG_PATH="dist/src/js/config.js"
 echo "🔄 Replacing placeholders in $CONFIG_PATH..."
 sed -i.bak "s|__VITE_API_BASE_URL__|$VITE_API_BASE_URL|g" "$CONFIG_PATH"
@@ -43,9 +42,16 @@ echo "✅ URLs replaced successfully."
 rm "${CONFIG_PATH}.bak"
 echo "🧹 Cleaned up backup files."
 
-# 6. 빌드된 config.js 파일의 URL 변경 여부 확인
-echo "🔍 Verifying replaced URLs..."
-grep -E "$VITE_API_BASE_URL|$VITE_AI_API_URL" "$CONFIG_PATH"
+# 6. 빌드된 config.js 파일에 주입된 URL을 추출하여 확인
+echo "🔍 Verifying injected URLs in $CONFIG_PATH..."
+
+# 'getApiBaseUrl' 라인에서 큰따옴표(")로 둘러싸인 2번째 필드(URL)를 추출
+BASE_URL_IN_FILE=$(grep 'getApiBaseUrl' "$CONFIG_PATH" | cut -d '"' -f 2)
+AI_URL_IN_FILE=$(grep 'getAiApiUrl' "$CONFIG_PATH" | cut -d '"' -f 2)
+
+# 추출된 URL을 echo로 출력
+echo "   - Injected VITE_API_BASE_URL: $BASE_URL_IN_FILE"
+echo "   - Injected VITE_AI_API_URL:   $AI_URL_IN_FILE"
 
 echo ""
 echo "🎉 Build finished successfully!"
