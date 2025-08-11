@@ -11,8 +11,12 @@ app = FastAPI(
 )
 
 origins = [
-"http://localhost:3000",
-"http://localhost:8000",
+    "http://localhost:3000",
+    "http://localhost:8000",
+    "https://portfolio-77b.pages.dev",
+    "https://*.portfolio-77b.pages.dev",
+    "https://chatbot-mac.mydomain.com",
+    "https://api-mac.mydomain.com"
 ]
 
 app.add_middleware(
