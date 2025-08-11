@@ -1,6 +1,6 @@
 'use strict';
 
-const API_BASE_URL = `${window.appConfig.getAiApiUrl()}`;
+const AI_API_BASE_URL = `${window.appConfig.getAiApiUrl()}`;
 
 
 // UUID 생성 함수
@@ -46,7 +46,7 @@ async function sendMessage() {
       const sessionId = getChatSessionId();
       
       // 서버로 메시지 전송
-      const response = await fetch(`${API_BASE_URL}chat/message`, {
+      const response = await fetch(`${AI_API_BASE_URL}/chat/message`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

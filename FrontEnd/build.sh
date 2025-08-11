@@ -31,12 +31,12 @@ cp -r src dist/
 cp -r assets dist/
 echo "➡️ Copied necessary files and directories to dist/"
 
-# 4. (핵심!) dist 폴더 안의 config.js 파일에서 localhost URL을 실제 환경 변수 값으로 교체
+# 4. (핵심!) dist 폴더 안의 config.js 파일에서 플레이스홀더를 실제 환경 변수 값으로 교체
 # config.js의 경로는 'dist/src/js/config.js'가 됩니다.
 CONFIG_PATH="dist/src/js/config.js"
-echo "🔄 Replacing localhost URLs in $CONFIG_PATH..."
-sed -i.bak "s|http://localhost:8080|$VITE_API_BASE_URL|g" "$CONFIG_PATH"
-sed -i.bak "s|http://localhost:8000|$VITE_AI_API_URL|g" "$CONFIG_PATH"
+echo "🔄 Replacing placeholders in $CONFIG_PATH..."
+sed -i.bak "s|__VITE_API_BASE_URL__|$VITE_API_BASE_URL|g" "$CONFIG_PATH"
+sed -i.bak "s|__VITE_AI_API_URL__|$VITE_AI_API_URL|g" "$CONFIG_PATH"
 echo "✅ URLs replaced successfully."
 
 # 5. sed가 만든 백업 파일(.bak)을 삭제
