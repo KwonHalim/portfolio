@@ -307,12 +307,13 @@ class ProjectManager {
         
         let mediaHtml;
         const path = media.imagePath || '';
+        const fullPath = path ? `${window.appConfig.getApiBaseUrl()}/${path}` : '';
         const isVideo = path.toLowerCase().match(/\.(mp4|webm|mov)$/);
 
         if (isVideo) {
-            mediaHtml = `<video src="${path}" controls preload="metadata"></video>`;
+            mediaHtml = `<video src="${fullPath}" controls preload="metadata"></video>`;
         } else {
-            mediaHtml = `<img src="${path}" alt="${media.description || 'Project Media'}" loading="lazy" onerror="this.onerror=null; this.src='./assets/images/project-1.jpg';">`;
+            mediaHtml = `<img src="${fullPath}" alt="${media.description || 'Project Media'}" loading="lazy" onerror="this.onerror=null; this.src='./assets/images/project-1.jpg';">`;
         }
 
         mediaItem.innerHTML = `
