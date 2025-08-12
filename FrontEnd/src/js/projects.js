@@ -6,6 +6,7 @@ class ProjectManager {
         this.isLoading = false;
         this.apiBaseUrl = window.appConfig.getProjectsApiUrl();
         this.categories = new Set();
+        this.categoriesRendered = false;
 
         // [리팩토링] 모달 관련 요소를 클래스 속성으로 관리
         this.modal = document.getElementById('projectModal');
@@ -78,7 +79,10 @@ class ProjectManager {
 
             if (projects.length > 0) {
                 console.log(`${projects.length}개의 프로젝트를 렌더링합니다.`);
-                this.extractCategoriesFromProjects(projects);
+                // 카테고리 추출은 최초 로드 시에만 수행
+                if (reset && !this.categoriesRendered) {
+                    this.extractCategoriesFromProjects(projects);
+                }
                 this.renderProjects(projects);
             } else {
                 console.log('가져온 프로젝트 데이터가 없습니다.');
@@ -342,7 +346,7 @@ class ProjectManager {
     }
 
     setupFilters() {
-        const filterList = document.getElementById('filterList');
+        const filterList = document.querySelector('.filter-list');
         if (!filterList) return;
 
         filterList.addEventListener('click', (e) => {
@@ -352,8 +356,11 @@ class ProjectManager {
             // 이미 활성화된 버튼이면 무시
             if (button.classList.contains('active')) return;
             
-            // 활성 버튼 변경
-            filterList.querySelector('[data-filter].active').classList.remove('active');
+            // 활성 버튼 변경 - 안전하게 처리
+            const activeButton = filterList.querySelector('[data-filter].active');
+            if (activeButton) {
+                activeButton.classList.remove('active');
+            }
             button.classList.add('active');
             
             this.currentCategory = button.dataset.filter;
@@ -363,25 +370,38 @@ class ProjectManager {
     }
     
     extractCategoriesFromProjects(projects) {
+        // 기존 카테고리 초기화
+        this.categories.clear();
+        
         projects.forEach(project => {
             if (project.category) {
                 this.categories.add(project.category);
             }
         });
-        this.renderCategories();
+        
+        // 카테고리 렌더링은 최초 한 번만 수행 (이미 렌더링된 경우 제외)
+        if (!this.categoriesRendered) {
+            this.renderCategories();
+            this.categoriesRendered = true;
+        }
     }
     
     renderCategories() {
-        const filterList = document.getElementById('filterList');
+        const filterList = document.querySelector('.filter-list');
         if (!filterList) return;
 
-        // 기존의 'All' 버튼을 제외한 카테고리 버튼들만 선택하여 제거
-        filterList.querySelectorAll('.filter-item:not(:first-child)').forEach(btn => btn.remove());
+        // 'All' 버튼을 제외한 동적으로 생성된 카테고리 버튼들만 제거
+        const dynamicItems = filterList.querySelectorAll('.filter-item[data-dynamic="true"]');
+        dynamicItems.forEach(item => item.remove());
+        
+        // 카테고리가 없으면 렌더링하지 않음
+        if (this.categories.size === 0) return;
         
         const fragment = document.createDocumentFragment();
         Array.from(this.categories).sort().forEach(category => {
             const filterItem = document.createElement('li');
             filterItem.className = 'filter-item';
+            filterItem.setAttribute('data-dynamic', 'true'); // 동적으로 생성된 항목임을 표시
             filterItem.innerHTML = `<button data-filter="${category}">${category}</button>`;
             fragment.appendChild(filterItem);
         });
