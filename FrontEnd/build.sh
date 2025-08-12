@@ -1,22 +1,19 @@
 #!/bin/bash
 
-# --- Cloudflare 배포용 빌드 스크립트 ---
+# --- Cloudflare 배포 및 로컬 테스트용 빌드 스크립트 ---
 
-# 1. 환경변수 검증 및 알림
-if [ -n "$VITE_API_BASE_URL" ] && [ -n "$VITE_AI_API_URL" ]; then
-    # ✅ 환경변수가 모두 설정된 경우
-    echo "✅ 환경변수가 감지되었습니다. 빌드 프로세스를 시작합니다."
-    echo "   - VITE_API_BASE_URL: $VITE_API_BASE_URL"
-    echo "   - VITE_AI_API_URL:   $VITE_AI_API_URL"
-    echo ""
-else
-    # ❌ 환경변수가 하나라도 설정되지 않은 경우
-    echo "❌ 필수 환경변수가 설정되지 않았습니다. 빌드를 중단합니다."
-    echo "   Cloudflare Pages 또는 로컬 환경에 다음 변수를 설정해주세요:"
-    echo "   - VITE_API_BASE_URL"
-    echo "   - VITE_AI_API_URL"
-    exit 1
-fi
+# 1. 환경변수 설정 (Cloudflare 변수가 없으면 localhost를 기본값으로 사용)
+# 형식: ${VARIABLE:-"default_value"}
+# 로컬 서버 주소에 맞게 포트 등을 수정해서 사용하세요.
+VITE_API_BASE_URL=${VITE_API_BASE_URL:-"http://localhost:8080"}
+VITE_AI_API_URL=${VITE_AI_API_URL:-"http://localhost:8000"}
+
+# ✅ 설정된 환경변수 값 알림
+echo "✅ 빌드 환경변수가 설정되었습니다."
+echo "   - VITE_API_BASE_URL: $VITE_API_BASE_URL"
+echo "   - VITE_AI_API_URL:   $VITE_AI_API_URL"
+echo ""
+
 
 # --- 빌드 프로세스 ---
 echo "🚀 Starting build process..."
@@ -34,15 +31,14 @@ echo "➡️ Copied necessary files and directories to dist/"
 # 4. (핵심!) dist 폴더 안의 config.js 파일에서 플레이스홀더를 실제 환경 변수 값으로 교체
 CONFIG_PATH="dist/src/js/config.js"
 echo "🔄 Replacing placeholders in $CONFIG_PATH..."
-sed -i.bak "s|__VITE_API_BASE_URL__|$VITE_API_BASE_URL|g" "$CONFIG_PATH"
-sed -i.bak "s|__VITE_AI_API_URL__|$VITE_AI_API_URL|g" "$CONFIG_PATH"
+
+# macOS와 Linux에서 모두 호환되도록 sed 명령어 수정
+# -i 뒤에 ""를 붙여주면 백업 파일을 만들지 않습니다.
+sed -i "" "s|__VITE_API_BASE_URL__|$VITE_API_BASE_URL|g" "$CONFIG_PATH"
+sed -i "" "s|__VITE_AI_API_URL__|$VITE_AI_API_URL|g" "$CONFIG_PATH"
 echo "✅ URLs replaced successfully."
 
-# 5. sed가 만든 백업 파일(.bak)을 삭제
-rm "${CONFIG_PATH}.bak"
-echo "🧹 Cleaned up backup files."
-
-# 6. 빌드된 config.js 파일에 주입된 URL을 추출하여 확인
+# 5. 빌드된 config.js 파일에 주입된 URL을 추출하여 확인
 echo "🔍 Verifying injected URLs in $CONFIG_PATH..."
 
 # 'getApiBaseUrl' 라인에서 큰따옴표(")로 둘러싸인 2번째 필드(URL)를 추출
