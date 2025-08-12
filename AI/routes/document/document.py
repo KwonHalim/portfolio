@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, UploadFile, File, HTTPException
 
 from AI.api_model.response_models import SuccessResponse
-from AI.container.dependency import get_rag_service
+from AI.container.dependency import get_singleton_rag_service
 from AI.service.rag_service import RAGService
 
 document_router = APIRouter(prefix="/documents", tags=["documents"])
@@ -11,7 +11,7 @@ document_router = APIRouter(prefix="/documents", tags=["documents"])
 async def process_documents(
         qa_file: UploadFile = File(None),  # 필수 아님
         paragraph_file: UploadFile = File(None),
-        rag_service: RAGService = Depends(get_rag_service),
+        rag_service: RAGService = Depends(get_singleton_rag_service),
 ):
     """
     문서 처리 및 벡터 저장소에 저장

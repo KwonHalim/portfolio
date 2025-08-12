@@ -1,4 +1,6 @@
-from fastapi import Depends
+from functools import lru_cache
+
+from fastapi import Depends, Request
 from langchain_community.llms.huggingface_endpoint import HuggingFaceEndpoint
 from langchain_core.language_models import BaseLanguageModel
 from langchain_core.prompts import ChatPromptTemplate
@@ -29,6 +31,7 @@ from AI.service.rag_service import RAGService
 # 1. 전략 (Strategies) 및 모델 (LLM) 생성
 # ----------------------------------------------------------------
 
+@lru_cache
 def get_chunk_strategy() -> ChunkStrategy:
     return RecursiveCharacterSplitter(chunk_size=500, chunk_overlap=100)
 
@@ -86,9 +89,11 @@ def get_chat_repository(
 # 3. 핵심 서비스 (Core Services) 생성
 # ----------------------------------------------------------------
 
+@lru_cache()
 def get_data_processor() -> DataProcessor:
     return DataProcessor()
 
+@lru_cache()
 def get_chunk_service(
     chunk_strategy: ChunkStrategy = Depends(get_chunk_strategy)
 ) -> ChunkService:
@@ -109,6 +114,8 @@ async def get_document_retriever(
 ) -> DocumentRetriever:
     return DocumentRetriever(vector_repository=vector_repository)
 
+
+@lru_cache()
 def get_prompt() -> ChatPromptTemplate:
     return create_prompt()
 
@@ -137,3 +144,14 @@ async def get_rag_service(
         data_processor=data_processor,
         vector_repository=vector_repository,
     )
+
+
+# ----------------------------------------------------------------
+# 6. 라우터에서 사용할 싱글톤 의존성 함수들
+# (Lifespan에서 생성된 객체들을 꺼내주는 역할)
+# ----------------------------------------------------------------
+def get_singleton_chat_service(request: Request) -> ChatService:
+    return request.app.state.chat_service
+
+def get_singleton_rag_service(request: Request) -> RAGService:
+    return request.app.state.rag_service
