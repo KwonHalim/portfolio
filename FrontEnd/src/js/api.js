@@ -163,7 +163,7 @@ function updateContactInfo(profileData) {
     const emailLink = document.querySelector('a[href^="mailto:"]');
     if (emailLink && profileData.email) {
         emailLink.href = `mailto:${profileData.email}`;
-        emailLink.querySelector('.contact-info').textContent = profileData.email;
+        emailLink.textContent = profileData.email;
     }
 
     // GitHub 링크 업데이트
@@ -172,7 +172,7 @@ function updateContactInfo(profileData) {
         githubLink.href = profileData.github_url;
         // GitHub 사용자 이름이 제공되면 표시, 아니면 URL 마지막 부분을 사용
         const githubUsername = profileData.github_username || profileData.github_url.split('/').pop();
-        githubLink.querySelector('.contact-info').textContent = githubUsername;
+        githubLink.textContent = githubUsername;
     }
 
     // 위치 정보 업데이트

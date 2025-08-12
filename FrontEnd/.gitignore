@@ -114,3 +114,4 @@ temp/
 *.njsproj
 *.sln
 *.sw? 
+build-mac.sh
