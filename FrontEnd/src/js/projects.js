@@ -4,12 +4,21 @@ class ProjectManager {
     constructor() {
         this.currentCategory = 'all';
         this.isLoading = false;
-        // 환경변수에서 API URL 설정 가져오기
         this.apiBaseUrl = window.appConfig.getProjectsApiUrl();
-        this.currentMediaIndex = 0;
-        this.currentMediaPaths = [];
         this.categories = new Set();
-        
+
+        // [리팩토링] 모달 관련 요소를 클래스 속성으로 관리
+        this.modal = document.getElementById('projectModal');
+        this.modalTitle = document.getElementById('modalTitle');
+        this.modalCategory = document.getElementById('modalCategory');
+        this.modalImage = document.getElementById('modalImage');
+        this.modalTechList = document.getElementById('modalTechList');
+        this.modalDescription = document.getElementById('modalDescription');
+        this.mediaContainer = document.getElementById('mediaContainer');
+        this.projectLinks = document.querySelector('.project-links');
+        this.closeButton = this.modal ? this.modal.querySelector('.close-modal') : null;
+
+
         // 전역 변수로 저장
         window.projectManager = this;
         
@@ -24,17 +33,16 @@ class ProjectManager {
             console.error('projectGrid 요소를 찾을 수 없습니다!');
             return;
         }
-        
-        // 백엔드에서 프로젝트 데이터를 먼저 로드
-        this.loadInitialProjects();
+
+        this.loadProjects(true); // 초기 로드 시 리셋
         this.setupFilters();
-        
-        // ✅ [수정] 아래 로직으로 변경해주세요.
-        // 전역 플래그를 확인하여 setupModal이 최초 한 번만 실행되도록 보장합니다.
-        if (!window.isModalHandlerSetup) {
+
+        // [리팩토링] 모달 이벤트 핸들러 설정 (한 번만 실행되도록 보장)
+        // 전역 플래그 대신 클래스 내부 상태로 관리하는 것이 더 안전합니다.
+        if (this.modal && !this.modal.dataset.handlerSetup) {
             console.log('최초로 모달 이벤트 핸들러를 설정합니다.');
             this.setupModal();
-            window.isModalHandlerSetup = true; // 플래그를 true로 설정
+            this.modal.dataset.handlerSetup = 'true'; // 플래그를 DOM 요소에 직접 설정
         }
         
         console.log('ProjectManager 초기화 완료');
@@ -47,130 +55,77 @@ class ProjectManager {
         this.showLoading();
         
         try {
-            // 페이징 없이 단순하게 API 호출
             let url = this.apiBaseUrl;
-            
-            // 카테고리가 'all'이 아닐 때만 파라미터 추가
             if (this.currentCategory !== 'all') {
+                // URL 파라미터는 URL-safe하게 인코딩해야 합니다.
                 url += `?category=${encodeURIComponent(this.currentCategory)}`;
             }
             
             console.log('API 요청 URL:', url);
             
-            const response = await fetch(url, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                }
-            });
-            
-            console.log('API 응답 상태:', response.status);
+            const response = await fetch(url);
             
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
             
             const data = await response.json();
-            console.log('API 응답 데이터:', data);
+            const projects = data.result || []; // API 응답 구조에 맞게 result 필드 사용
             
             if (reset) {
                 this.resetProjects();
-                this.currentPage = 0;
             }
-            
-            // API 응답 데이터 처리
-            let projects = [];
-            
-            if (data.result && Array.isArray(data.result)) {
-                // result 안에 배열이 있는 경우 (현재 API 응답 구조)
-                projects = data.result;
-                console.log('result 안의 배열 형태로 처리됨:', projects);
-            } else if (Array.isArray(data)) {
-                // 직접 배열 형태
-                projects = data;
-                console.log('직접 배열 형태로 처리됨:', projects);
-            } else {
-                console.error('지원하지 않는 API 응답 구조:', data);
-                projects = [];
-            }
-            
-            if (projects && projects.length > 0) {
-                console.log(`${projects.length}개의 프로젝트를 렌더링합니다:`, projects);
-                
-                // 프로젝트에서 카테고리 추출
+
+            if (projects.length > 0) {
+                console.log(`${projects.length}개의 프로젝트를 렌더링합니다.`);
                 this.extractCategoriesFromProjects(projects);
-                
-                // 새로 렌더링 (resetProjects는 이미 위에서 호출됨)
                 this.renderProjects(projects);
-                
             } else {
-                console.log('프로젝트 데이터가 없습니다. 기본 프로젝트를 표시합니다.');
-                this.showDefaultProjects();
+                console.log('가져온 프로젝트 데이터가 없습니다.');
+                if (reset) this.showDefaultProjects(); // 데이터가 없을 때만 기본 프로젝트 표시
             }
             
         } catch (error) {
             console.error('프로젝트 로딩 실패:', error);
             // 백엔드 연결 실패 시 기본 프로젝트 표시
-            console.log('백엔드 연결 실패, 기본 프로젝트를 표시합니다.');
-            this.showDefaultProjects();
+            if (reset) this.showDefaultProjects();
         } finally {
             this.hideLoading();
             this.isLoading = false;
         }
     }
     
-    // 기본 프로젝트 데이터 표시
     showDefaultProjects() {
-        console.log('기본 프로젝트 데이터 표시');
+        console.log('백엔드 연결 실패, 기본 프로젝트를 표시합니다.');
         const defaultProjects = [
-            {
-                id: 1,
-                title: 'E-Commerce Backend',
-                category: 'Toy Project',
-                imagePath: 'images/ecommerce_detail_1.png'
-            },
-            {
-                id: 2,
-                title: 'Portfolio Website',
-                category: 'Personal Project',
-                imagePath: 'images/portfolio_detail_1.png'
-            }
+            { id: 1, title: 'E-Commerce Backend', category: 'Toy Project', imagePath: 'images/ecommerce_detail_1.png' },
+            { id: 2, title: 'Portfolio Website', category: 'Personal Project', imagePath: 'images/portfolio_detail_1.png' }
         ];
-        
         this.renderProjects(defaultProjects);
     }
     
     renderProjects(projects) {
         const grid = document.getElementById('projectGrid');
-        console.log('렌더링할 프로젝트:', projects);
+        if (!grid) return;
         
-        if (!grid) {
-            console.error('projectGrid 요소를 찾을 수 없습니다!');
-            return;
-        }
-        
-        // 기존 프로젝트 완전 제거
-        grid.innerHTML = '';
-        
-        // 새로 렌더링 (순차적으로 1, 2, 3, 4, 5, 6... 순서)
+        // [성능] DocumentFragment를 사용하여 DOM 조작 최소화
+        const fragment = document.createDocumentFragment();
         projects.forEach((project, index) => {
             const projectElement = this.createProjectElement(project, index);
-            grid.appendChild(projectElement);
+            fragment.appendChild(projectElement);
         });
+        
+        grid.appendChild(fragment);
     }
     
     createProjectElement(project, index) {
         const projectItem = document.createElement('div');
         projectItem.className = 'project-item';
         projectItem.setAttribute('data-category', project.category);
-        
-        // 이미지 경로 처리 - 보안 개선
+
+        // 기본 이미지 경로 설정
         let imagePath = project.imagePath || './assets/images/project-1.jpg';
-        if (imagePath && !imagePath.startsWith('http') && !imagePath.startsWith('./')) {
-            // 상대 경로인 경우 기본 이미지 사용
-            imagePath = './assets/images/project-1.jpg';
-        }
-        
+
         projectItem.innerHTML = `
             <a href="#" data-project-id="${project.id}">
                 <figure class="project-img">
@@ -178,116 +133,91 @@ class ProjectManager {
                         <ion-icon name="eye-outline"></ion-icon>
                     </div>
                     <img src="${imagePath}" 
-                        alt="${project.title}" loading="lazy"
-                        onerror="this.onerror=null; this.src='./assets/images/project-1.jpg';">
+                         alt="${project.title}" loading="lazy"
+                         onerror="this.onerror=null; this.src='./assets/images/project-1.jpg';">
                 </figure>
                 <h3 class="project-title">${project.title}</h3>
                 <p class="project-category">${project.category}</p>
             </a>
         `;
         
-        // 클릭 이벤트 추가
         const link = projectItem.querySelector('a');
         link.addEventListener('click', (e) => {
             e.preventDefault();
             this.showProjectDetail(project.id);
         });
         
-        // 9방향 슬라이드 인 애니메이션 적용
+        // 애니메이션 적용
         this.applyAnimationToProject(projectItem, index);
-        
-        // 애니메이션 완료 후 animated 클래스 추가 (애니메이션 이벤트 리스너 사용)
-        const handleAnimationEnd = () => {
-            if (projectItem && projectItem.parentNode) {
-                projectItem.classList.add('animated');
-                projectItem.setAttribute('data-animated', 'true');
-                // 인라인 스타일 제거
-                projectItem.style.removeProperty('opacity');
-                projectItem.style.removeProperty('transform');
-                projectItem.style.removeProperty('animation');
-                // 이벤트 리스너 제거
-                projectItem.removeEventListener('animationend', handleAnimationEnd);
-            }
-        };
-        
-        projectItem.addEventListener('animationend', handleAnimationEnd);
         
         return projectItem;
     }
-    
-    // 이 함수는 새로 렌더링되는 프로젝트 아이템과 그 인덱스를 파라미터로 받습니다.
-    applyAnimationToProject(projectElement, index) {
-        
-        // 1. 열(Column) 위치 계산 (0: 왼쪽, 1: 가운데, 2: 오른쪽)
-        const column = index % 3;
 
-        // 2. 행(Row) 위치 계산
+    applyAnimationToProject(projectElement, index) {
+        const column = index % 3;
         const row = Math.floor(index / 3);
         
-        let animationName = 'slide-in-fwd-center'; // 기본값은 중앙
+        let animationName;
+        if (row === 0) animationName = ['slide-in-fwd-tl', 'slide-in-fwd-top', 'slide-in-fwd-tr'][column];
+        else if (row === 1) animationName = ['slide-in-fwd-left', 'slide-in-fwd-center', 'slide-in-fwd-right'][column];
+        else if (row === 2) animationName = ['slide-in-fwd-bl', 'slide-in-fwd-bottom', 'slide-in-fwd-br'][column];
+        else animationName = 'slide-in-fwd-center';
 
-        // 3. 위치에 따라 애니메이션 이름 결정 (순차적으로 1, 2, 3, 4, 5, 6...)
-        if (row === 0) {
-            // 첫 번째 행: 위에서 슬라이드 인
-            if (column === 0) animationName = 'slide-in-fwd-tl';       // 1번 위치
-            else if (column === 1) animationName = 'slide-in-fwd-top'; // 2번 위치
-            else animationName = 'slide-in-fwd-tr';                    // 3번 위치
-        } else if (row === 1) {
-            // 두 번째 행: 좌우에서 슬라이드 인
-            if (column === 0) animationName = 'slide-in-fwd-left';     // 4번 위치
-            else if (column === 1) animationName = 'slide-in-fwd-center'; // 5번 위치
-            else animationName = 'slide-in-fwd-right';                 // 6번 위치
-        } else if (row === 2) {
-            // 세 번째 행: 아래에서 슬라이드 인
-            if (column === 0) animationName = 'slide-in-fwd-bl';       // 7번 위치
-            else if (column === 1) animationName = 'slide-in-fwd-bottom'; // 8번 위치
-            else animationName = 'slide-in-fwd-br';                    // 9번 위치
-        } else {
-            // 그 이후 행들: 기본 중앙 애니메이션
-            animationName = 'slide-in-fwd-center';
-        }
-
-        // 4. 애니메이션 지연 시간 계산 (순차적 등장 효과)
-        const randomDelay = 0.1 + Math.random() * 0.5; // 0.1~0.6초 랜덤 지연
-
-        // 5. 결정된 애니메이션 이름과 지연 시간을 적용
-        projectElement.style.animation = `${animationName} 0.3s ease-out ${randomDelay}s`;
+        const randomDelay = 0.1 + Math.random() * 0.4;
         
-        console.log(`프로젝트 ${index + 1} (행: ${row + 1}, 열: ${column + 1})에 ${animationName} 애니메이션 적용 (지연: ${randomDelay.toFixed(3)}s)`);
+        // 초기 상태 설정 (애니메이션 시작 전)
+        projectElement.style.opacity = '0';
+        projectElement.style.transform = 'translateZ(-200px)';
+        
+        // 애니메이션 적용
+        projectElement.style.animation = `${animationName} 0.4s ease-out ${randomDelay}s forwards`;
+
+        projectElement.addEventListener('animationend', () => {
+            // 애니메이션 완료 후 최종 상태 보장
+            projectElement.style.opacity = '1';
+            projectElement.style.transform = 'translateZ(0) translateY(0) translateX(0)';
+            projectElement.style.animation = ''; // 애니메이션 스타일 제거
+        }, { once: true });
     }
-    
-    // 프로젝트 아이템의 인덱스를 가져오는 함수
-    getProjectIndex(projectElement) {
+
+    resetProjects() {
         const projectGrid = document.getElementById('projectGrid');
-        if (!projectGrid) return 0;
-        
-        const projectItems = projectGrid.querySelectorAll('.project-item');
-        for (let i = 0; i < projectItems.length; i++) {
-            if (projectItems[i] === projectElement) {
-                return i;
-            }
+        if (projectGrid) {
+            projectGrid.innerHTML = '';
         }
-        return projectItems.length; // 새로운 아이템의 경우 마지막 인덱스
     }
     
-    // 전체 프로젝트 개수를 가져오는 함수
-    getTotalProjectCount() {
-        const projectGrid = document.getElementById('projectGrid');
-        if (!projectGrid) return 0;
+    // [리팩토링] 모달 열기/닫기 로직 개선
+    openModal() {
+        if (!this.modal) return;
+        this.modal.style.display = 'block';
+        // 기존 애니메이션 클래스 제거
+        this.modal.classList.remove('modal-close');
+        // 애니메이션을 위해 약간의 지연 후 클래스 추가
+        setTimeout(() => {
+            this.modal.classList.add('modal-open');
+        }, 10);
+        document.body.style.overflow = 'hidden'; // 스크롤 방지
+    }
+
+    closeModal() {
+        if (!this.modal) return;
+        this.modal.classList.remove('modal-open');
+        this.modal.classList.add('modal-close');
         
-        return projectGrid.querySelectorAll('.project-item').length;
-    }
-    
-    // 모달 닫기 (애니메이션 없이)
-    closeModal(modal) {
-        modal.style.display = 'none';
-        modal.classList.remove('modal-open', 'modal-close');
+        // 애니메이션이 끝난 후 display: none 처리
+        this.modal.addEventListener('animationend', () => {
+            this.modal.style.display = 'none';
+            this.modal.classList.remove('modal-close');
+            document.body.style.overflow = 'auto'; // 스크롤 복원
+        }, { once: true });
     }
     
     async showProjectDetail(projectId) {
+        if (!projectId) return;
+        this.showLoading();
         try {
-            console.log(`프로젝트 상세 정보 로딩: ${projectId}`);
-            const projectDetailUrl = window.appConfig ? window.appConfig.getProjectDetailApiUrl(projectId) : `${this.apiBaseUrl}/${projectId}`;
+            const projectDetailUrl = window.appConfig.getProjectDetailApiUrl(projectId);
             const response = await fetch(projectDetailUrl);
             
             if (!response.ok) {
@@ -295,402 +225,168 @@ class ProjectManager {
             }
             
             const data = await response.json();
-            console.log('프로젝트 상세 정보:', data);
-            
             if (data.result) {
-                const project = data.result;
-                this.updateModal(project);
-                const modal = document.getElementById('projectModal');
-                console.log('모달 요소 (열기 시):', modal);
-                                if (modal) {
-                modal.style.display = 'block';
-                
-                // 모달 열기 애니메이션 적용
-                modal.classList.remove('modal-close');
-                modal.classList.add('modal-open');
-                
-                console.log('모달이 열렸습니다');
-                console.log('모달 display 속성:', modal.style.display);
-                
-                // 모달이 열릴 때 닫기 버튼에 이벤트 리스너 추가
-                const closeButton = modal.querySelector('.close-modal');
-                if (closeButton) {
-                    // 기존 이벤트 리스너 제거 (중복 방지)
-                    closeButton.removeEventListener('click', this.closeModalHandler);
-                    
-                    // 새로운 이벤트 리스너 추가
-                    this.closeModalHandler = (e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        console.log('🎯 닫기 버튼 직접 클릭 감지!');
-                        this.closeModal(modal);
-                        console.log('✅ 모달 닫기 완료');
-                    };
-                    
-                    closeButton.addEventListener('click', this.closeModalHandler);
-                    console.log('닫기 버튼 이벤트 리스너 추가됨');
-                }
-                
-                // 모달 배경 클릭 시 닫기 기능 추가
-                modal.addEventListener('click', (e) => {
-                    if (e.target === modal) {
-                        console.log('🎯 모달 배경 클릭 감지!');
-                        this.closeModal(modal);
-                        console.log('✅ 모달 닫기 완료');
-                    }
-                });
-            } else {
-                console.error('projectModal 요소를 찾을 수 없음 (열기 시)');
-            }
+                this.updateModal(data.result);
+                this.openModal();
             } else {
                 throw new Error('프로젝트 정보를 찾을 수 없습니다.');
             }
         } catch (error) {
             console.error('프로젝트 상세 정보 로딩 실패:', error);
-            // 백엔드 연결 실패 시 조용히 실패
+            alert('프로젝트 상세 정보를 불러오는 데 실패했습니다.');
+        } finally {
+            this.hideLoading();
         }
     }
     
     updateModal(project) {
-        // 프로젝트 헤더 정보 업데이트
-        document.getElementById('modalTitle').textContent = project.title;
-        document.getElementById('modalCategory').textContent = project.category;
+        if (!this.modal) return;
+
+        // 모달 상태 초기화
+        this.modal.classList.remove('modal-open', 'modal-close');
+
+        this.modalTitle.textContent = project.title || '제목 없음';
+        this.modalCategory.textContent = project.category || '카테고리 없음';
+        this.modalDescription.innerHTML = project.description || '상세 설명이 없습니다.';
         
-        // 프로젝트 메인 이미지 업데이트
-        const modalImage = document.getElementById('modalImage');
-        if (modalImage) {
-            let imagePath = '';
-            if (project.images && project.images.length > 0) {
-                imagePath = project.images[0].imagePath || project.images[0];
-            } else if (project.imagePath) {
-                imagePath = project.imagePath;
-            } else {
-                imagePath = './assets/images/project-1.jpg';
-            }
-            
-            // 상대 경로인 경우 API 베이스 URL 추가
-            if (imagePath && !imagePath.startsWith('http') && !imagePath.startsWith('./')) {
-                const baseUrl = window.appConfig.getApiBaseUrl();
-                imagePath = `${baseUrl}/${imagePath}`;
-            }
-            
-            modalImage.src = imagePath;
-            modalImage.alt = project.title;
-            modalImage.onerror = function() {
-                this.src = './assets/images/project-1.jpg';
-            };
-        }
-        
-        // 기술 스택 렌더링
-        const techList = document.getElementById('modalTechList');
-        techList.innerHTML = '';
+        // 기술 스택
+        this.modalTechList.innerHTML = '';
         if (project.technologies && project.technologies.length > 0) {
             project.technologies.forEach(tech => {
                 const li = document.createElement('li');
                 li.textContent = tech;
-                techList.appendChild(li);
+                this.modalTechList.appendChild(li);
             });
+        }
+
+        // 미디어(이미지/비디오)
+        this.mediaContainer.innerHTML = '';
+        const mediaItems = project.images || [];
+        if (mediaItems.length > 0) {
+            mediaItems.forEach(item => {
+                const mediaElement = this.createMediaElement(item);
+                this.mediaContainer.appendChild(mediaElement);
+            });
+        }
+
+        // 프로젝트 링크
+        this.projectLinks.innerHTML = '';
+        if (project.githubUrl) {
+            // [보안] noopener, noreferrer 추가
+            this.projectLinks.appendChild(this.createLink('modalGithub', project.githubUrl, 'logo-github', 'View Source', true));
+        }
+        if (project.demoUrl) {
+            // [보안] noopener, noreferrer 추가
+            this.projectLinks.appendChild(this.createLink('modalDemo', project.demoUrl, 'open-outline', 'Live Demo', true));
+        }
+    }
+
+    createMediaElement(media) {
+        const mediaItem = document.createElement('div');
+        mediaItem.className = 'media-item';
+        
+        let mediaHtml;
+        const path = media.imagePath || '';
+        const isVideo = path.toLowerCase().match(/\.(mp4|webm|mov)$/);
+
+        if (isVideo) {
+            mediaHtml = `<video src="${path}" controls preload="metadata"></video>`;
         } else {
-            const li = document.createElement('li');
-            li.textContent = '기술 스택 정보가 없습니다.';
-            techList.appendChild(li);
+            mediaHtml = `<img src="${path}" alt="${media.description || 'Project Media'}" loading="lazy" onerror="this.onerror=null; this.src='./assets/images/project-1.jpg';">`;
         }
-        
-        // 프로젝트 메인 설명 업데이트
-        const modalDescription = document.getElementById('modalDescription');
-        if (modalDescription) {
-            modalDescription.innerHTML = project.description || '프로젝트에 대한 상세한 설명이 없습니다.';
-        }
-        
-        // 미디어 컨테이너 초기화
-        const mediaContainer = document.getElementById('mediaContainer');
-        if (mediaContainer) {
-            mediaContainer.innerHTML = '';
-            
-            // API 응답 구조에 맞게 images 배열 처리
-            let images = [];
-            if (project.images && Array.isArray(project.images)) {
-                images = project.images;
-            } else if (project.imagePath) {
-                // 기존 imagePath가 있는 경우 호환성 유지
-                if (Array.isArray(project.imagePath)) {
-                    images = project.imagePath.map(path => ({ imagePath: path, description: '' }));
-                } else {
-                    images = [{ imagePath: project.imagePath, description: '' }];
-                }
-            } else {
-                images = [{ imagePath: './assets/images/project-1.jpg', description: '기본 이미지' }];
-            }
-            
-            // 모든 이미지를 생성
-            images.forEach((image, index) => {
-                const isVideo = image.imagePath.toLowerCase().match(/\.(mp4|webm|ogg|mov)$/);
-                const mediaItem = document.createElement('div');
-                mediaItem.className = 'media-item';
-                
-                // 미디어 이미지/비디오 섹션
-                const mediaImage = document.createElement('div');
-                mediaImage.className = 'media-image';
-                
-                if (isVideo) {
-                    // 영상인 경우
-                    const video = document.createElement('video');
-                    video.controls = true;
-                    video.preload = 'metadata';
-                    video.crossOrigin = 'anonymous';
-                    
-                    let videoPath = image.imagePath;
-                    if (videoPath && !videoPath.startsWith('http') && !videoPath.startsWith('./')) {
-                        const baseUrl = window.appConfig.getApiBaseUrl();
-                        videoPath = `${baseUrl}/${videoPath}`;
-                    }
-                    
-                    video.src = videoPath;
-                    video.onerror = function() {
-                        this.style.display = 'none';
-                    };
-                    
-                    mediaImage.appendChild(video);
-                } else {
-                    // 이미지인 경우
-                    const img = document.createElement('img');
-                    img.alt = `Project Image ${index + 1}`;
-                    
-                    let imagePath = image.imagePath;
-                    if (imagePath && !imagePath.startsWith('http') && !imagePath.startsWith('./')) {
-                        const baseUrl = window.appConfig.getApiBaseUrl();
-                        imagePath = `${baseUrl}/${imagePath}`;
-                    }
-                    
-                    img.src = imagePath;
-                    img.onerror = function() {
-                        this.onerror = null;
-                        this.src = './assets/images/project-1.jpg';
-                    };
-                    
-                    mediaImage.appendChild(img);
-                }
-                
-                // 설명 섹션
-                const mediaDescription = document.createElement('div');
-                mediaDescription.className = 'media-description';
-                
-                const descriptionText = document.createElement('p');
-                // API에서 받은 설명이 있으면 사용, 없으면 기본 설명
-                if (image.description) {
-                    descriptionText.innerHTML = image.description;
-                } else {
-                    descriptionText.textContent = '이 이미지에 대한 상세한 설명이 없습니다.';
-                }
-                
-                mediaDescription.appendChild(descriptionText);
-                
-                // 미디어 아이템에 이미지와 설명 추가
-                mediaItem.appendChild(mediaImage);
-                mediaItem.appendChild(mediaDescription);
-                
-                mediaContainer.appendChild(mediaItem);
-            });
-        }
-        
-        // 프로젝트 링크 설정
-        const projectLinks = document.querySelector('.project-links');
-        if (projectLinks) {
-            projectLinks.innerHTML = '';
-            
-            // GitHub 링크가 있으면 버튼 생성
-            if (project.githubUrl) {
-                const githubLink = document.createElement('a');
-                githubLink.id = 'modalGithub';
-                githubLink.href = project.githubUrl;
-                githubLink.target = '_blank';
-                githubLink.className = 'form-btn';
-                githubLink.innerHTML = `
-                    <ion-icon name="logo-github"></ion-icon>
-                    <span>View Source</span>
-                `;
-                projectLinks.appendChild(githubLink);
-            }
-            
-            // Demo 링크가 있으면 버튼 생성
-            if (project.demoUrl) {
-                const demoLink = document.createElement('a');
-                demoLink.id = 'modalDemo';
-                demoLink.href = project.demoUrl;
-                demoLink.target = '_blank';
-                demoLink.className = 'form-btn';
-                demoLink.innerHTML = `
-                    <ion-icon name="open-outline"></ion-icon>
-                    <span>Live Demo</span>
-                `;
-                projectLinks.appendChild(demoLink);
-            }
-        }
-    }
-    
 
-    
+        mediaItem.innerHTML = `
+            <div class="media-image">${mediaHtml}</div>
+            <div class="media-description"><p>${media.description || ''}</p></div>
+        `;
+        return mediaItem;
+    }
+
+    createLink(id, url, icon, text, isExternal = false) {
+        const link = document.createElement('a');
+        link.id = id;
+        link.href = url;
+        link.className = 'form-btn';
+        if (isExternal) {
+            link.target = '_blank';
+            // [보안] 외부 링크는 rel="noopener noreferrer"를 추가하여 보안 강화
+            link.rel = 'noopener noreferrer';
+        }
+        link.innerHTML = `<ion-icon name="${icon}"></ion-icon><span>${text}</span>`;
+        return link;
+    }
+        
+    // [리팩토링] 모달 이벤트 핸들러 설정 단순화
+    setupModal() {
+        if (!this.modal) return;
+
+        // 닫기 버튼 클릭 시
+        this.closeButton.addEventListener('click', (e) => {
+            e.preventDefault();
+            this.closeModal();
+        });
+
+        // 모달 바깥 영역 클릭 시
+        this.modal.addEventListener('click', (e) => {
+            if (e.target === this.modal) {
+                this.closeModal();
+            }
+        });
+        
+        // ESC 키 누를 시
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && this.modal.style.display === 'block') {
+                this.closeModal();
+            }
+        });
+    }
+
     setupFilters() {
-        // 기존 이벤트 리스너 제거 (중복 방지)
-        document.querySelectorAll('[data-filter]').forEach(button => {
-            button.removeEventListener('click', this.filterClickHandler);
+        const filterList = document.getElementById('filterList');
+        if (!filterList) return;
+
+        filterList.addEventListener('click', (e) => {
+            const button = e.target.closest('[data-filter]');
+            if (!button) return;
+
+            // 이미 활성화된 버튼이면 무시
+            if (button.classList.contains('active')) return;
+            
+            // 활성 버튼 변경
+            filterList.querySelector('[data-filter].active').classList.remove('active');
+            button.classList.add('active');
+            
+            this.currentCategory = button.dataset.filter;
+            console.log('카테고리 변경:', this.currentCategory);
+            this.loadProjects(true); // 카테고리 변경 시 프로젝트 목록 리셋 후 새로 로드
         });
-        
-        // 새로운 이벤트 리스너 추가
-        document.querySelectorAll('[data-filter]').forEach(button => {
-            button.addEventListener('click', this.filterClickHandler.bind(this));
-        });
-    }
-    
-    filterClickHandler(e) {
-        // 활성 버튼 변경
-        document.querySelectorAll('[data-filter]').forEach(btn => btn.classList.remove('active'));
-        e.target.classList.add('active');
-        
-        this.currentCategory = e.target.dataset.filter;
-        console.log('카테고리 변경:', this.currentCategory);
-        this.loadProjects(); // 카테고리 변경 시 새로 로드
-    }
-    
-        setupModal() {
-        console.log('모달 설정 시작');
-
-        // 기존 이벤트 리스너 제거 (중복 방지)
-        document.removeEventListener('click', this.handleModalClick);
-        document.removeEventListener('keydown', this.handleModalKeydown);
-
-        // 이벤트 핸들러를 클래스 메서드로 정의
-        this.handleModalClick = (event) => {
-            const modal = document.getElementById('projectModal');
-            console.log('클릭 이벤트 발생:', event.target);
-            console.log('클릭된 요소 클래스:', event.target.className);
-            console.log('모달 상태:', modal ? modal.style.display : 'null');
-
-            // 모달이 화면에 보이지 않으면 아무것도 하지 않습니다.
-            if (!modal || modal.style.display !== 'block') {
-                console.log('모달이 닫혀있거나 존재하지 않음');
-                return;
-            }
-
-            // 1. 닫기 버튼(또는 그 안의 아이콘)을 클릭했는지 확인합니다.
-            if (event.target.closest('.close-modal')) {
-                event.preventDefault(); // a 태그 등의 기본 동작 방지
-                event.stopPropagation(); // 이벤트 전파 중단
-                console.log('🎯 닫기 버튼 클릭 감지!');
-                modal.style.display = 'none';
-                console.log('✅ 모달 닫기 완료');
-                return;
-            }
-            // 2. 모달의 어두운 배경 부분을 클릭했는지 확인합니다.
-            else if (event.target === modal) {
-                console.log('🎯 모달 바깥 영역 클릭 감지!');
-                modal.style.display = 'none';
-                console.log('✅ 모달 닫기 완료');
-                return;
-            }
-            // 3. 모달 콘텐츠 영역을 클릭했는지 확인 (닫지 않음)
-            else if (event.target.closest('.modal-content')) {
-                console.log('모달 콘텐츠 영역 클릭 - 닫지 않음');
-                return;
-            }
-        };
-
-        this.handleModalKeydown = (event) => {
-            const modal = document.getElementById('projectModal');
-            if (event.key === 'Escape' && modal && modal.style.display === 'block') {
-                console.log('🎯 ESC 키 감지!');
-                modal.style.display = 'none';
-                console.log('✅ 모달 닫기 완료');
-            }
-        };
-
-        // 이벤트 리스너 등록
-        document.addEventListener('click', this.handleModalClick);
-        document.addEventListener('keydown', this.handleModalKeydown);
-
-        // 닫기 버튼에 직접 이벤트 리스너 추가
-        const closeButton = document.querySelector('.close-modal');
-        if (closeButton) {
-            closeButton.addEventListener('click', (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                const modal = document.getElementById('projectModal');
-                if (modal) {
-                    console.log('🎯 닫기 버튼 직접 클릭 감지!');
-                    modal.style.display = 'none';
-                    console.log('✅ 모달 닫기 완료');
-                }
-            });
-        }
-
-        console.log('모달 이벤트 리스너 설정 완료.');
     }
     
     extractCategoriesFromProjects(projects) {
-        // 프로젝트에서 카테고리 추출하여 Set에 추가
         projects.forEach(project => {
             if (project.category) {
                 this.categories.add(project.category);
             }
         });
-        
-        console.log('추출된 카테고리들:', Array.from(this.categories));
-        
-        // 카테고리 필터가 없을 때만 생성
-        if (!this.hasCategoryFilters()) {
-            this.renderCategories();
-        }
-    }
-    
-    // 카테고리 필터가 이미 존재하는지 확인하는 함수
-    hasCategoryFilters() {
-        const filterList = document.getElementById('filterList');
-        if (!filterList) return false;
-        
-        // All 버튼을 제외한 카테고리 버튼이 있는지 확인
-        const categoryButtons = filterList.querySelectorAll('.filter-item:not(:first-child)');
-        return categoryButtons.length > 0;
+        this.renderCategories();
     }
     
     renderCategories() {
         const filterList = document.getElementById('filterList');
-        if (!filterList) {
-            console.error('filterList 요소를 찾을 수 없습니다!');
-            return;
-        }
+        if (!filterList) return;
+
+        // 기존의 'All' 버튼을 제외한 카테고리 버튼들만 선택하여 제거
+        filterList.querySelectorAll('.filter-item:not(:first-child)').forEach(btn => btn.remove());
         
-        // 카테고리 필터가 이미 존재한다면 생성하지 않음
-        if (this.hasCategoryFilters()) {
-            console.log('카테고리 필터가 이미 존재합니다. 건너뜁니다.');
-            return;
-        }
-        
-        // 기존 카테고리 버튼들 제거 (All 버튼 제외)
-        const existingButtons = filterList.querySelectorAll('.filter-item:not(:first-child)');
-        existingButtons.forEach(button => button.remove());
-        
-        // 새로운 카테고리 버튼들 생성
-        Array.from(this.categories).forEach(category => {
+        const fragment = document.createDocumentFragment();
+        Array.from(this.categories).sort().forEach(category => {
             const filterItem = document.createElement('li');
             filterItem.className = 'filter-item';
-            
-            const button = document.createElement('button');
-            button.setAttribute('data-filter', category);
-            button.textContent = category;
-            
-            filterItem.appendChild(button);
-            filterList.appendChild(filterItem);
+            filterItem.innerHTML = `<button data-filter="${category}">${category}</button>`;
+            fragment.appendChild(filterItem);
         });
-        
-        // 필터 이벤트 리스너 다시 설정
-        this.setupFilters();
-        
-        console.log(`${this.categories.size}개의 카테고리 필터를 생성했습니다:`, Array.from(this.categories));
-    }
-    
-    loadInitialProjects() {
-        console.log('초기 프로젝트 로딩 시작');
-        this.loadProjects();
+
+        filterList.appendChild(fragment);
     }
     
     showLoading() {
@@ -702,104 +398,28 @@ class ProjectManager {
         const loadingSpinner = document.getElementById('loadingSpinner');
         if (loadingSpinner) loadingSpinner.style.display = 'none';
     }
-    
-
-    
-
-    
-    resetProjects() {
-        const projectGrid = document.getElementById('projectGrid');
-        
-        if (projectGrid) {
-            // 기존 요소들의 애니메이션 상태 완전 초기화
-            const existingItems = projectGrid.querySelectorAll('.project-item');
-            existingItems.forEach(item => {
-                item.classList.remove('animated');
-                item.classList.remove('active');
-                item.removeAttribute('data-animated');
-                item.style.animation = '';
-                item.style.opacity = '';
-                item.style.transform = '';
-            });
-            projectGrid.innerHTML = '';
-        }
-        this.hasMoreData = true;
-    }
 }
 
-// 초기화
-// ProjectManager 인스턴스를 전역에서 관리합니다.
-// 이렇게 하면 여러 이벤트에서 동일한 인스턴스를 참조할 수 있습니다.
-if (typeof window.projectManager === 'undefined') {
-    window.projectManager = null;
-}
-
-// 페이지가 처음 로드될 때 실행됩니다.
+// 페이지 로드 및 변경에 따른 ProjectManager 인스턴스 관리
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('ProjectManager DOM 로드됨');
-    
-    // 'projects' 페이지가 기본 페이지일 경우에만 인스턴스를 생성합니다.
-    const projectPage = document.querySelector('article.projects[data-page="projects"]');
+    // 'projects' 페이지가 기본 활성 페이지일 경우에만 인스턴스 생성
+    const projectPage = document.querySelector('[data-page="projects"]');
     if (projectPage && projectPage.classList.contains('active')) {
         if (!window.projectManager) {
-            console.log('프로젝트 페이지 발견, ProjectManager 인스턴스를 생성합니다.');
             window.projectManager = new ProjectManager();
         }
-    } else {
-        console.log('현재 페이지는 프로젝트 페이지가 아니므로 초기화를 건너뜁니다.');
     }
 });
 
-// 네비게이션으로 페이지가 변경될 때 실행됩니다.
-// (사용자 정의 이벤트로 보이며, navigation.js에서 발생시키는 것으로 추정됩니다.)
-document.addEventListener('pageChanged', (event) => {
-    if (event.detail.page === 'projects') {
-        console.log('프로젝트 페이지로 변경됨');
-        // 인스턴스가 아직 생성되지 않았다면 새로 생성하고,
-        // 이미 존재한다면 프로젝트 목록만 다시 로드합니다.
+// 네비게이션으로 페이지가 변경될 때의 이벤트 리스너
+document.addEventListener('pageChanged', (e) => {
+    if (e.detail.page === 'projects') {
         if (!window.projectManager) {
-            console.log('ProjectManager 인스턴스를 새로 생성합니다.');
+            // 인스턴스가 없으면 새로 생성
             window.projectManager = new ProjectManager();
         } else {
-            console.log('기존 인스턴스를 사용하여 프로젝트를 새로고침합니다.');
-            // 페이지 전환 시 모든 애니메이션 상태 초기화
-            const projectGrid = document.getElementById('projectGrid');
-            if (projectGrid) {
-                const existingItems = projectGrid.querySelectorAll('.project-item');
-                existingItems.forEach(item => {
-                    item.classList.remove('animated');
-                    item.classList.remove('active');
-                    item.removeAttribute('data-animated');
-                    item.style.animation = '';
-                    item.style.opacity = '';
-                    item.style.transform = '';
-                });
-            }
+            // 인스턴스가 있으면 프로젝트 목록을 새로고침
             window.projectManager.loadProjects(true);
         }
-    }
-});
-
-// 전역 모달 닫기 함수
-window.closeProjectModal = function() {
-    const modal = document.getElementById('projectModal');
-    if (modal) {
-        console.log('🎯 전역 닫기 함수 호출!');
-        if (window.projectManager) {
-            window.projectManager.closeModal(modal);
-        } else {
-            modal.style.display = 'none';
-        }
-        console.log('✅ 모달 닫기 완료');
-    }
-};
-
-// 네비게이션 링크 클릭 이벤트는 pageChanged 이벤트를 발생시키므로
-// 여기에서 중복으로 인스턴스를 생성할 필요가 없습니다.
-// 만약 navigation.js에서 'pageChanged' 이벤트를 사용하지 않는다면,
-// 위의 'pageChanged' 리스너 코드를 이 아래로 옮겨야 합니다.
-document.addEventListener('click', (event) => {
-    if (event.target.matches('[data-nav-link]') && event.target.getAttribute('data-nav-link') === 'projects') {
-        console.log('프로젝트 네비게이션 클릭됨 (페이지 전환은 pageChanged 이벤트가 처리)');
     }
 });
