@@ -184,6 +184,22 @@ class ProjectManager {
         }, { once: true });
     }
 
+    // 애니메이션 재실행 함수
+    replayProjectAnimations() {
+        const projectItems = document.querySelectorAll('.project-item');
+        projectItems.forEach((item, index) => {
+            // 기존 애니메이션 제거
+            item.style.animation = '';
+            item.style.opacity = '0';
+            item.style.transform = 'translateZ(-200px)';
+            
+            // 애니메이션 다시 적용
+            setTimeout(() => {
+                this.applyAnimationToProject(item, index);
+            }, 50); // 약간의 지연 후 애니메이션 시작
+        });
+    }
+
     resetProjects() {
         const projectGrid = document.getElementById('projectGrid');
         if (projectGrid) {
@@ -353,8 +369,12 @@ class ProjectManager {
             const button = e.target.closest('[data-filter]');
             if (!button) return;
 
-            // 이미 활성화된 버튼이면 무시
-            if (button.classList.contains('active')) return;
+            // 이미 활성화된 버튼이면 애니메이션만 다시 실행
+            if (button.classList.contains('active')) {
+                console.log('같은 카테고리 선택, 애니메이션 재실행:', button.dataset.filter);
+                this.replayProjectAnimations();
+                return;
+            }
             
             // 활성 버튼 변경 - 안전하게 처리
             const activeButton = filterList.querySelector('[data-filter].active');
@@ -417,6 +437,24 @@ class ProjectManager {
     hideLoading() {
         const loadingSpinner = document.getElementById('loadingSpinner');
         if (loadingSpinner) loadingSpinner.style.display = 'none';
+    }
+    
+    // 프로젝트 애니메이션 재실행
+    replayProjectAnimations() {
+        const projectItems = document.querySelectorAll('.project-item');
+        if (projectItems.length === 0) return;
+        
+        console.log(`${projectItems.length}개 프로젝트 애니메이션 재실행`);
+        
+        projectItems.forEach((item, index) => {
+            // 기존 애니메이션 스타일 제거
+            item.style.animation = '';
+            item.style.opacity = '0';
+            item.style.transform = 'translateZ(-200px)';
+            
+            // 각 프로젝트마다 다른 시간에 애니메이션 시작 (원래 랜덤 지연 효과 유지)
+            this.applyAnimationToProject(item, index);
+        });
     }
 }
 
