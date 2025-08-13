@@ -22,7 +22,6 @@ origins = [
     "http://localhost:3000",      # React 같은 프론트엔드 개발 서버
     "http://localhost:8000",      # 로컬 테스트용 서버
     "http://localhost:5500",      # Live Server 같은 정적 파일 서버
-    "https://chatbot.harim.dev" ,
     "https://harim.dev"# 허용하려는 프로덕션 프론트엔드 주소
 ]
 
