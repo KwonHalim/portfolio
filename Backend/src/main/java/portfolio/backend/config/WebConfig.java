@@ -12,7 +12,6 @@ public class WebConfig implements WebMvcConfigurer {
         registry.addMapping("/api/**") // /api/로 시작하는 모든 경로에 대해
                 // Cloudflare Pages의 모든 미리보기 주소와 최종 도메인을 허용하도록 패턴을 사용합니다.
                 .allowedOriginPatterns(
-                        "https://*.portfolio-77b.pages.dev", // 모든 pages.dev 미리보기 주소 허용
                         "https://harim.dev"  // 최종 프로덕션 주소 허용
                 )
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
