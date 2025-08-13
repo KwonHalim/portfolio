@@ -44,4 +44,3 @@ echo "---------------------------------"
 
 echo ""
 echo "🎉 Build finished successfully!"
-echo "📁 Build output is ready in the 'dist/' folder."
