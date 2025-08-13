@@ -43,3 +43,7 @@ application.yml
 *.db
 *.sqlite
 *.sqlite3
+
+### resource ###
+/src/main/resources/static/videos
+/src/main/resources/static/images
