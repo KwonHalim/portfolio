@@ -29,6 +29,6 @@ class DocumentRetriever(Runnable):
 
         # 4. 컨텍스트 문자열과 원본 Document 리스트를 딕셔너리 형태로 함께 반환합니다.
         #    이것이 ChatService에서 참고 문서를 추적하는 데 사용됩니다.
-        print(f"context_str: {context_str[:100]}... (총 {len(context_str)}자)")
-        print(f"원본 문서: {source_docs}")
+        # print(f"context_str: {context_str[:100]}... (총 {len(context_str)}자)")
+        # print(f"원본 문서: {source_docs}")
         return {"context": context_str, "source_docs": source_docs}

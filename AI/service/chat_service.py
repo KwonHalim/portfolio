@@ -1,6 +1,7 @@
 # Langchain 메모리 관련 클래스들을 임포트합니다.
 from typing import Dict
 
+from fastapi.logger import logger
 from langchain_core.language_models import BaseLanguageModel
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import ChatPromptTemplate
@@ -36,13 +37,12 @@ class ChatService:
         if len(question) > 200:
             return {"answer": "질문이 너무 깁니다. 200자 이하로 줄여주세요.", "message_id": None}
 
-        print(f"\n--- 🗣️ 질문: {question} (Chat Session: {session_id}) ---")
+        logger.info(f"--- 🗣️ 질문: {question} (Chat Session: {session_id}) ---")
 
         retriever_output = self.retriever.invoke(question)
         context = retriever_output["context"]
         source_docs = retriever_output["source_docs"]
         source_ids = [doc.metadata.get("source_id") for doc in source_docs if "source_id" in doc.metadata]
-        print(f"--- 📚 참고 소스 ID: {source_ids} ---")
         chain = self.prompt | self.llm | StrOutputParser()
 
         answer = chain.invoke({
@@ -67,5 +67,4 @@ class ChatService:
         :param chat_id: 피드백을 남길 채팅 메시지 ID
         :param is_good: 피드백이 긍정적인지 여부 (True/False)
         """
-        print(f"--- 피드백 저장 시작 (채팅 ID: {chat_id}, 긍정적: {is_good}) ---")
         return self.repository.update_feedback(chat_id, is_good)

@@ -35,5 +35,5 @@ class ChromaVectorStore(VectorStoreStrategy):
     def query(self, query_text: str, k: int = 3) -> list[tuple[Document, float]]:
         """유사도 검색을 수행하고 (문서, 점수) 튜플 리스트를 반환합니다."""
         results = self.vectorstore.similarity_search_with_relevance_scores(query_text, k=k)
-        print(f"🔍 '{query_text}' 쿼리로 유사 문서 검색 완료")
+        # print(f"🔍 '{query_text}' 쿼리로 유사 문서 검색 완료")
         return results

@@ -1,18 +1,23 @@
 # routes/chat.py
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Request
 
 from AI.api_model.ChatDTO import RequestMessageDTO, RequestFeedbackDTO
 from AI.api_model.response_models import SuccessResponse
 from AI.container.dependency import get_singleton_chat_service
 from AI.service.chat_service import ChatService
+from fastapi.logger import logger
 
 chat_router = APIRouter(prefix="/chat", tags=["chat"])
 
 @chat_router.post("/message", response_model=SuccessResponse)
 async def chat_message(
     message_data: RequestMessageDTO,
+    request : Request,
     chat_service: ChatService = Depends(get_singleton_chat_service)
 ):
+    client_ip = request.client.host
+    # print(f"IP: {client_ip}")
+    logger.info(f"Client IP: {client_ip}")
     """채팅 메시지 처리"""
     result = chat_service.ask(question=message_data.message, session_id = message_data.sessionId)
     return SuccessResponse(result=result)

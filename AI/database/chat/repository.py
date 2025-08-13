@@ -14,11 +14,11 @@ class ChatRepository:
         :param chat_message: 채팅 메시지 객체
         :return: 저장된 채팅 메시지 ID
         """
-        print("--- 채팅 메시지 저장 시작 (세션: {session}) ---")
-        print(f"  - 사람 질문: {human_message}")
-        print(f"  - AI 답변: {ai_message}")
-        print(f"  - 메타데이터: {metadata}")
-        print("--- 채팅 메시지 저장 완료 ---")
+        # print("--- 채팅 메시지 저장 시작 (세션: {session}) ---")
+        # print(f"  - 사람 질문: {human_message}")
+        # print(f"  - AI 답변: {ai_message}")
+        # print(f"  - 메타데이터: {metadata}")
+        # print("--- 채팅 메시지 저장 완료 ---")
 
         return self.chat_repository.save_chats(session, human_message, ai_message, metadata)
 

@@ -24,12 +24,12 @@ class VectorRepository:
         :param top_k:
         :return:
         """
-        print(f"--- 벡터 스토어에서 '{query_text}' 쿼리로 유사 문서 검색 시작 ---")
+        # print(f"--- 벡터 스토어에서 '{query_text}' 쿼리로 유사 문서 검색 시작 ---")
         results = self.vector_db.query(query_text, k=top_k)
-        print(f"--- 벡터 스토어에서 '{query_text}' 쿼리로 유사 문서 검색 완료 ---")
-        for i, (doc, score) in enumerate(results):
-            print(f"  - 검색결과 {i+1}: {doc.page_content},... (유사도: {score:.4f})")
-            print(f"    메타데이터: {doc.metadata}")
+        # print(f"--- 벡터 스토어에서 '{query_text}' 쿼리로 유사 문서 검색 완료 ---")
+        # for i, (doc, score) in enumerate(results):
+        #     print(f"  - 검색결과 {i+1}: {doc.page_content},... (유사도: {score:.4f})")
+        #     print(f"    메타데이터: {doc.metadata}")
         return results
 
     def update_feedback_metadata(self, chunk_id: str, feedback: str):
