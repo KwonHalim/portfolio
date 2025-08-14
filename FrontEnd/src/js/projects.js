@@ -127,8 +127,13 @@ class ProjectManager {
         projectItem.className = 'project-item';
         projectItem.setAttribute('data-category', project.category);
 
-        // 기본 이미지 경로 설정
-        let imagePath = project.imagePath || './assets/images/project-1.jpg';
+        // API_BASE_URL을 사용하여 이미지 경로 설정 (createMediaElement와 동일한 방식)
+        let imagePath;
+        if (project.imagePath) {
+            imagePath = `${window.appConfig.getApiBaseUrl()}/${project.imagePath}`;
+        } else {
+            imagePath = './assets/images/project-1.jpg'; // 기본 이미지는 로컬 경로 사용
+        }
 
         projectItem.innerHTML = `
             <a href="#" data-project-id="${project.id}">
