@@ -22,7 +22,8 @@ origins = [
     "http://localhost:3000",      # React 같은 프론트엔드 개발 서버
     "http://localhost:8000",      # 로컬 테스트용 서버
     "http://localhost:5500",      # Live Server 같은 정적 파일 서버
-    "https://harim.dev"# 허용하려는 프로덕션 프론트엔드 주소
+    "https://harim.dev",# 허용하려는 프로덕션 프론트엔드 주소
+    "https://*.my-portfolio-4gw.pages.dev" #배포주소
 ]
 
 # CORS 미들웨어를 앱에 추가합니다.
