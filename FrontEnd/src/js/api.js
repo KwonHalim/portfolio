@@ -251,8 +251,19 @@ function updateTimelineSection(listSelector, items, defaultIcon) {
             } = item;
 
             const dateRange = startDate && endDate ? `${startDate} — ${endDate}` : startDate;
+            
+            // API_BASE_URL을 사용하여 이미지 경로 설정
+            let fullIconPath = '';
+            if (iconPath) {
+                if (iconPath.startsWith('http')) {
+                    fullIconPath = iconPath; // 이미 전체 URL인 경우
+                } else {
+                    fullIconPath = `${window.appConfig.getApiBaseUrl()}/${iconPath}`;
+                }
+            }
+            
             const iconHtml = iconPath
-                ? `<img src="${iconPath}" alt="${place}" width="20" height="20">`
+                ? `<img src="${fullIconPath}" alt="${place}" width="20" height="20">`
                 : `<ion-icon name="${defaultIcon}"></ion-icon>`;
 
             // [보안] innerHTML에 변수를 사용할 때는 신뢰할 수 있는 데이터인지 확인해야 합니다.
