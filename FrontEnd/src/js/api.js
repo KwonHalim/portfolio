@@ -55,6 +55,37 @@ async function fetchTimelineData() {
  */
 async function loadProfileData() {
     console.log('프로필 데이터 로드 시작...');
+    
+    // Sidebar에 로딩 메시지 추가
+    const sidebar = document.querySelector('.sidebar');
+    if (sidebar) {
+        const sidebarLoading = document.createElement('div');
+        sidebarLoading.className = 'loading-message';
+        sidebarLoading.innerHTML = '<div class="loading-spinner"></div>로딩중입니다.';
+        sidebarLoading.id = 'sidebarLoading';
+        sidebar.appendChild(sidebarLoading);
+    }
+    
+    // About Me 섹션에 로딩 메시지 추가
+    const aboutText = document.querySelector('.about-text');
+    if (aboutText) {
+        const aboutLoading = document.createElement('div');
+        aboutLoading.className = 'loading-message';
+        aboutLoading.innerHTML = '<div class="loading-spinner"></div>로딩중입니다.';
+        aboutLoading.id = 'aboutLoading';
+        aboutText.appendChild(aboutLoading);
+    }
+    
+    // Tech Stack 섹션에 로딩 메시지 추가
+    const serviceList = document.querySelector('.service-list');
+    if (serviceList) {
+        const techLoading = document.createElement('div');
+        techLoading.className = 'loading-message';
+        techLoading.innerHTML = '<div class="loading-spinner"></div>로딩중입니다.';
+        techLoading.id = 'techLoading';
+        serviceList.appendChild(techLoading);
+    }
+    
     try {
         const profileData = await fetchProfileData();
         console.log('받은 프로필 데이터:', profileData);
@@ -89,8 +120,13 @@ async function loadProfileData() {
             }
 
             // About 텍스트 업데이트 (introduction 사용)
-            const aboutText = document.querySelector('.about-text');
             if (aboutText && profileData.introduction) {
+                // About Me 로딩 메시지 제거
+                const aboutLoading = document.getElementById('aboutLoading');
+                if (aboutLoading) {
+                    aboutLoading.remove();
+                }
+                
                 // [보안] textContent를 사용하여 안전하게 텍스트를 설정합니다.
                 // 만약 HTML을 의도적으로 사용해야 한다면, 서버에서 오는 값을 신뢰할 수 있어야 합니다.
                 const p = document.createElement('p');
@@ -107,11 +143,17 @@ async function loadProfileData() {
 
             // 연락처 정보 업데이트
             updateContactInfo(profileData);
+            
+            // 모든 로딩 메시지 제거
+            removeLoadingMessages();
+            
+            // 사이드바와 테크스택의 기존 내용 다시 표시
+            restoreSectionContents();
         }
     } catch (error) {
         console.error('프로필 데이터를 처리하는 중 오류가 발생했습니다.', error);
-        // API 호출 실패 시 기본값 설정
-        setDefaultValues();
+        // 각 섹션별로 오류 메시지 표시
+        showSectionErrors();
     }
 }
 
@@ -124,6 +166,12 @@ function updateTechStack(techInfos) {
     if (!serviceList) {
         console.log('service-list 요소를 찾을 수 없음');
         return;
+    }
+
+    // Tech Stack 로딩 메시지 제거
+    const techLoading = document.getElementById('techLoading');
+    if (techLoading) {
+        techLoading.remove();
     }
 
     // 기존 내용을 비우고 새로운 내용으로 교체
@@ -159,6 +207,12 @@ function updateTechStack(techInfos) {
  * @param {object} profileData - 프로필 데이터
  */
 function updateContactInfo(profileData) {
+    // Sidebar 로딩 메시지 제거
+    const sidebarLoading = document.getElementById('sidebarLoading');
+    if (sidebarLoading) {
+        sidebarLoading.remove();
+    }
+    
     // 이메일 업데이트
     const emailLink = document.querySelector('a[href^="mailto:"]');
     if (emailLink && profileData.email) {
@@ -201,6 +255,17 @@ function updateContactInfo(profileData) {
  */
 async function loadTimelineData() {
     console.log('타임라인 데이터 로드 시작...');
+    
+    // Resume 섹션에 로딩 메시지 추가
+    const resumeSection = document.querySelector('.resume[data-page="timeline"]');
+    if (resumeSection) {
+        const loadingMsg = document.createElement('div');
+        loadingMsg.className = 'loading-message';
+        loadingMsg.innerHTML = '<div class="loading-spinner"></div>로딩중입니다.';
+        loadingMsg.id = 'timelineLoading';
+        resumeSection.appendChild(loadingMsg);
+    }
+    
     try {
         const timelineData = await fetchTimelineData();
         console.log('받은 타임라인 데이터:', timelineData);
@@ -214,9 +279,19 @@ async function loadTimelineData() {
             if (window.reinitializeTimeline) {
                 window.reinitializeTimeline();
             }
+            
+            // 로딩 메시지 제거
+            const loadingMsg = document.getElementById('timelineLoading');
+            if (loadingMsg) loadingMsg.remove();
         }
     } catch (error) {
         console.error('타임라인 데이터를 처리하는 중 오류가 발생했습니다:', error);
+        // 로딩 메시지를 오류 메시지로 변경
+        const loadingMsg = document.getElementById('timelineLoading');
+        if (loadingMsg) {
+            loadingMsg.innerHTML = '오류로 정보를 불러오지 못했습니다. 잠시 뒤에 다시 시도해주세요.';
+            loadingMsg.className = 'error-message';
+        }
     }
 }
 
@@ -295,40 +370,73 @@ function updateTimelineSection(listSelector, items, defaultIcon) {
     }
 }
 
+/**
+ * 모든 로딩 메시지를 제거하는 함수
+ */
+function removeLoadingMessages() {
+    const loadingIds = ['sidebarLoading', 'aboutLoading', 'techLoading'];
+    loadingIds.forEach(id => {
+        const loadingMsg = document.getElementById(id);
+        if (loadingMsg) loadingMsg.remove();
+    });
+}
 
 /**
- * API 호출 실패 시 기본값을 설정하는 함수
+ * 각 섹션별로 오류 메시지를 표시하는 함수
  */
-function setDefaultValues() {
-    console.warn('API 호출에 실패하여 기본값을 설정합니다.');
-
-    document.title = 'Backend Developer - 권하림';
-
-    const nameElement = document.querySelector('.name');
-    if (nameElement) {
-        nameElement.textContent = '권하림';
-        nameElement.title = '권하림';
+function showSectionErrors() {
+    // Sidebar 오류 메시지 - 기존 내용 지우고 오류 메시지만 표시
+    const sidebar = document.querySelector('.sidebar');
+    if (sidebar) {
+        // 기존 내용 숨기기
+        const sidebarInfo = sidebar.querySelector('.sidebar-info');
+        const sidebarInfoMore = sidebar.querySelector('.sidebar-info_more');
+        if (sidebarInfo) sidebarInfo.style.display = 'none';
+        if (sidebarInfoMore) sidebarInfoMore.style.display = 'none';
+        
+        // 오류 메시지 표시
+        const sidebarLoading = document.getElementById('sidebarLoading');
+        if (sidebarLoading) {
+            sidebarLoading.innerHTML = '오류로 정보를 불러오지 못했습니다. 잠시 뒤에 다시 시도해주세요.';
+            sidebarLoading.className = 'error-message';
+        }
     }
-
-    const jobElement = document.querySelector('.job');
-    if (jobElement) {
-        jobElement.textContent = 'Backend Developer';
+    
+    // About Me 오류 메시지
+    const aboutLoading = document.getElementById('aboutLoading');
+    if (aboutLoading) {
+        aboutLoading.innerHTML = '오류로 정보를 불러오지 못했습니다. 잠시 뒤에 다시 시도해주세요.';
+        aboutLoading.className = 'error-message';
     }
-
-    const articleTitle = document.querySelector('.about .article-title');
-    if (articleTitle) {
-        articleTitle.textContent = 'About me';
+    
+    // Tech Stack 오류 메시지 - 기존 내용 지우고 오류 메시지만 표시
+    const serviceList = document.querySelector('.service-list');
+    if (serviceList) {
+        // 기존 내용 지우기
+        serviceList.innerHTML = '';
+        
+        // 오류 메시지 표시
+        const techLoading = document.getElementById('techLoading');
+        if (techLoading) {
+            techLoading.innerHTML = '오류로 정보를 불러오지 못했습니다. 잠시 뒤에 다시 시도해주세요.';
+            techLoading.className = 'error-message';
+            serviceList.appendChild(techLoading);
+        }
     }
+}
 
-    const aboutText = document.querySelector('.about-text');
-    if (aboutText) {
-        aboutText.innerHTML = `
-            <p>안녕하세요. 백엔드 개발자를 꿈꾸는 권하림입니다.</p>
-            <p>API 서버 연결에 실패하여 기본 정보가 표시됩니다.</p>
-        `;
+/**
+ * 섹션의 기존 내용을 복원하는 함수
+ */
+function restoreSectionContents() {
+    // Sidebar 내용 복원
+    const sidebar = document.querySelector('.sidebar');
+    if (sidebar) {
+        const sidebarInfo = sidebar.querySelector('.sidebar-info');
+        const sidebarInfoMore = sidebar.querySelector('.sidebar-info_more');
+        if (sidebarInfo) sidebarInfo.style.display = '';
+        if (sidebarInfoMore) sidebarInfoMore.style.display = '';
     }
-
-    // 기타 연락처 정보 등도 기본값으로 설정할 수 있습니다.
 }
 
 

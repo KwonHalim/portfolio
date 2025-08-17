@@ -1813,3 +1813,41 @@ textarea.form-input::-webkit-resizer { display: none; }
     font-size: 1.3rem;
   }
 } 
+
+/* 로딩 및 오류 메시지 스타일 */
+.loading-message {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  color: #666;
+  font-size: 1rem;
+}
+
+.loading-spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid #f3f3f3;
+  border-top: 2px solid #3498db;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-right: 0.5rem;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.error-message {
+  text-align: center;
+  padding: 1.5rem;
+  color: #0c5460;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  background: #d1ecf1;
+  border: 1px solid #bee5eb;
+  border-radius: 6px;
+  margin: 1rem 0;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+} 

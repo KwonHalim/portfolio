@@ -55,6 +55,17 @@ class ProjectManager {
         this.isLoading = true;
         this.showLoading();
         
+        // 프로젝트 그리드에 로딩 메시지 추가
+        const projectGrid = document.getElementById('projectGrid');
+        if (projectGrid && reset) {
+            const loadingMsg = document.createElement('div');
+            loadingMsg.className = 'loading-message';
+            loadingMsg.innerHTML = '<div class="loading-spinner"></div>로딩중입니다.';
+            loadingMsg.id = 'projectsLoading';
+            loadingMsg.style.gridColumn = '1 / -1';
+            projectGrid.appendChild(loadingMsg);
+        }
+        
         try {
             let url = this.apiBaseUrl;
             if (this.currentCategory !== 'all') {
@@ -86,27 +97,24 @@ class ProjectManager {
                 this.renderProjects(projects);
             } else {
                 console.log('가져온 프로젝트 데이터가 없습니다.');
-                if (reset) this.showDefaultProjects(); // 데이터가 없을 때만 기본 프로젝트 표시
+                if (reset) this.showNoProjectsMessage(); // 데이터가 없을 때 메시지 표시
             }
             
         } catch (error) {
             console.error('프로젝트 로딩 실패:', error);
-            // 백엔드 연결 실패 시 기본 프로젝트 표시
-            if (reset) this.showDefaultProjects();
+            // 백엔드 연결 실패 시 오류 메시지 표시
+            if (reset) this.showProjectsError();
         } finally {
             this.hideLoading();
             this.isLoading = false;
+            
+            // 로딩 메시지 제거
+            const loadingMsg = document.getElementById('projectsLoading');
+            if (loadingMsg) loadingMsg.remove();
         }
     }
     
-    showDefaultProjects() {
-        console.log('백엔드 연결 실패, 기본 프로젝트를 표시합니다.');
-        const defaultProjects = [
-            { id: 1, title: 'E-Commerce Backend', category: 'Toy Project', imagePath: 'images/ecommerce_detail_1.png' },
-            { id: 2, title: 'Portfolio Website', category: 'Personal Project', imagePath: 'images/portfolio_detail_1.png' }
-        ];
-        this.renderProjects(defaultProjects);
-    }
+
     
     renderProjects(projects) {
         const grid = document.getElementById('projectGrid');
@@ -461,6 +469,31 @@ class ProjectManager {
             // 각 프로젝트마다 다른 시간에 애니메이션 시작 (원래 랜덤 지연 효과 유지)
             this.applyAnimationToProject(item, index);
         });
+    }
+
+    showNoProjectsMessage() {
+        console.log('프로젝트 데이터가 없습니다.');
+        const projectGrid = document.getElementById('projectGrid');
+        if (!projectGrid) return;
+        
+        projectGrid.innerHTML = `
+            <div class="no-projects-message" style="grid-column: 1 / -1; text-align: center; padding: 3rem; color: #666;">
+                <div style="font-size: 1.2rem; margin-bottom: 0.5rem;">등록된 프로젝트가 없습니다</div>
+                <div style="font-size: 0.9rem;">새로운 프로젝트를 추가해주세요.</div>
+            </div>
+        `;
+    }
+    
+    showProjectsError() {
+        console.log('백엔드 연결 실패, 오류 메시지를 표시합니다.');
+        const projectGrid = document.getElementById('projectGrid');
+        if (!projectGrid) return;
+        
+        projectGrid.innerHTML = `
+            <div class="error-message" style="grid-column: 1 / -1;">
+                오류로 정보를 불러오지 못했습니다. 잠시 뒤에 다시 시도해주세요.
+            </div>
+        `;
     }
 }
 
