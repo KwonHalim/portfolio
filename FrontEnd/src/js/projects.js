@@ -53,7 +53,8 @@ class ProjectManager {
         if (this.isLoading) return;
         
         this.isLoading = true;
-        this.showLoading();
+        
+
         
         // 프로젝트 그리드에 로딩 메시지 추가
         const projectGrid = document.getElementById('projectGrid');
@@ -105,7 +106,6 @@ class ProjectManager {
             // 백엔드 연결 실패 시 오류 메시지 표시
             if (reset) this.showProjectsError();
         } finally {
-            this.hideLoading();
             this.isLoading = false;
             
             // 로딩 메시지 제거
@@ -248,7 +248,7 @@ class ProjectManager {
     
     async showProjectDetail(projectId) {
         if (!projectId) return;
-        this.showLoading();
+        
         try {
             const projectDetailUrl = window.appConfig.getProjectDetailApiUrl(projectId);
             const response = await fetch(projectDetailUrl);
@@ -267,8 +267,6 @@ class ProjectManager {
         } catch (error) {
             console.error('프로젝트 상세 정보 로딩 실패:', error);
             alert('프로젝트 상세 정보를 불러오는 데 실패했습니다.');
-        } finally {
-            this.hideLoading();
         }
     }
     
@@ -443,15 +441,7 @@ class ProjectManager {
         filterList.appendChild(fragment);
     }
     
-    showLoading() {
-        const loadingSpinner = document.getElementById('loadingSpinner');
-        if (loadingSpinner) loadingSpinner.style.display = 'block';
-    }
-    
-    hideLoading() {
-        const loadingSpinner = document.getElementById('loadingSpinner');
-        if (loadingSpinner) loadingSpinner.style.display = 'none';
-    }
+
     
     // 프로젝트 애니메이션 재실행
     replayProjectAnimations() {

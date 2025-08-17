@@ -56,9 +56,15 @@ async function fetchTimelineData() {
 async function loadProfileData() {
     console.log('프로필 데이터 로드 시작...');
     
-    // Sidebar에 로딩 메시지 추가
+    // Sidebar에 로딩 메시지 추가 (기존 내용 숨기기)
     const sidebar = document.querySelector('.sidebar');
     if (sidebar) {
+        // 기존 내용 숨기기
+        const sidebarInfo = sidebar.querySelector('.sidebar-info');
+        const sidebarInfoMore = sidebar.querySelector('.sidebar-info_more');
+        if (sidebarInfo) sidebarInfo.style.display = 'none';
+        if (sidebarInfoMore) sidebarInfoMore.style.display = 'none';
+        
         const sidebarLoading = document.createElement('div');
         sidebarLoading.className = 'loading-message';
         sidebarLoading.innerHTML = '<div class="loading-spinner"></div>로딩중입니다.';
@@ -207,12 +213,6 @@ function updateTechStack(techInfos) {
  * @param {object} profileData - 프로필 데이터
  */
 function updateContactInfo(profileData) {
-    // Sidebar 로딩 메시지 제거
-    const sidebarLoading = document.getElementById('sidebarLoading');
-    if (sidebarLoading) {
-        sidebarLoading.remove();
-    }
-    
     // 이메일 업데이트
     const emailLink = document.querySelector('a[href^="mailto:"]');
     if (emailLink && profileData.email) {
@@ -388,7 +388,7 @@ function showSectionErrors() {
     // Sidebar 오류 메시지 - 기존 내용 지우고 오류 메시지만 표시
     const sidebar = document.querySelector('.sidebar');
     if (sidebar) {
-        // 기존 내용 숨기기
+        // 기존 내용 숨기기 (이미 숨겨져 있음)
         const sidebarInfo = sidebar.querySelector('.sidebar-info');
         const sidebarInfoMore = sidebar.querySelector('.sidebar-info_more');
         if (sidebarInfo) sidebarInfo.style.display = 'none';
