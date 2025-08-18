@@ -16,7 +16,7 @@ public class ProjectController {
     
     private final ProjectService projectService;
 
-    @GetMapping("")
+    @GetMapping("KwonHalim")
     public ApiResponse<List<ProjectSimpleResponse>> getProjects(
             @RequestParam(required = false) String category) {
         List<ProjectSimpleResponse> projectPage = projectService.getProjects(category);
