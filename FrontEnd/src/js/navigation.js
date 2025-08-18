@@ -61,7 +61,7 @@ async function loadPageData(page) {
     let apiUrl;
     if (page === 'about') {
       apiUrl = window.appConfig.getAboutApiUrl();
-    } else if (page === 'resume') {
+    } else if (page === 'timeline') {
       apiUrl = window.appConfig.getTimelineApiUrl();
     } else {
       apiUrl = `${window.appConfig.getApiBaseUrl()}/api/${page}`;
