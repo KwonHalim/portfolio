@@ -123,14 +123,14 @@ class ProjectManager {
         // [성능] DocumentFragment를 사용하여 DOM 조작 최소화
         const fragment = document.createDocumentFragment();
         projects.forEach((project, index) => {
-            const projectElement = this.createProjectElement(project, index);
+            const projectElement = this.createProjectElement(project, index, projects.length);
             fragment.appendChild(projectElement);
         });
         
         grid.appendChild(fragment);
     }
     
-    createProjectElement(project, index) {
+    createProjectElement(project, index, totalProjects) {
         const projectItem = document.createElement('div');
         projectItem.className = 'project-item';
         
@@ -140,6 +140,7 @@ class ProjectManager {
         }
         
         projectItem.setAttribute('data-category', project.category);
+        projectItem.setAttribute('data-total-projects', totalProjects);
 
         // API_BASE_URL을 사용하여 이미지 경로 설정 (createMediaElement와 동일한 방식)
         let imagePath;
@@ -171,22 +172,33 @@ class ProjectManager {
         });
         
         // 애니메이션 적용
-        this.applyAnimationToProject(projectItem, index);
+        this.applyAnimationToProject(projectItem, index, totalProjects);
         
         return projectItem;
     }
 
-    applyAnimationToProject(projectElement, index) {
+    applyAnimationToProject(projectElement, index, totalProjects) {
         const column = index % 3;
         const row = Math.floor(index / 3);
         
         let animationName;
-        if (row === 0) animationName = ['slide-in-fwd-tl', 'slide-in-fwd-top', 'slide-in-fwd-tr'][column];
-        else if (row === 1) animationName = ['slide-in-fwd-left', 'slide-in-fwd-center', 'slide-in-fwd-right'][column];
-        else if (row === 2) animationName = ['slide-in-fwd-bl', 'slide-in-fwd-bottom', 'slide-in-fwd-br'][column];
-        else animationName = 'slide-in-fwd-center';
-
-        const randomDelay = 0.1 + Math.random() * 0.4;
+        let randomDelay = 0.1 + Math.random() * 0.6;
+        
+        // 첫 번째 줄 (맨 위)
+        if (row === 0) {
+            animationName = ['slide-in-fwd-tl', 'slide-in-fwd-top', 'slide-in-fwd-tr'][column];
+        }
+        // 마지막 줄 (맨 아래) - 전체 프로젝트 개수를 확인하여 마지막 줄 판단
+        else if (this.isLastRow(index, totalProjects)) {
+            animationName = ['slide-in-fwd-bl', 'slide-in-fwd-bottom', 'slide-in-fwd-br'][column];
+        }
+        // 중간 줄들 (2번째 줄부터 마지막 줄 전까지)
+        else {
+            animationName = ['slide-in-fwd-left', 'slide-in-fwd-center', 'slide-in-fwd-right'][column];
+            // 중간 줄들은 순차적으로 나타나도록 지연 시간 조정
+            randomDelay = 0.1 + (row * 0.1) + (Math.random() * 0.2);
+        }
+        
         
         // 초기 상태 설정 (애니메이션 시작 전)
         projectElement.style.opacity = '0';
@@ -202,6 +214,17 @@ class ProjectManager {
             projectElement.style.animation = ''; // 애니메이션 스타일 제거
         }, { once: true });
     }
+    
+    // 마지막 줄인지 확인하는 헬퍼 함수
+    isLastRow(index, totalProjects) {
+        const projectsPerRow = 3;
+        const currentRow = Math.floor(index / projectsPerRow);
+        const lastRow = Math.floor((totalProjects - 1) / projectsPerRow);
+        
+        const isLast = currentRow === lastRow;
+        
+        return isLast;
+    }
 
     // 애니메이션 재실행 함수
     replayProjectAnimations() {
@@ -212,9 +235,12 @@ class ProjectManager {
             item.style.opacity = '0';
             item.style.transform = 'translateZ(-200px)';
             
+            // 전체 프로젝트 개수 가져오기
+            const totalProjects = parseInt(item.getAttribute('data-total-projects')) || projectItems.length;
+            
             // 애니메이션 다시 적용
             setTimeout(() => {
-                this.applyAnimationToProject(item, index);
+                this.applyAnimationToProject(item, index, totalProjects);
             }, 50); // 약간의 지연 후 애니메이션 시작
         });
     }
@@ -462,8 +488,11 @@ class ProjectManager {
             item.style.opacity = '0';
             item.style.transform = 'translateZ(-200px)';
             
+            // 전체 프로젝트 개수 가져오기
+            const totalProjects = parseInt(item.getAttribute('data-total-projects')) || projectItems.length;
+            
             // 각 프로젝트마다 다른 시간에 애니메이션 시작 (원래 랜덤 지연 효과 유지)
-            this.applyAnimationToProject(item, index);
+            this.applyAnimationToProject(item, index, totalProjects);
         });
     }
 
