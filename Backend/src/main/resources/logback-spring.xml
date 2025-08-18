@@ -19,6 +19,10 @@
         </encoder>
     </appender>
 
+    <logger name="org.hibernate.SQL" level="INFO" />
+    <logger name="org.hibernate.type.descriptor.sql.BasicBinder" level="INFO" />
+    <logger name="org.springframework.jdbc.core.JdbcTemplate" level="INFO" />
+
     <root level="INFO">
         <appender-ref ref="CONSOLE" />
         <appender-ref ref="FILE" />
