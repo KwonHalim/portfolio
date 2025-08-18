@@ -15,7 +15,7 @@ import portfolio.backend.service.ProfileService;
 public class ProfileController {
     private final ProfileService profileService;
 
-    @GetMapping("/KwonHalim")
+    @GetMapping("")
     public ApiResponse<ProfileResponse> about_page(HttpServletRequest request) {
         String clientIp = request.getHeader("CF-Connecting-IP");
         if (clientIp == null) {
