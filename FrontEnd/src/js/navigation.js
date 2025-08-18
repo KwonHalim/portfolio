@@ -166,6 +166,7 @@ function handleNavigation(clickedPage) {
 // 안전한 데이터 로드 함수 (상태 기반 제어 + 디바운싱)
 let lastRequestedPage = null;
 let lastRequestTime = 0;
+const RAPID_CLICK_THRESHOLD = 5000; // 5초 이내 재클릭 제한
 
 function loadPageDataSafely(page) {
   // 해당 페이지의 요청 상태 확인
@@ -175,8 +176,8 @@ function loadPageDataSafely(page) {
   
   const now = Date.now();
   
-  // 같은 페이지를 4초 이내에 다시 클릭하면 무시
-  if (lastRequestedPage === page && (now - lastRequestTime) < 4000) {
+  // 같은 페이지를 2.5초 이내에 다시 클릭하면 백엔드 요청 무시 (애니메이션만 실행)
+  if (lastRequestedPage === page && (now - lastRequestTime) < RAPID_CLICK_THRESHOLD) {
     return;
   }
   
@@ -204,10 +205,10 @@ function initializeNavigation() {
     link.addEventListener("click", function () {
       const clickedPage = this.innerHTML.toLowerCase();
       
-      // 즉시 네비게이션 처리 (캐시 확인 포함)
+      // 즉시 네비게이션 처리 (애니메이션 + 캐시 확인)
       handleNavigation(clickedPage);
       
-      // 안전한 백그라운드 데이터 로드 (상태 기반 제어 + 디바운싱)
+      // 백엔드 요청 제어 (2.5초 이내 재클릭 시 무시)
       loadPageDataSafely(clickedPage);
     });
   });
