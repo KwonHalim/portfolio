@@ -17,8 +17,8 @@ let pageRequestStates = {
 // 캐시 유효시간 (30초)
 const CACHE_TTL = 30000;
 
-// 디바운싱 시간 (500ms)
-const DEBOUNCE_DELAY = 500;
+// 디바운싱 시간 (4초)
+const DEBOUNCE_DELAY = 4000;
 
 // 캐시 유효성 확인
 function isCacheValid(page) {
@@ -154,15 +154,27 @@ function handleNavigation(clickedPage) {
   }, 100);
 }
 
-// 안전한 데이터 로드 함수 (상태 기반 제어 + 디바운싱)
+// 안전한 데이터 로드 함수 (상태 기반 제어 + 조건부 디바운싱)
+let isFirstClick = true;
+let lastClickTime = 0;
+
 function loadPageDataSafely(page) {
   // 해당 페이지의 요청 상태 확인
   if (pageRequestStates[page]) {
     return;
   }
   
-  // 디바운싱 적용
-  debouncedLoadData(page);
+  const now = Date.now();
+  
+  // 첫 번째 클릭이거나 4초 이상 지났으면 즉시 요청
+  if (isFirstClick || (now - lastClickTime) > 4000) {
+    isFirstClick = false;
+    lastClickTime = now;
+    loadPageData(page);
+  } else {
+    // 연속 클릭이면 디바운싱 적용
+    debouncedLoadData(page);
+  }
 }
 
 // 디바운싱된 데이터 로드 함수
