@@ -133,6 +133,12 @@ class ProjectManager {
     createProjectElement(project, index) {
         const projectItem = document.createElement('div');
         projectItem.className = 'project-item';
+        
+        // 맨 윗줄 3개 프로젝트에 특별 효과 추가
+        if (index < 3) {
+            projectItem.classList.add('featured');
+        }
+        
         projectItem.setAttribute('data-category', project.category);
 
         // API_BASE_URL을 사용하여 이미지 경로 설정 (createMediaElement와 동일한 방식)

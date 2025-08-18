@@ -1851,3 +1851,105 @@ textarea.form-input::-webkit-resizer { display: none; }
   margin: 1rem 0;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 } 
+
+/* 맨 윗줄 3개 프로젝트 특별 효과 */
+.project-item.featured {
+  position: relative;
+  z-index: 10;
+}
+
+.project-item.featured::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  background: linear-gradient(45deg, #8BA3C4, #5B7A9A, #8BA3C4);
+  border-radius: 18px;
+  z-index: -1;
+  animation: featuredGlow 3s ease-in-out infinite alternate;
+}
+
+.project-item.featured::after {
+  content: '⭐';
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  font-size: 18px;
+  z-index: 15;
+  animation: starTwinkle 2s ease-in-out infinite;
+}
+
+.project-item.featured > a {
+  background: var(--bg-gradient-onyx);
+  border: 2px solid transparent;
+  background-clip: padding-box;
+  position: relative;
+  z-index: 5;
+}
+
+.project-item.featured > a:hover {
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 0 15px 40px rgba(139, 163, 196, 0.4),
+              0 0 30px rgba(91, 122, 154, 0.6);
+}
+
+.project-item.featured .project-title {
+  color: var(--orange-yellow-crayola);
+  font-weight: var(--fw-600);
+  text-shadow: 0 0 10px rgba(255, 193, 7, 0.3);
+}
+
+/* 특별 효과 애니메이션 */
+@keyframes featuredGlow {
+  0% {
+    box-shadow: 0 0 20px rgba(139, 163, 196, 0.3);
+  }
+  100% {
+    box-shadow: 0 0 30px rgba(139, 163, 196, 0.6),
+                0 0 40px rgba(91, 122, 154, 0.4);
+  }
+}
+
+@keyframes starTwinkle {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(1.2) rotate(180deg);
+  }
+}
+
+/* 맨 윗줄 3개 프로젝트 전용 슬라이드 인 애니메이션 */
+@keyframes featuredSlideIn {
+  0% {
+    opacity: 0;
+    transform: translateY(-50px) translateZ(-200px) scale(0.8);
+  }
+  50% {
+    opacity: 0.7;
+    transform: translateY(-10px) translateZ(-50px) scale(0.95);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) translateZ(0) scale(1);
+  }
+}
+
+/* 맨 윗줄 3개 프로젝트 호버 시 추가 효과 */
+.project-item.featured:hover .project-img::before {
+  background: hsla(0, 0%, 0%, 0.5) !important;
+}
+
+.project-item.featured:hover .project-item-icon-box {
+  --scale: 1;
+  opacity: 1;
+  background: var(--orange-yellow-crayola) !important;
+}
+
+.project-item.featured:hover .project-item-icon-box ion-icon {
+  color: var(--onyx) !important;
+} 
