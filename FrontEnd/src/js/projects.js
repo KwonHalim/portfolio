@@ -486,20 +486,24 @@ class ProjectManager {
         `;
     }
     
-    // 캐시된 데이터로 프로젝트 렌더링
+    // 캐시된 데이터로 프로젝트 렌더링 (애니메이션 포함, API 요청 없음)
     renderProjectsFromCache(data) {
-        console.log('캐시된 데이터로 프로젝트 렌더링');
-        
         const projects = data.result || data || [];
         
         if (projects.length > 0) {
+            // 기존 프로젝트 제거
+            this.resetProjects();
+            
             // 카테고리 추출 (최초 한 번만)
             if (!this.categoriesRendered) {
                 this.extractCategoriesFromProjects(projects);
             }
             
-            // 프로젝트 렌더링
+            // 프로젝트 렌더링 (애니메이션 포함)
             this.renderProjects(projects);
+            
+            // 애니메이션 재실행
+            this.replayProjectAnimations();
         } else {
             this.showNoProjectsMessage();
         }
@@ -537,13 +541,11 @@ document.addEventListener('pageChanged', (e) => {
             // 인스턴스가 없으면 새로 생성
             window.projectManager = new ProjectManager();
         } else {
-            // 캐시된 데이터가 있으면 즉시 사용
+            // 캐시된 데이터가 있으면 즉시 사용 (애니메이션 포함)
             if (e.detail.data) {
-                console.log('캐시된 프로젝트 데이터 사용');
                 window.projectManager.renderProjectsFromCache(e.detail.data);
             } else if (e.detail.loading) {
                 // 로딩 상태 표시
-                console.log('프로젝트 데이터 로딩 중...');
                 window.projectManager.showLoadingState();
             } else {
                 // 기존 방식으로 새로고침
