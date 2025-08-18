@@ -12,7 +12,7 @@ import portfolio.backend.service.TimelineService;
 public class TimelineController {
     private final TimelineService timelineService;
 
-    @GetMapping("KwonHalim")
+    @GetMapping("/KwonHalim")
     public ApiResponse<TimelineResponse> timeline_page() {
         TimelineResponse timelineResponse = timelineService.timeLinePage();
         return ApiResponse.success(timelineResponse);
