@@ -58,7 +58,16 @@ async function loadPageData(page) {
   try {
     // 여기서 실제 API 호출을 수행
     // 예: 프로젝트 데이터, 블로그 데이터 등
-    const response = await fetch(`${window.appConfig.getApiBaseUrl()}/api/${page}`);
+    let apiUrl;
+    if (page === 'about') {
+      apiUrl = window.appConfig.getAboutApiUrl();
+    } else if (page === 'resume') {
+      apiUrl = window.appConfig.getTimelineApiUrl();
+    } else {
+      apiUrl = `${window.appConfig.getApiBaseUrl()}/api/${page}`;
+    }
+    
+    const response = await fetch(apiUrl);
     const data = await response.json();
     
     // 캐시 업데이트
