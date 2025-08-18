@@ -146,12 +146,41 @@ function getChatSessionId() {
   return sessionId;
 }
 
+// 메시지 전송 제한 상태 변수
+let isMessageSending = false;
+let messageCooldownTimer = null;
+let countdownInterval = null;
+
 // 메시지 전송 함수
 async function sendMessage() {
   const input = document.getElementById('chatInput');
+  const sendButton = document.getElementById('sendButton');
   const message = input.value.trim();
   
-  if (!message) return;
+  if (!message || isMessageSending) return;
+
+  // 전송 상태 활성화
+  isMessageSending = true;
+  input.disabled = true;
+  if (sendButton) sendButton.disabled = true;
+  
+  // 실시간 카운트다운 시작
+  let countdown = 8;
+  input.placeholder = `${countdown}초 후 다시 메시지를 보낼 수 있습니다...`;
+  
+  countdownInterval = setInterval(() => {
+    countdown--;
+    if (countdown > 0) {
+      input.placeholder = `${countdown}초 후 다시 메시지를 보낼 수 있습니다...`;
+    } else {
+      // 카운트다운 완료
+      clearInterval(countdownInterval);
+      isMessageSending = false;
+      input.disabled = false;
+      input.placeholder = '메시지를 입력하세요...';
+      if (sendButton) sendButton.disabled = false;
+    }
+  }, 1000);
 
   addMessage('user', message);
   input.value = '';
@@ -183,6 +212,11 @@ async function sendMessage() {
     addMessage('bot', '죄송합니다. 일시적인 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
   } finally {
     removeTypingMessage(typingMessage);
+    
+    // 기존 타이머 정리
+    if (messageCooldownTimer) {
+      clearTimeout(messageCooldownTimer);
+    }
   }
 }
 
@@ -259,7 +293,7 @@ function initializeChatbot() {
 
 // 엔터키 입력 처리
 function handleEnterKey(e) {
-  if (e.key === 'Enter') {
+  if (e.key === 'Enter' && !isMessageSending) {
     e.preventDefault();
     sendMessage();
   }

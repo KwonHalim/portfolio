@@ -485,6 +485,38 @@ class ProjectManager {
             </div>
         `;
     }
+    
+    // 캐시된 데이터로 프로젝트 렌더링
+    renderProjectsFromCache(data) {
+        console.log('캐시된 데이터로 프로젝트 렌더링');
+        
+        const projects = data.result || data || [];
+        
+        if (projects.length > 0) {
+            // 카테고리 추출 (최초 한 번만)
+            if (!this.categoriesRendered) {
+                this.extractCategoriesFromProjects(projects);
+            }
+            
+            // 프로젝트 렌더링
+            this.renderProjects(projects);
+        } else {
+            this.showNoProjectsMessage();
+        }
+    }
+    
+    // 로딩 상태 표시
+    showLoadingState() {
+        const projectGrid = document.getElementById('projectGrid');
+        if (!projectGrid) return;
+        
+        projectGrid.innerHTML = `
+            <div class="loading-message" style="grid-column: 1 / -1; text-align: center; padding: 3rem;">
+                <div class="loading-spinner"></div>
+                <div>프로젝트를 불러오는 중...</div>
+            </div>
+        `;
+    }
 }
 
 // 페이지 로드 및 변경에 따른 ProjectManager 인스턴스 관리
@@ -505,8 +537,18 @@ document.addEventListener('pageChanged', (e) => {
             // 인스턴스가 없으면 새로 생성
             window.projectManager = new ProjectManager();
         } else {
-            // 인스턴스가 있으면 프로젝트 목록을 새로고침
-            window.projectManager.loadProjects(true);
+            // 캐시된 데이터가 있으면 즉시 사용
+            if (e.detail.data) {
+                console.log('캐시된 프로젝트 데이터 사용');
+                window.projectManager.renderProjectsFromCache(e.detail.data);
+            } else if (e.detail.loading) {
+                // 로딩 상태 표시
+                console.log('프로젝트 데이터 로딩 중...');
+                window.projectManager.showLoadingState();
+            } else {
+                // 기존 방식으로 새로고침
+                window.projectManager.loadProjects(true);
+            }
         }
     }
 });
