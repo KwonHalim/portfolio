@@ -25,6 +25,9 @@ function initializeSidebar() {
   
   // 프로필 이미지 모달 초기화
   initializeProfileModal();
+  
+  // 깃허브 잔디밭 3D 효과 초기화
+  initializeGitHubGraph3D();
 }
 
 // 3D Avatar 효과 함수
@@ -100,5 +103,44 @@ function initializeProfileModal() {
     console.log('Profile modal initialized');
   } else {
     console.log('Profile modal elements not found');
+  }
+} 
+
+// 깃허브 잔디밭 3D 효과 초기화
+function initializeGitHubGraph3D() {
+  const githubGraph = document.querySelector('.github-graph');
+
+  if (githubGraph) {
+    let isHovering = false;
+    
+    githubGraph.addEventListener('mouseenter', function() {
+      isHovering = true;
+    });
+    
+    githubGraph.addEventListener('mousemove', function(e) {
+      if (!isHovering) return;
+      
+      const rect = githubGraph.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      
+      // 회전 효과 계산
+      const centerX = rect.width / 2;
+      const centerY = rect.height / 2;
+      
+      const rotateY = (x - centerX) / 20;
+      const rotateX = (centerY - y) / 20;
+
+      githubGraph.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.02)`;
+    });
+
+    githubGraph.addEventListener('mouseleave', function() {
+      isHovering = false;
+      githubGraph.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale(1)';
+    });
+
+    console.log('GitHub Graph 3D effect initialized');
+  } else {
+    console.log('GitHub Graph not found');
   }
 } 

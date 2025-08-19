@@ -1270,3 +1270,58 @@
     flex-direction: column;
   }
 } 
+
+/*-----------------------------------*\
+  #GITHUB CONTRIBUTIONS 3D EFFECT
+\*-----------------------------------*/
+
+.github-contributions {
+  margin-top: 30px;
+}
+
+.github-graph {
+  position: relative;
+  border-radius: 15px;
+  overflow: hidden;
+  cursor: pointer;
+  transform-style: preserve-3d;
+  transition: all 0.3s ease;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+}
+
+.github-graph img {
+  width: 100%;
+  height: auto;
+  border-radius: 15px;
+  transition: all 0.3s ease;
+  filter: brightness(0.9) contrast(1.1);
+}
+
+/* 3D 효과를 위한 호버 상태 */
+.github-graph:hover {
+  transform: perspective(1000px) rotateX(5deg) rotateY(5deg) scale(1.02);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+}
+
+.github-graph:hover img {
+  filter: brightness(1.1) contrast(1.2);
+}
+
+/* 마우스 움직임에 따른 동적 3D 효과 */
+.github-graph-3d {
+  transform-style: preserve-3d;
+  transition: transform 0.1s ease;
+}
+
+/* 깃허브 잔디밭 컨테이너에 3D 효과 적용 */
+.github-graph-container {
+  position: relative;
+  perspective: 1000px;
+}
+
+/* 반응형 대응 */
+@media (max-width: 768px) {
+  .github-graph:hover {
+    transform: perspective(800px) rotateX(3deg) rotateY(3deg) scale(1.01);
+  }
+} 
