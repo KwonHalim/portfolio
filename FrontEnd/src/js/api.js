@@ -111,7 +111,12 @@ async function loadProfileData() {
             // 프로필 이미지 업데이트
             const profileImage = document.getElementById('profileImage');
             if (profileImage && profileData.profile_path) {
-                profileImage.src = profileData.profile_path;
+                // 테크스택과 동일하게 API Base URL 조합
+                let imageSrc = profileData.profile_path;
+                if (profileData.profile_path && !profileData.profile_path.startsWith('./assets/') && !profileData.profile_path.startsWith('http')) {
+                    imageSrc = `${window.appConfig.getApiBaseUrl()}/${profileData.profile_path}`;
+                }
+                profileImage.src = imageSrc;
                 profileImage.alt = profileData.name;
             }
 
