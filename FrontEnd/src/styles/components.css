@@ -67,11 +67,20 @@
   z-index: -1;
 }
 
+
+
 .info_more-btn:hover,
-.info_more-btn:focus { background: #8BA3C4; }
+.info_more-btn:focus { 
+  background: var(--text-gradient-yellow);
+  color: var(--smoky-black);
+}
 
 .info_more-btn:hover::before,
-.info_more-btn:focus::before { background: #8BA3C4; }
+.info_more-btn:focus::before { 
+  background: var(--text-gradient-yellow);
+}
+
+
 
 .info_more-btn span { display: none; }
 
@@ -94,6 +103,14 @@
   transition: all 0.3s ease;
 }
 
+/* a태그의 클릭 영역을 글자 크기만큼만 제한 */
+.contact-info a,
+.social-list a,
+.navbar a {
+  display: inline;
+  width: fit-content;
+}
+
 /* a태그가 있는 요소에만 파란색 hover 효과 적용 */
 .contact-item a:hover {
   color: #8BA3C4 !important;
@@ -103,12 +120,18 @@
   min-width: 100%;
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
 }
 
 .contact-info {
-  max-width: calc(100% - 46px);
-  width: calc(100% - 46px);
+  max-width: calc(100% - 50px);
+  width: calc(100% - 50px);
+}
+
+.contact-info .contact-link {
+  display: inline;
+  width: fit-content;
+  word-break: break-all;
 }
 
 .contact-title {
