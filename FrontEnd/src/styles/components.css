@@ -24,6 +24,105 @@
   border-radius: 20px;
 }
 
+/* 3D Avatar Container */
+.avatar-container {
+  width: 240px;
+  height: 240px;
+  transition: all 0.1s;
+  position: relative;
+  border-radius: 20px;
+  overflow: visible;
+  cursor: pointer;
+  transform-style: preserve-3d;
+}
+
+.avatar-card {
+  width: 240px;
+  height: 240px;
+  background: var(--bg-gradient-onyx);
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: visible;
+}
+
+.avatar-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: 20px;
+}
+
+/* profileImage ID를 가진 이미지도 동일하게 스타일링 */
+#profileImage {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: 20px;
+}
+
+/* 기본 hover 효과 (JavaScript가 작동하지 않을 때를 대비) */
+.avatar-container:hover {
+  transform: perspective(500px) rotateY(8deg) rotateX(5deg);
+}
+
+/* 프로필 이미지 클릭 가능 스타일 */
+.profile-image-clickable {
+  cursor: pointer;
+}
+
+/* 프로필 모달 스타일 */
+.profile-modal {
+  display: none;
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(5px);
+}
+
+.profile-modal-content {
+  position: relative;
+  margin: auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  max-width: 90vw;
+  max-height: 90vh;
+  pointer-events: none;
+}
+
+.profile-modal-close {
+  position: absolute;
+  top: 20px;
+  right: 30px;
+  color: #f1f1f1;
+  font-size: 40px;
+  font-weight: bold;
+  cursor: pointer;
+  z-index: 1001;
+  transition: color 0.3s ease;
+}
+
+.profile-modal-close:hover {
+  color: #bbb;
+}
+
+#modalProfileImage {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  border-radius: 10px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  pointer-events: auto;
+}
+
 .info-content .name {
   color: var(--white-2);
   font-size: var(--fs-3);

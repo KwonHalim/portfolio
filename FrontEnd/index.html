@@ -32,9 +32,11 @@
 
       <div class="sidebar-info">
 
-        <figure class="avatar-box">
-          <img src="" alt="" width="80" id="profileImage">
-        </figure>
+        <div class="avatar-container">
+          <div class="avatar-card">
+            <img src="" alt="" width="80" id="profileImage" class="profile-image-clickable">
+          </div>
+        </div>
 
         <div class="info-content">
           <h1 class="name" title="KwonHalim">권하림</h1>
@@ -370,6 +372,14 @@
     </div>
 
   </main>
+
+  <!-- 프로필 이미지 모달 -->
+  <div id="profileModal" class="profile-modal">
+    <div class="profile-modal-content">
+      <span class="profile-modal-close">&times;</span>
+      <img id="modalProfileImage" src="" alt="프로필 이미지">
+    </div>
+  </div>
 
   <!--
     - custom js links
