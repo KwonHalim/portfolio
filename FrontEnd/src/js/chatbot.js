@@ -64,10 +64,7 @@ async function submitFeedback() {
       throw new Error('서버 응답 오류');
     }
   } catch (error) {
-    console.error('피드백 전송 실패:', error);
-    saveFeedbackLocally(feedbackData);
-    alert('피드백 전송에 실패하여 로컬에 저장되었습니다. 다음 접속 시 다시 시도합니다.');
-    closeFeedbackModal();
+    // 피드백 전송 실패
   }
 }
 
@@ -77,9 +74,7 @@ function saveFeedbackLocally(feedbackData) {
     const pendingFeedback = JSON.parse(localStorage.getItem('pendingFeedback') || '[]');
     pendingFeedback.push(feedbackData);
     localStorage.setItem('pendingFeedback', JSON.stringify(pendingFeedback));
-    console.log('피드백이 로컬 스토리지에 저장되었습니다.');
   } catch (error) {
-    console.error('로컬 스토리지 저장 실패:', error);
   }
 }
 
@@ -88,8 +83,6 @@ async function sendPendingFeedback() {
   const pendingFeedback = JSON.parse(localStorage.getItem('pendingFeedback') || '[]');
   if (pendingFeedback.length === 0) return;
 
-  console.log(`${pendingFeedback.length}개의 저장된 피드백 전송을 시도합니다.`);
-  
   const successfulSubmissions = [];
 
   for (const feedback of pendingFeedback) {
@@ -101,14 +94,12 @@ async function sendPendingFeedback() {
       });
       
       if (response.ok) {
-        console.log('저장된 피드백 전송 성공:', feedback);
         successfulSubmissions.push(feedback);
       } else {
         // 하나라도 실패하면 다음을 위해 중단
         throw new Error('서버 응답 오류');
       }
     } catch (error) {
-      console.error('저장된 피드백 전송 실패, 다음 시도를 위해 중단합니다.', error);
       break; 
     }
   }
@@ -208,7 +199,6 @@ async function sendMessage() {
     addMessage('bot', botResponse, chatId);
 
   } catch (error) {
-    console.error('Error:', error);
     addMessage('bot', '죄송합니다. 일시적인 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
   } finally {
     removeTypingMessage(typingMessage);
@@ -328,13 +318,7 @@ async function rateMessage(button, rating, chatId) {
     activeBtn.style.color = rating === 'like' ? '#4CAF50' : '#f44336';
     activeBtn.innerHTML = `<ion-icon name="${iconName}"></ion-icon>`;
     
-    showFeedbackStatus(button, '피드백이 전송되었습니다.', 'success');
-
   } catch (error) {
-    console.error('피드백 전송 실패:', error);
-    likeBtn.disabled = false;
-    dislikeBtn.disabled = false;
-    showFeedbackStatus(button, '피드백 전송에 실패했습니다.', 'error');
   }
 }
 

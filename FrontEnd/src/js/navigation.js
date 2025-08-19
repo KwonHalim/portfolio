@@ -14,11 +14,40 @@ let pageRequestStates = {
   'resume': false
 };
 
-// 캐시 유효시간 (30초)
-const CACHE_TTL = 30000;
+// 캐시 유효시간 (3시간 = 3 * 60 * 60 * 1000 밀리초)
+const CACHE_TTL = 3 * 60 * 60 * 1000;
 
 // 디바운싱 시간 (1초)
 const DEBOUNCE_DELAY = 1000;
+
+// sessionStorage에서 캐시 복원 (브라우저 종료 시 자동 삭제)
+function restoreCacheFromSession() {
+  try {
+    const cachedData = sessionStorage.getItem('pageCache');
+    if (cachedData) {
+      const parsed = JSON.parse(cachedData);
+      const now = Date.now();
+      
+      // 유효한 캐시만 복원
+      Object.keys(parsed).forEach(page => {
+        if ((now - parsed[page].timestamp) < CACHE_TTL) {
+          pageCache[page] = parsed[page];
+        }
+      });
+    }
+  } catch (error) {
+    // 캐시 복원 실패 시 조용히 처리
+  }
+}
+
+// sessionStorage에 캐시 저장
+function saveCacheToSession() {
+  try {
+    sessionStorage.setItem('pageCache', JSON.stringify(pageCache));
+  } catch (error) {
+    // 캐시 저장 실패 시 조용히 처리
+  }
+}
 
 // 캐시 유효성 확인
 function isCacheValid(page) {
@@ -35,6 +64,9 @@ function saveToCache(page, data) {
     data: data,
     timestamp: Date.now()
   };
+  
+  // sessionStorage에 저장
+  saveCacheToSession();
 }
 
 // 디바운싱 함수
@@ -49,6 +81,11 @@ function debounce(func, delay) {
 async function loadPageData(page) {
   // 해당 페이지의 요청 상태 확인
   if (pageRequestStates[page]) {
+    return;
+  }
+  
+  // 캐시가 유효하면 API 요청하지 않음
+  if (isCacheValid(page)) {
     return;
   }
   
@@ -77,7 +114,7 @@ async function loadPageData(page) {
     updatePageIfNeeded(page, data);
     
   } catch (error) {
-    // 에러 로그는 유지 (디버깅 필요시)
+    // 페이지: API 요청 실패
   } finally {
     // 요청 완료 - 상태 해제 (성공/실패 상관없이)
     pageRequestStates[page] = false;
@@ -137,7 +174,7 @@ function handleNavigation(clickedPage) {
 
   // 캐시 확인 및 즉시 표시
   if (isCacheValid(clickedPage)) {
-    // 캐시된 데이터로 즉시 표시
+    // 캐시된 데이터로 즉시 표시 (애니메이션은 유지됨)
     if (clickedPage === 'projects') {
       const pageChangedEvent = new CustomEvent('pageChanged', {
         detail: { page: 'projects', data: pageCache[clickedPage].data }
@@ -174,6 +211,11 @@ function loadPageDataSafely(page) {
     return;
   }
   
+  // 캐시가 유효하면 API 요청하지 않음
+  if (isCacheValid(page)) {
+    return;
+  }
+  
   const now = Date.now();
   
   // 같은 페이지를 2.5초 이내에 다시 클릭하면 백엔드 요청 무시 (애니메이션만 실행)
@@ -198,6 +240,9 @@ const debouncedLoadData = debounce(loadPageData, DEBOUNCE_DELAY);
 
 // 네비게이션 초기화 함수
 function initializeNavigation() {
+  // sessionStorage에서 캐시 복원
+  restoreCacheFromSession();
+  
   const navigationLinks = document.querySelectorAll("[data-nav-link]");
 
   // add event to all nav link
@@ -212,4 +257,6 @@ function initializeNavigation() {
       loadPageDataSafely(clickedPage);
     });
   });
+  
+  // 네비게이션 초기화 완료 - 캐시 시스템 활성화
 } 

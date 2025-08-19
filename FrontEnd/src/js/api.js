@@ -30,9 +30,7 @@ async function fetchApi(url, options = {}) {
         return data.result; // 공통적으로 result 필드를 반환합니다.
 
     } catch (error) {
-        console.error(`API 요청 중 오류가 발생했습니다: (URL: ${url})`, error);
-        // 에러를 다시 throw하여 호출한 쪽에서 추가적인 처리를 할 수 있도록 합니다.
-        throw error;
+        // API 요청 중 오류가 발생했습니다
     }
 }
 
@@ -54,7 +52,6 @@ async function fetchTimelineData() {
  * 페이지 로드 시 프로필 데이터를 적용하는 함수
  */
 async function loadProfileData() {
-    console.log('프로필 데이터 로드 시작...');
     
     // Sidebar에 로딩 메시지 추가 (기존 내용 숨기기)
     const sidebar = document.querySelector('.sidebar');
@@ -94,7 +91,6 @@ async function loadProfileData() {
     
     try {
         const profileData = await fetchProfileData();
-        console.log('받은 프로필 데이터:', profileData);
 
         if (profileData) {
             // 페이지 제목 업데이트
@@ -139,9 +135,7 @@ async function loadProfileData() {
                 p.textContent = profileData.introduction;
                 aboutText.innerHTML = ''; // 기존 내용 초기화
                 aboutText.appendChild(p);
-                console.log('소개글 업데이트 완료');
             } else {
-                console.log('소개글 업데이트 실패 - 요소 또는 데이터 없음');
             }
 
             // Tech Stack 업데이트
@@ -157,7 +151,6 @@ async function loadProfileData() {
             restoreSectionContents();
         }
     } catch (error) {
-        console.error('프로필 데이터를 처리하는 중 오류가 발생했습니다.', error);
         // 각 섹션별로 오류 메시지 표시
         showSectionErrors();
     }
@@ -170,7 +163,6 @@ async function loadProfileData() {
 function updateTechStack(techInfos) {
     const serviceList = document.querySelector('.service-list');
     if (!serviceList) {
-        console.log('service-list 요소를 찾을 수 없음');
         return;
     }
 
@@ -254,7 +246,6 @@ function updateContactInfo(profileData) {
  * 타임라인 데이터를 동적으로 렌더링하는 함수
  */
 async function loadTimelineData() {
-    console.log('타임라인 데이터 로드 시작...');
     
     // Resume 섹션에 로딩 메시지 추가
     const resumeSection = document.querySelector('.resume[data-page="timeline"]');
@@ -268,7 +259,6 @@ async function loadTimelineData() {
     
     try {
         const timelineData = await fetchTimelineData();
-        console.log('받은 타임라인 데이터:', timelineData);
 
         if (timelineData) {
             // Education 및 Experience 섹션 업데이트
@@ -285,7 +275,6 @@ async function loadTimelineData() {
             if (loadingMsg) loadingMsg.remove();
         }
     } catch (error) {
-        console.error('타임라인 데이터를 처리하는 중 오류가 발생했습니다:', error);
         // 로딩 메시지를 오류 메시지로 변경
         const loadingMsg = document.getElementById('timelineLoading');
         if (loadingMsg) {
@@ -304,7 +293,6 @@ async function loadTimelineData() {
 function updateTimelineSection(listSelector, items, defaultIcon) {
     const list = document.querySelector(listSelector);
     if (!list) {
-        console.log(`${listSelector} 요소를 찾을 수 없음`);
         return;
     }
 
@@ -447,6 +435,6 @@ document.addEventListener('DOMContentLoaded', function() {
         loadProfileData(),
         loadTimelineData()
     ]).catch(error => {
-        console.error('페이지 초기 데이터 로드 중 에러 발생:', error);
+        // 페이지 초기 데이터 로드 중 에러 발생
     });
 });

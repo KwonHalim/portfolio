@@ -90,8 +90,13 @@
 .contact-info a:hover,
 .social-list a:hover,
 .navbar a:hover {
-  color: #8BA3C4;
+  color: var(--orange-yellow-crayola);
   transition: all 0.3s ease;
+}
+
+/* a태그가 있는 요소에만 파란색 hover 효과 적용 */
+.contact-item a:hover {
+  color: #8BA3C4 !important;
 }
 
 .contact-item {
@@ -150,7 +155,7 @@
   border: 1px solid var(--jet);
   border-radius: 12px 12px 0 0;
   box-shadow: var(--shadow-2);
-  z-index: 5;
+  z-index: 100;
 }
 
 .navbar-list {
@@ -603,10 +608,10 @@
 }
 
 .bot-message {
-  background: var(--eerie-black-2);
+  background: var(--eerie-black-2) !important;
   margin-right: auto;
-  background-color: var(--eerie-black-2);
-  color: var(--light-gray);
+  background-color: var(--eerie-black-2) !important;
+  color: var(--light-gray) !important;
   margin-right: auto;
   margin-left: 10px;
   position: relative;
@@ -836,15 +841,14 @@
 .filter-item button.active {
   background: var(--orange-yellow-crayola);
   border-color: var(--orange-yellow-crayola);
-  color: var(--eerie-black-1);
+  color: var(--smoky-black);
   font-weight: var(--fw-600);
   transform: translateY(-1px);
   box-shadow: 0 6px 20px rgba(255, 193, 7, 0.3);
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 .filter-item button.active::before {
-  opacity: 1;
+  opacity: 0;
 }
 
 /* 반응형 디자인 */

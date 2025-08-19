@@ -28,13 +28,18 @@ class ProjectManager {
     }
     
     init() {
-        console.log('ProjectManager 초기화 시작');
+        // ProjectManager 초기화 시작
         
         const projectGrid = document.getElementById('projectGrid');
         if (!projectGrid) {
-            console.error('projectGrid 요소를 찾을 수 없습니다!');
             return;
         }
+
+        // 캐시된 데이터가 있는지 확인
+        this.checkCachedData();
+        
+        // pageChanged 이벤트 리스너 설정
+        this.setupPageChangeListener();
 
         this.loadProjects(true); // 초기 로드 시 리셋
         this.setupFilters();
@@ -42,20 +47,24 @@ class ProjectManager {
         // [리팩토링] 모달 이벤트 핸들러 설정 (한 번만 실행되도록 보장)
         // 전역 플래그 대신 클래스 내부 상태로 관리하는 것이 더 안전합니다.
         if (this.modal && !this.modal.dataset.handlerSetup) {
-            console.log('최초로 모달 이벤트 핸들러를 설정합니다.');
             this.setupModal();
             this.modal.dataset.handlerSetup = 'true'; // 플래그를 DOM 요소에 직접 설정
         }
         
-        console.log('ProjectManager 초기화 완료');
+        // ProjectManager 초기화 완료
     }
     
     async loadProjects(reset = false) {
         if (this.isLoading) return;
         
-        this.isLoading = true;
+        // 카테고리별 캐시된 데이터 확인
+        const cachedData = this.checkCachedDataForCategory(this.currentCategory);
+        if (cachedData) {
+            this.renderProjectsFromCache(cachedData);
+            return;
+        }
         
-
+        this.isLoading = true;
         
         // 프로젝트 그리드에 로딩 메시지 추가
         const projectGrid = document.getElementById('projectGrid');
@@ -75,8 +84,6 @@ class ProjectManager {
                 url += `?category=${encodeURIComponent(this.currentCategory)}`;
             }
             
-            console.log('API 요청 URL:', url);
-            
             const response = await fetch(url);
             
             if (!response.ok) {
@@ -86,12 +93,14 @@ class ProjectManager {
             const data = await response.json();
             const projects = data.result || []; // API 응답 구조에 맞게 result 필드 사용
             
+            // 카테고리별 데이터를 캐시에 저장
+            this.saveToCacheForCategory(this.currentCategory, data);
+            
             if (reset) {
                 this.resetProjects();
             }
 
             if (projects.length > 0) {
-                console.log(`${projects.length}개의 프로젝트를 렌더링합니다.`);
                 // 카테고리 추출은 최초 로드 시에만 수행
                 if (reset && !this.categoriesRendered) {
                     this.extractCategoriesFromProjects(projects);
@@ -99,18 +108,14 @@ class ProjectManager {
                 // 최초 로드 시에만 강조할 프로젝트 ID들을 저장
                 if (reset && this.currentCategory === 'all' && this.featuredProjectIds.length === 0) {
                     this.featuredProjectIds = projects.slice(0, 3).map(project => project.id);
-                    console.log('강조할 프로젝트 ID들:', this.featuredProjectIds);
                 }
                 this.renderProjects(projects);
             } else {
-                console.log('가져온 프로젝트 데이터가 없습니다.');
-                if (reset) this.showNoProjectsMessage(); // 데이터가 없을 때 메시지 표시
+                this.showNoProjectsMessage(); // 데이터가 없을 때 메시지 표시
             }
             
         } catch (error) {
-            console.error('프로젝트 로딩 실패:', error);
-            // 백엔드 연결 실패 시 오류 메시지 표시
-            if (reset) this.showProjectsError();
+            this.showProjectsError();
         } finally {
             this.isLoading = false;
             
@@ -287,6 +292,14 @@ class ProjectManager {
     async showProjectDetail(projectId) {
         if (!projectId) return;
         
+        // 캐시된 프로젝트 상세 정보 확인
+        const cachedDetail = this.getCachedProjectDetail(projectId);
+        if (cachedDetail) {
+            this.updateModal(cachedDetail);
+            this.openModal();
+            return;
+        }
+        
         try {
             const projectDetailUrl = window.appConfig.getProjectDetailApiUrl(projectId);
             const response = await fetch(projectDetailUrl);
@@ -297,13 +310,15 @@ class ProjectManager {
             
             const data = await response.json();
             if (data.result) {
+                // 프로젝트 상세 정보를 캐시에 저장
+                this.cacheProjectDetail(projectId, data.result);
+                
                 this.updateModal(data.result);
                 this.openModal();
             } else {
                 throw new Error('프로젝트 정보를 찾을 수 없습니다.');
             }
         } catch (error) {
-            console.error('프로젝트 상세 정보 로딩 실패:', error);
             alert('프로젝트 상세 정보를 불러오는 데 실패했습니다.');
         }
     }
@@ -421,7 +436,6 @@ class ProjectManager {
 
             // 이미 활성화된 버튼이면 애니메이션만 다시 실행
             if (button.classList.contains('active')) {
-                console.log('같은 카테고리 선택, 애니메이션 재실행:', button.dataset.filter);
                 this.replayProjectAnimations();
                 return;
             }
@@ -433,9 +447,18 @@ class ProjectManager {
             }
             button.classList.add('active');
             
-            this.currentCategory = button.dataset.filter;
-            console.log('카테고리 변경:', this.currentCategory);
-            this.loadProjects(true); // 카테고리 변경 시 프로젝트 목록 리셋 후 새로 로드
+            const newCategory = button.dataset.filter;
+            
+            // 카테고리 변경 시 캐시 확인
+            this.currentCategory = newCategory;
+            
+            // 해당 카테고리의 캐시된 데이터가 있는지 확인
+            const cachedData = this.checkCachedDataForCategory(newCategory);
+            if (cachedData) {
+                this.renderProjectsFromCache(cachedData);
+            } else {
+                this.loadProjects(true); // 카테고리 변경 시 프로젝트 목록 리셋 후 새로 로드
+            }
         });
     }
     
@@ -486,8 +509,6 @@ class ProjectManager {
         const projectItems = document.querySelectorAll('.project-item');
         if (projectItems.length === 0) return;
         
-        console.log(`${projectItems.length}개 프로젝트 애니메이션 재실행`);
-        
         projectItems.forEach((item, index) => {
             // 기존 애니메이션 스타일 제거
             item.style.animation = '';
@@ -503,7 +524,6 @@ class ProjectManager {
     }
 
     showNoProjectsMessage() {
-        console.log('프로젝트 데이터가 없습니다.');
         const projectGrid = document.getElementById('projectGrid');
         if (!projectGrid) return;
         
@@ -516,7 +536,6 @@ class ProjectManager {
     }
     
     showProjectsError() {
-        console.log('백엔드 연결 실패, 오류 메시지를 표시합니다.');
         const projectGrid = document.getElementById('projectGrid');
         if (!projectGrid) return;
         
@@ -550,17 +569,186 @@ class ProjectManager {
         }
     }
     
+    // 캐시된 데이터 확인
+    checkCachedData() {
+        try {
+            const cachedData = sessionStorage.getItem('pageCache');
+            if (cachedData) {
+                const parsed = JSON.parse(cachedData);
+                if (parsed.projects && parsed.projects.data) {
+                    this.renderProjectsFromCache(parsed.projects.data);
+                }
+            }
+        } catch (error) {
+            // 캐시된 데이터 확인 실패
+        }
+    }
+    
+    // 카테고리별 캐시 키 생성
+    getCacheKey(category = 'all') {
+        return `projects_${category}`;
+    }
+    
+    // 카테고리별 캐시된 데이터 확인
+    checkCachedDataForCategory(category = 'all') {
+        try {
+            const cachedData = sessionStorage.getItem('pageCache');
+            if (cachedData) {
+                const parsed = JSON.parse(cachedData);
+                const cacheKey = this.getCacheKey(category);
+                
+                if (parsed[cacheKey] && parsed[cacheKey].data) {
+                    const age = Date.now() - parsed[cacheKey].timestamp;
+                    const isValid = age < (3 * 60 * 60 * 1000); // 3시간
+                    
+                    if (isValid) {
+                        return parsed[cacheKey].data;
+                    } else {
+                        // 만료된 캐시 삭제
+                        delete parsed[cacheKey];
+                        sessionStorage.setItem('pageCache', JSON.stringify(parsed));
+                    }
+                } else {
+                    return null;
+                }
+            }
+        } catch (error) {
+            // 카테고리별 캐시된 데이터 확인 실패
+        }
+        return null;
+    }
+    
+    // 카테고리별 데이터를 캐시에 저장
+    saveToCacheForCategory(category = 'all', data) {
+        try {
+            const cachedData = sessionStorage.getItem('pageCache');
+            let parsed = {};
+            
+            if (cachedData) {
+                parsed = JSON.parse(cachedData);
+            }
+            
+            const cacheKey = this.getCacheKey(category);
+            parsed[cacheKey] = {
+                data: data,
+                timestamp: Date.now()
+            };
+            
+            sessionStorage.setItem('pageCache', JSON.stringify(parsed));
+        } catch (error) {
+            // 카테고리별 데이터 캐시 저장 실패
+        }
+    }
+    
+    // 캐시된 데이터로 프로젝트 렌더링
+    renderProjectsFromCache(data) {
+        const projects = data.result || data;
+        if (projects && projects.length > 0) {
+            this.resetProjects();
+            this.extractCategoriesFromProjects(projects);
+            if (this.currentCategory === 'all' && this.featuredProjectIds.length === 0) {
+                this.featuredProjectIds = projects.slice(0, 3).map(project => project.id);
+            }
+            this.renderProjects(projects);
+        }
+    }
+    
+    // pageChanged 이벤트 리스너 설정
+    setupPageChangeListener() {
+        document.addEventListener('pageChanged', (event) => {
+            const { page, data, loading } = event.detail;
+            
+            if (page === 'projects') {
+                if (loading) {
+                    // 로딩 상태 표시
+                    this.showLoadingState();
+                } else if (data) {
+                    // 현재 카테고리에 맞는 데이터인지 확인
+                    // navigation.js에서 전달된 데이터는 'all' 카테고리 데이터일 가능성이 높음
+                    if (this.currentCategory === 'all') {
+                        this.renderProjectsFromCache(data);
+                    } else {
+                        // 다른 카테고리인 경우 해당 카테고리의 캐시 확인
+                        const cachedData = this.checkCachedDataForCategory(this.currentCategory);
+                        if (cachedData) {
+                            this.renderProjectsFromCache(cachedData);
+                        } else {
+                            // 캐시가 없으면 API 요청
+                            this.loadProjects(true);
+                        }
+                    }
+                }
+            }
+        });
+    }
+    
     // 로딩 상태 표시
     showLoadingState() {
         const projectGrid = document.getElementById('projectGrid');
-        if (!projectGrid) return;
-        
-        projectGrid.innerHTML = `
-            <div class="loading-message" style="grid-column: 1 / -1; text-align: center; padding: 3rem;">
-                <div class="loading-spinner"></div>
-                <div>프로젝트를 불러오는 중...</div>
-            </div>
-        `;
+        if (projectGrid) {
+            this.resetProjects();
+            const loadingMsg = document.createElement('div');
+            loadingMsg.className = 'loading-message';
+            loadingMsg.innerHTML = '<div class="loading-spinner"></div>로딩중입니다.';
+            loadingMsg.id = 'projectsLoading';
+            loadingMsg.style.gridColumn = '1 / -1';
+            projectGrid.appendChild(loadingMsg);
+        }
+    }
+
+    // 프로젝트 상세 정보 캐시에서 가져오기
+    getCachedProjectDetail(projectId) {
+        try {
+            const cachedData = sessionStorage.getItem('projectDetailCache');
+            if (cachedData) {
+                const parsed = JSON.parse(cachedData);
+                const cacheKey = `project_${projectId}`;
+                
+                if (parsed[cacheKey]) {
+                    const cache = parsed[cacheKey];
+                    const now = Date.now();
+                    const CACHE_TTL = 3 * 60 * 60 * 1000; // 3시간
+                    
+                    // 캐시가 유효한지 확인
+                    if ((now - cache.timestamp) < CACHE_TTL) {
+                        return cache.data;
+                    } else {
+                        // 만료된 캐시 삭제
+                        delete parsed[cacheKey];
+                        sessionStorage.setItem('projectDetailCache', JSON.stringify(parsed));
+                    }
+                }
+            }
+        } catch (error) {
+            // 프로젝트 상세 정보 캐시 확인 실패
+        }
+        return null;
+    }
+    
+    // 프로젝트 상세 정보 캐시에 저장
+    cacheProjectDetail(projectId, data) {
+        try {
+            const cacheKey = `project_${projectId}`;
+            let cachedData = {};
+            
+            // 기존 캐시 데이터 가져오기
+            const existingCache = sessionStorage.getItem('projectDetailCache');
+            if (existingCache) {
+                cachedData = JSON.parse(existingCache);
+            }
+            
+            // 새로운 데이터 캐시에 저장
+            cachedData[cacheKey] = {
+                data: data,
+                timestamp: Date.now()
+            };
+            
+            // sessionStorage에 저장
+            sessionStorage.setItem('projectDetailCache', JSON.stringify(cachedData));
+            
+        } catch (error) {
+            // 프로젝트 상세 정보 캐시 저장 실패
+        }
     }
 }
 

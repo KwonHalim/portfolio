@@ -23,7 +23,7 @@ async function loadComponent(elementId, componentPath) {
       initializeChatbot();
     }
   } catch (error) {
-    console.error('컴포넌트 로드 실패:', error);
+    // 컴포넌트 로드 실패
   }
 }
 
