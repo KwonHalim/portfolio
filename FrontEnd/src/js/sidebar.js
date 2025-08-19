@@ -157,11 +157,9 @@ function loadProfileImage() {
   fetch(window.appConfig.getAboutApiUrl())
     .then(response => response.json())
     .then(data => {
-      if (data.result && data.result.profile_image_path) {
-        // 테크스택과 동일하게 API Base URL + 경로 방식 사용
-        const imagePath = `${window.appConfig.getApiBaseUrl()}/${data.result.profile_image_path}`;
-        
-        profileImage.src = imagePath;
+      if (data.result && data.result.profile_path) {
+        // api.js와 동일하게 profile_path 사용
+        profileImage.src = data.result.profile_path;
         profileImage.alt = data.result.name || '권하림';
         
         // 이미지 로드 실패 시 기본 이미지로 fallback
