@@ -105,9 +105,11 @@ class ProjectManager {
                 if (reset && !this.categoriesRendered) {
                     this.extractCategoriesFromProjects(projects);
                 }
-                // 최초 로드 시에만 강조할 프로젝트 ID들을 저장
+                // emphasized가 true인 프로젝트들의 ID를 저장 (참고용)
                 if (reset && this.currentCategory === 'all' && this.featuredProjectIds.length === 0) {
-                    this.featuredProjectIds = projects.slice(0, 3).map(project => project.id);
+                    this.featuredProjectIds = projects
+                        .filter(project => project.emphasized === true)
+                        .map(project => project.id);
                 }
                 this.renderProjects(projects);
             } else {
@@ -145,8 +147,8 @@ class ProjectManager {
         const projectItem = document.createElement('div');
         projectItem.className = 'project-item';
         
-        // 처음 ALL 카테고리에서 받아온 1, 2, 3번 프로젝트만 강조 효과 추가
-        if (this.featuredProjectIds.includes(project.id)) {
+        // emphasized가 true인 프로젝트에 강조 효과 추가
+        if (project.emphasized === true) {
             projectItem.classList.add('featured');
         }
         
@@ -646,8 +648,11 @@ class ProjectManager {
         if (projects && projects.length > 0) {
             this.resetProjects();
             this.extractCategoriesFromProjects(projects);
+            // emphasized가 true인 프로젝트들의 ID를 저장 (참고용)
             if (this.currentCategory === 'all' && this.featuredProjectIds.length === 0) {
-                this.featuredProjectIds = projects.slice(0, 3).map(project => project.id);
+                this.featuredProjectIds = projects
+                    .filter(project => project.emphasized === true)
+                    .map(project => project.id);
             }
             this.renderProjects(projects);
         }
