@@ -21,7 +21,7 @@ logger.add(sys.stderr, level="INFO", format=log_format)
 # - retention="7 days": 7일이 지난 로그 파일은 자동 삭제
 # - level="INFO": INFO 레벨 이상의 로그만 파일에 기록
 logger.add(
-    "~/logs/FastAPI/app_{time:YYYY-MM-DD}.log",
+    "logs/app_{time:YYYY-MM-DD}.log",
     rotation="1 day",
     retention="7 days",
     level="INFO",
