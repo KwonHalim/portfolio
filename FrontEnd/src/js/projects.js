@@ -7,6 +7,7 @@ class ProjectManager {
         this.apiBaseUrl = window.appConfig.getProjectsApiUrl();
         this.categories = new Set();
         this.categoriesRendered = false;
+        this.featuredProjectIds = []; // 강조할 프로젝트 ID들을 저장
 
         // [리팩토링] 모달 관련 요소를 클래스 속성으로 관리
         this.modal = document.getElementById('projectModal');
@@ -95,6 +96,11 @@ class ProjectManager {
                 if (reset && !this.categoriesRendered) {
                     this.extractCategoriesFromProjects(projects);
                 }
+                // 최초 로드 시에만 강조할 프로젝트 ID들을 저장
+                if (reset && this.currentCategory === 'all' && this.featuredProjectIds.length === 0) {
+                    this.featuredProjectIds = projects.slice(0, 3).map(project => project.id);
+                    console.log('강조할 프로젝트 ID들:', this.featuredProjectIds);
+                }
                 this.renderProjects(projects);
             } else {
                 console.log('가져온 프로젝트 데이터가 없습니다.');
@@ -134,8 +140,8 @@ class ProjectManager {
         const projectItem = document.createElement('div');
         projectItem.className = 'project-item';
         
-        // 맨 윗줄 3개 프로젝트에 특별 효과 추가
-        if (index < 3) {
+        // 처음 ALL 카테고리에서 받아온 1, 2, 3번 프로젝트만 강조 효과 추가
+        if (this.featuredProjectIds.includes(project.id)) {
             projectItem.classList.add('featured');
         }
         
