@@ -158,12 +158,8 @@ function loadProfileImage() {
     .then(response => response.json())
     .then(data => {
       if (data.result && data.result.profile_image_path) {
-        // 이미지 경로를 그대로 사용 (테크스택과 동일한 방식)
-        let imagePath = data.result.profile_image_path;
-        if (imagePath && !imagePath.startsWith('./assets/') && !imagePath.startsWith('http')) {
-          // API 경로가 제공된 경우
-          imagePath = `${window.appConfig.getApiBaseUrl()}/${imagePath}`;
-        }
+        // 테크스택과 동일하게 API Base URL 사용
+        const imagePath = `${window.appConfig.getApiBaseUrl()}/${data.result.profile_image_path}`;
         
         profileImage.src = imagePath;
         profileImage.alt = data.result.name || '권하림';
