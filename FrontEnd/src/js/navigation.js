@@ -250,6 +250,14 @@ function initializeNavigation() {
     link.addEventListener("click", function () {
       const clickedPage = this.innerHTML.toLowerCase();
       
+      // 클릭한 링크에 회전 애니메이션 적용
+      this.style.animation = 'rotate-hor-center 0.5s cubic-bezier(0.455, 0.030, 0.515, 0.955) both';
+      
+      // 애니메이션 완료 후 스타일 제거
+      setTimeout(() => {
+        this.style.animation = '';
+      }, 500);
+      
       // 즉시 네비게이션 처리 (애니메이션 + 캐시 확인)
       handleNavigation(clickedPage);
       

@@ -9,7 +9,14 @@ function initializeSidebar() {
   // sidebar toggle functionality for mobile
   if (sidebarBtn) {
     sidebarBtn.addEventListener("click", function () { 
-      elementToggleFunc(sidebar); 
+      // 360도 회전 애니메이션 추가
+      sidebarBtn.style.animation = 'rotate360 0.6s ease-in-out';
+      
+      // 애니메이션 완료 후 사이드바 토글
+      setTimeout(() => {
+        elementToggleFunc(sidebar);
+        sidebarBtn.style.animation = '';
+      }, 300);
     });
   }
 } 

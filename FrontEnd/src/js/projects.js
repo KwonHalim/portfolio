@@ -436,6 +436,14 @@ class ProjectManager {
             const button = e.target.closest('[data-filter]');
             if (!button) return;
 
+            // 클릭한 버튼에 회전 애니메이션 적용
+            button.style.animation = 'rotate-center 0.6s ease-in-out both';
+            
+            // 애니메이션 완료 후 스타일 제거
+            setTimeout(() => {
+                button.style.animation = '';
+            }, 600);
+
             // 이미 활성화된 버튼이면 애니메이션만 다시 실행
             if (button.classList.contains('active')) {
                 this.replayProjectAnimations();

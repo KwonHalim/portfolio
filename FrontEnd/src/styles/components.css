@@ -67,17 +67,76 @@
   z-index: -1;
 }
 
+/* 사이드바가 active 상태일 때 버튼 스타일 (노란색) */
+.sidebar.active .info_more-btn {
+  background: var(--text-gradient-yellow);
+  color: var(--smoky-black);
+  transform: rotate(360deg);
+}
 
+.sidebar.active .info_more-btn::before {
+  background: var(--text-gradient-yellow);
+}
 
+/* 기본 상태 명확히 정의 (사이드바가 닫혔을 때) */
+.sidebar:not(.active) .info_more-btn {
+  background: var(--border-gradient-onyx);
+  color: var(--orange-yellow-crayola);
+  transform: rotate(0deg);
+}
+
+.sidebar:not(.active) .info_more-btn::before {
+  background: var(--bg-gradient-jet);
+}
+
+/* hover 효과 */
 .info_more-btn:hover,
 .info_more-btn:focus { 
   background: var(--text-gradient-yellow);
   color: var(--smoky-black);
+  transform: scale(1.05);
 }
 
 .info_more-btn:hover::before,
 .info_more-btn:focus::before { 
   background: var(--text-gradient-yellow);
+}
+
+/* active 상태에서 hover 시 추가 효과 */
+.sidebar.active .info_more-btn:hover,
+.sidebar.active .info_more-btn:focus {
+  transform: rotate(360deg) scale(1.05);
+  box-shadow: 0 0 20px rgba(255, 193, 7, 0.4);
+}
+
+/* 360도 회전 애니메이션 */
+@keyframes rotate360 {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* 네비게이션 링크 회전 애니메이션 */
+@keyframes rotate-hor-center {
+  0% {
+    transform: rotateX(0);
+  }
+  100% {
+    transform: rotateX(-360deg);
+  }
+}
+
+/* 카테고리 필터 버튼 회전 애니메이션 */
+@keyframes rotate-center {
+  0% {
+    transform: rotate(0);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 
@@ -230,10 +289,40 @@
 
 .navbar-link.active { 
   color: var(--orange-yellow-crayola); 
+  background: rgba(91, 122, 154, 0.15);
+  border-radius: 6px;
+  border: 1px solid rgba(91, 122, 154, 0.3);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(91, 122, 154, 0.2);
+  position: relative;
 }
 
 .navbar-link.active::after {
   display: none;
+}
+
+.navbar-link.active::before {
+  content: "";
+  position: absolute;
+  bottom: -2px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60%;
+  height: 2px;
+  background: var(--orange-yellow-crayola);
+  border-radius: 1px;
+  animation: activePulse 2s ease-in-out infinite;
+}
+
+@keyframes activePulse {
+  0%, 100% {
+    opacity: 0.7;
+    width: 60%;
+  }
+  50% {
+    opacity: 1;
+    width: 80%;
+  }
 }
 
 .navbar-link:active {
