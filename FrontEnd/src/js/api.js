@@ -182,11 +182,18 @@ function updateTechStack(techInfos) {
             const serviceItem = document.createElement('li');
             serviceItem.className = 'service-item';
 
+            // API 경로에서 이미지 로드
+            let imageSrc = icon_path;
+            if (icon_path && !icon_path.startsWith('./assets/') && !icon_path.startsWith('http')) {
+                // API 경로가 제공된 경우
+                imageSrc = `${window.appConfig.getApiBaseUrl()}/${icon_path}`;
+            }
+
             // [보안] innerHTML 사용 시 변수 값에 주의해야 하지만, 여기서는 제어된 값이므로 유지합니다.
             // 더 안전하게 하려면 모든 요소를 createElement로 생성하고 appendChild로 추가하는 것이 좋습니다.
             serviceItem.innerHTML = `
                 <div class="service-icon-box">
-                    <img src="${icon_path}" alt="${stack} icon" width="40">
+                    <img src="${imageSrc}" alt="${stack} icon" width="40" onerror="this.src='./assets/images/icon-design.svg';">
                 </div>
                 <div class="service-content-box">
                     <h4 class="h4 service-item-title">${stack}</h4>

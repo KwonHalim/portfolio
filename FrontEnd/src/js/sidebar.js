@@ -28,6 +28,9 @@ function initializeSidebar() {
   
   // 깃허브 잔디밭 3D 효과 초기화
   initializeGitHubGraph3D();
+  
+  // 프로필 이미지 동적 로드
+  loadProfileImage();
 }
 
 // 3D Avatar 효과 함수
@@ -143,4 +146,34 @@ function initializeGitHubGraph3D() {
   } else {
     console.log('GitHub Graph not found');
   }
+} 
+
+// 프로필 이미지 동적 로드 함수
+function loadProfileImage() {
+  const profileImage = document.querySelector('.avatar-card img');
+  if (!profileImage) return;
+
+  // API에서 프로필 데이터 가져오기
+  fetch(window.appConfig.getAboutApiUrl())
+    .then(response => response.json())
+    .then(data => {
+      if (data.result && data.result.profile_image_path) {
+        // API 경로에서 이미지 로드
+        const imagePath = `${window.appConfig.getApiBaseUrl()}/${data.result.profile_image_path}`;
+        profileImage.src = imagePath;
+        profileImage.alt = data.result.name || '권하림';
+        
+        // 이미지 로드 실패 시 기본 이미지로 fallback
+        profileImage.onerror = function() {
+          this.src = './assets/images/my-avatar.png';
+          this.alt = '권하림';
+        };
+      }
+    })
+    .catch(error => {
+      console.log('프로필 이미지 로드 실패:', error);
+      // 에러 시 기본 이미지 사용
+      profileImage.src = './assets/images/my-avatar.png';
+      profileImage.alt = '권하림';
+    });
 } 
