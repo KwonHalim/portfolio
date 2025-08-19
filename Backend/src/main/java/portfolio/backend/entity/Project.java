@@ -2,6 +2,7 @@ package portfolio.backend.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.ColumnDefault;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -55,4 +56,8 @@ public class Project extends BaseEntity{
             inverseJoinColumns = @JoinColumn(name = "technology_id") // Technology 테이블의 ID 참조
     )
     private Set<Technology> technologies = new HashSet<>();
+
+    @Column
+    @ColumnDefault("false") // Hibernate 어노테이션을 사용하여 기본값 지정
+    boolean emphasized;
 } 

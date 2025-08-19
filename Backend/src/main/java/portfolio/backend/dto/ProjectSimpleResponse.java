@@ -12,6 +12,7 @@ public class ProjectSimpleResponse {
     private String title;
     private String category;
     private String imagePath; // 대표 이미지
+    private boolean emphasized;
 
     public static ProjectSimpleResponse from(Project project) {
         return ProjectSimpleResponse.builder()
@@ -19,6 +20,7 @@ public class ProjectSimpleResponse {
                 .title(project.getTitle())
                 .category(project.getCategory())
                 .imagePath(project.getImagePath())
+                .emphasized(project.isEmphasized())
                 .build();
     }
 }
