@@ -27,6 +27,8 @@
   gap: 20px;
 }
 
+
+
 .service-item {
   position: relative;
   background: var(--border-gradient-onyx);
@@ -100,6 +102,47 @@
 .service-item:hover .service-item-text {
   transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1);
 }
+
+/*-----------------------------------*\
+  #TECH STACK
+\*-----------------------------------*/
+
+.tech-stack-container {
+  width: 100%;
+  overflow: hidden;
+  position: relative;
+  margin-top: 20px;
+  max-width: 100%;
+  border: 1px solid transparent;
+  box-sizing: border-box;
+}
+
+.tech-stack-track {
+  display: flex;
+  flex-direction: column;
+  flex-wrap: wrap;
+  gap: 15px;
+  width: max-content;
+  max-height: 400px;
+  overflow: hidden;
+  will-change: transform;
+  transition: transform 0.1s ease-out;
+}
+
+.tech-stack-track .service-item {
+  flex-shrink: 0;
+  min-width: 380px;
+  max-width: 380px;
+  margin: 0;
+}
+
+
+
+
+
+
+
+
 
 /*-----------------------------------*\
   #RESUME
@@ -1730,14 +1773,24 @@ textarea.form-input::-webkit-resizer { display: none; }
     animation-duration: 0.5s;
   }
   
-  /* 폼 요소 애니메이션 단축 */
+    /* 폼 요소 애니메이션 단축 */
   .form-input,
   .form-btn {
     animation-duration: 0.2s;
   }
-  
+
   .select-item button {
     animation-duration: 0.15s;
+  }
+
+  /* Tech Stack 모바일 반응형 */
+  .tech-stack-track {
+    gap: 12px;
+  }
+
+  .tech-stack-track .service-item {
+    min-width: 320px;
+    max-width: 320px;
   }
 }
 
@@ -1811,6 +1864,16 @@ textarea.form-input::-webkit-resizer { display: none; }
     right: 1.2rem;
     top: 1.2rem;
     font-size: 1.3rem;
+  }
+
+  /* Tech Stack 작은 화면 반응형 */
+  .tech-stack-track {
+    gap: 8px;
+  }
+
+  .tech-stack-track .service-item {
+    min-width: 280px;
+    max-width: 280px;
   }
 } 
 

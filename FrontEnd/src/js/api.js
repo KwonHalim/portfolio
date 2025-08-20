@@ -183,24 +183,29 @@ function updateTechStack(techInfos) {
     serviceList.innerHTML = '';
 
     if (techInfos && techInfos.length > 0) {
+        // 무한 스크롤을 위한 컨테이너 생성
+        const techStackContainer = document.createElement('div');
+        techStackContainer.className = 'tech-stack-container';
+        
+        const techStackTrack = document.createElement('div');
+        techStackTrack.className = 'tech-stack-track';
+        
+        // 원본 tech stack 요소들 생성 (기존 service-item 형태 유지)
         techInfos.forEach(techInfo => {
             const { stack = '', description = '', icon_path = './assets/images/icon-design.svg' } = techInfo;
-
+            
             const serviceItem = document.createElement('li');
             serviceItem.className = 'service-item';
-
+            
             // API 경로에서 이미지 로드
             let imageSrc = icon_path;
             if (icon_path && !icon_path.startsWith('./assets/') && !icon_path.startsWith('http')) {
-                // API 경로가 제공된 경우
                 imageSrc = `${window.appConfig.getApiBaseUrl()}/${icon_path}`;
             }
-
-            // [보안] innerHTML 사용 시 변수 값에 주의해야 하지만, 여기서는 제어된 값이므로 유지합니다.
-            // 더 안전하게 하려면 모든 요소를 createElement로 생성하고 appendChild로 추가하는 것이 좋습니다.
+            
             serviceItem.innerHTML = `
                 <div class="service-icon-box">
-                    <img src="${imageSrc}" alt="${stack} icon" width="40" onerror="this.src='./assets/images/icon-design.svg';">
+                    <img src="${imageSrc}" alt="${stack} icon" width="50" onerror="this.src='./assets/images/icon-design.svg';">
                 </div>
                 <div class="service-content-box">
                     <h4 class="h4 service-item-title">${stack}</h4>
@@ -209,9 +214,159 @@ function updateTechStack(techInfos) {
                     </p>
                 </div>
             `;
-            serviceList.appendChild(serviceItem);
+            
+            techStackTrack.appendChild(serviceItem);
         });
+        
+        // 원본 요소만 생성 (복제 없음)
+        
+        // 스크롤 힌트 추가
+        const scrollHint = document.createElement('div');
+        scrollHint.className = 'scroll-hint';
+        scrollHint.textContent = '스크롤하여 빠르게 확인이 가능합니다';
+        scrollHint.style.cssText = `
+            text-align: center;
+            color: var(--light-gray);
+            font-size: 0.9rem;
+            margin-top: 15px;
+            opacity: 0.7;
+        `;
+        
+        techStackContainer.appendChild(techStackTrack);
+        serviceList.appendChild(techStackContainer);
+        serviceList.appendChild(scrollHint);
+        
+        // service-list의 grid 레이아웃을 block으로 변경하여 전체 너비 사용
+        serviceList.style.display = 'block';
+        serviceList.style.width = '100%';
+        
+        // 무한 스크롤 기능 초기화
+        initializeTechStackScroll();
     }
+}
+
+/**
+ * Tech Stack 가로 스크롤 초기화
+ */
+function initializeTechStackScroll() {
+    const techStackContainer = document.querySelector('.tech-stack-container');
+    const techStackTrack = document.querySelector('.tech-stack-track');
+    
+    if (!techStackContainer || !techStackTrack) {
+        return;
+    }
+
+    let scrollPosition = 0;
+    let isScrolling = false;
+    let autoScrollInterval = null;
+    const scrollSpeed = 1;
+    const autoScrollSpeed = 3;
+
+    // 자동 스크롤 함수 (컨베이어 벨트 방식)
+    function startAutoScroll() {
+        if (autoScrollInterval) return;
+        
+        autoScrollInterval = setInterval(() => {
+            if (!isScrolling) {
+                scrollPosition -= autoScrollSpeed;
+                
+                // 마지막 요소가 완전히 사라진 후 원위치로
+                const maxScroll = -techStackTrack.scrollWidth;
+                if (scrollPosition <= maxScroll) {
+                    scrollPosition = 0;
+                }
+                
+                updateScrollPosition();
+            }
+        }, 30);
+    }
+
+    // 스크롤 위치 업데이트 (강제조정 없음)
+    function updateScrollPosition() {
+        techStackTrack.style.transform = `translateX(${scrollPosition}px)`;
+    }
+
+    // 마우스 휠 이벤트
+    techStackContainer.addEventListener('wheel', function(e) {
+        e.preventDefault();
+        isScrolling = true;
+        
+        scrollPosition += e.deltaY * scrollSpeed;
+        
+        // 스크롤 범위 제한 (자연스러운 끝)
+        const maxScroll = -(techStackTrack.scrollWidth - techStackContainer.clientWidth);
+        if (scrollPosition < maxScroll) {
+            scrollPosition = maxScroll;
+        } else if (scrollPosition > 0) {
+            scrollPosition = 0;
+        }
+        
+        updateScrollPosition();
+        
+        // 스크롤 후 일정 시간 후 자동 스크롤 재시작
+        clearTimeout(window.scrollTimeout);
+        window.scrollTimeout = setTimeout(() => {
+            isScrolling = false;
+        }, 1000);
+    }, { passive: false });
+
+    // 마우스 호버 시 자동 스크롤 일시정지
+    techStackContainer.addEventListener('mouseenter', function() {
+        if (autoScrollInterval) {
+            clearInterval(autoScrollInterval);
+            autoScrollInterval = null;
+        }
+    });
+
+    techStackContainer.addEventListener('mouseleave', function() {
+        if (!autoScrollInterval) {
+            startAutoScroll();
+        }
+    });
+
+    // 터치 이벤트
+    let touchStartX = 0;
+    let touchStartY = 0;
+
+    techStackContainer.addEventListener('touchstart', function(e) {
+        touchStartX = e.touches[0].clientX;
+        touchStartY = e.touches[0].clientY;
+        isScrolling = true;
+    });
+
+    techStackContainer.addEventListener('touchmove', function(e) {
+        e.preventDefault();
+        
+        const touchX = e.touches[0].clientX;
+        const touchY = e.touches[0].clientY;
+        
+        const deltaX = touchStartX - touchX;
+        const deltaY = touchStartY - touchY;
+        
+        if (Math.abs(deltaX) > Math.abs(deltaY)) {
+            scrollPosition += deltaX * 0.5;
+            
+            // 스크롤 범위 제한 (자연스러운 끝)
+            const maxScroll = -(techStackTrack.scrollWidth - techStackContainer.clientWidth);
+            if (scrollPosition < maxScroll) {
+                scrollPosition = maxScroll;
+            } else if (scrollPosition > 0) {
+                scrollPosition = 0;
+            }
+            
+            updateScrollPosition();
+            touchStartX = touchX;
+        }
+    }, { passive: false });
+
+    techStackContainer.addEventListener('touchend', function() {
+        setTimeout(() => {
+            isScrolling = false;
+        }, 1000);
+    });
+
+    // 자동 스크롤 시작
+    startAutoScroll();
 }
 
 /**
