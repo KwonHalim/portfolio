@@ -467,13 +467,7 @@
 
   .info-content .title { margin: auto; }
 
-  .info_more-btn { 
-    display: block;
-    top: -10px;
-    right: -10px;
-    padding: 6px 10px;
-    font-size: 10px;
-  }
+  .info_more-btn { display: none; }
 
   .sidebar-info_more {
     opacity: 1;
