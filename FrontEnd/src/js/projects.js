@@ -379,13 +379,25 @@ class ProjectManager {
         if (isVideo) {
             mediaHtml = `<video src="${fullPath}" controls preload="metadata"></video>`;
         } else {
-            mediaHtml = `<img src="${fullPath}" alt="${media.description || 'Project Media'}" loading="lazy" onerror="this.onerror=null; this.src='./assets/images/project-1.jpg';">`;
+            // 이미지에 클릭 이벤트를 위한 클래스와 스타일 추가
+            mediaHtml = `<img src="${fullPath}" alt="${media.description || 'Project Media'}" loading="lazy" class="project-media-image" style="cursor: pointer;" onerror="this.onerror=null; this.src='./assets/images/project-1.jpg';">`;
         }
 
         mediaItem.innerHTML = `
             <div class="media-image">${mediaHtml}</div>
             <div class="media-description"><p>${media.description || ''}</p></div>
         `;
+
+        // 이미지 클릭 시 모달 열기 이벤트 추가
+        if (!isVideo) {
+            const imgElement = mediaItem.querySelector('.project-media-image');
+            if (imgElement) {
+                imgElement.addEventListener('click', () => {
+                    this.openProjectImageModal(fullPath, media.description || '');
+                });
+            }
+        }
+
         return mediaItem;
     }
 
@@ -426,6 +438,54 @@ class ProjectManager {
                 this.closeModal();
             }
         });
+
+        // 프로젝트 이미지 모달 이벤트 핸들러 설정
+        this.setupProjectImageModal();
+    }
+
+    // 프로젝트 이미지 모달 이벤트 핸들러 설정
+    setupProjectImageModal() {
+        const projectImageModal = document.getElementById('projectImageModal');
+
+        if (projectImageModal) {
+            // 모달 배경 클릭 시 닫기
+            projectImageModal.addEventListener('click', (e) => {
+                if (e.target === projectImageModal) {
+                    this.closeProjectImageModal();
+                }
+            });
+
+            // 프로젝트 이미지 모달 전용 ESC 키 이벤트
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && projectImageModal.style.display === 'block') {
+                    this.closeProjectImageModal();
+                    e.stopPropagation();
+                }
+            });
+        }
+    }
+
+    // 프로젝트 이미지 모달 열기
+    openProjectImageModal(imageSrc, description) {
+        const modal = document.getElementById('projectImageModal');
+        const modalImage = document.getElementById('modalProjectImage');
+        const modalDescription = document.getElementById('modalProjectImageDescription');
+
+        if (modal && modalImage && modalDescription) {
+            modalImage.src = imageSrc;
+            modalDescription.textContent = description;
+            modal.style.display = 'block';
+            document.body.style.overflow = 'hidden';
+        }
+    }
+
+    // 프로젝트 이미지 모달 닫기
+    closeProjectImageModal() {
+        const modal = document.getElementById('projectImageModal');
+        if (modal) {
+            modal.style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
     }
 
     setupFilters() {

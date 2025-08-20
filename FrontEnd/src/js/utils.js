@@ -21,10 +21,53 @@ async function loadComponent(elementId, componentPath) {
       initializeContact();
     } else if (elementId === 'about-container') {
       initializeChatbot();
+      // about 페이지 로드 후 깃허브 모달 초기화
+      setTimeout(() => {
+        if (typeof initializeGitHubModal === 'function') {
+          initializeGitHubModal();
+        }
+      }, 100);
+    } else if (elementId === 'projects-container') {
+      // projects 페이지 로드 후 프로젝트 이미지 모달 초기화
+      setTimeout(() => {
+        if (window.projectManager && typeof window.projectManager.setupProjectImageModal === 'function') {
+          window.projectManager.setupProjectImageModal();
+        }
+      }, 100);
     }
   } catch (error) {
     // 컴포넌트 로드 실패
   }
+}
+
+// 전역 모달 상태 추적
+window.activeModal = null;
+
+// 전역 ESC 키 이벤트 리스너
+function setupGlobalEscapeListener() {
+    if (window.globalEscapeListenerAdded) return;
+  
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && window.activeModal) {
+      if (window.activeModal === 'profileModal') {
+        const modal = document.getElementById('profileModal');
+        if (modal) {
+          modal.style.display = 'none';
+          document.body.style.overflow = 'auto';
+        }
+      } else if (window.activeModal === 'githubModal') {
+        const modal = document.getElementById('githubModal');
+        if (modal) {
+          modal.style.display = 'none';
+          document.body.style.overflow = 'auto';
+        }
+      }
+      window.activeModal = null;
+      e.stopPropagation();
+    }
+  });
+  
+  window.globalEscapeListenerAdded = true;
 }
 
 // 페이지 초기화 함수
@@ -44,6 +87,9 @@ async function initializePage() {
   
   // 모든 컴포넌트 로드 후 이벤트 리스너 초기화
   initializeAllEventListeners();
+  
+  // 전역 ESC 키 이벤트 리스너 설정
+  setupGlobalEscapeListener();
 }
 
 // 모든 이벤트 리스너 초기화

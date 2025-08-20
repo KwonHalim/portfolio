@@ -98,21 +98,7 @@
   pointer-events: none;
 }
 
-.profile-modal-close {
-  position: absolute;
-  top: 20px;
-  right: 30px;
-  color: #f1f1f1;
-  font-size: 40px;
-  font-weight: bold;
-  cursor: pointer;
-  z-index: 1001;
-  transition: color 0.3s ease;
-}
 
-.profile-modal-close:hover {
-  color: #bbb;
-}
 
 #modalProfileImage {
   max-width: 100%;
@@ -121,6 +107,103 @@
   border-radius: 10px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
   pointer-events: auto;
+}
+
+/* 깃허브 모달 스타일 */
+.github-modal {
+  display: none;
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(5px);
+}
+
+.github-modal-content {
+  position: relative;
+  margin: auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  max-width: 90vw;
+  max-height: 90vh;
+  pointer-events: none;
+  text-align: center;
+}
+
+
+
+.github-modal-content h3 {
+  color: var(--white-2);
+  font-size: var(--fs-2);
+  font-weight: var(--fw-500);
+  margin-bottom: 20px;
+  pointer-events: auto;
+}
+
+#modalGitHubImage {
+  max-width: 100%;
+  max-height: 70vh;
+  object-fit: contain;
+  border-radius: 10px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  pointer-events: auto;
+}
+
+/* 프로젝트 이미지 모달 스타일 */
+.project-image-modal {
+  display: none;
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(5px);
+}
+
+.project-image-modal-content {
+  position: relative;
+  margin: auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  max-width: 90vw;
+  max-height: 90vh;
+  pointer-events: none;
+  text-align: center;
+}
+
+
+
+#modalProjectImage {
+  max-width: 100%;
+  max-height: 70vh;
+  object-fit: contain;
+  border-radius: 10px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  pointer-events: auto;
+  margin-bottom: 15px;
+}
+
+.project-image-description {
+  color: var(--white-2);
+  font-size: var(--fs-6);
+  font-weight: var(--fw-400);
+  max-width: 80%;
+  margin: 0 auto;
+  pointer-events: auto;
+  line-height: 1.5;
 }
 
 .info-content .name {

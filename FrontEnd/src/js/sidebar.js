@@ -29,6 +29,9 @@ function initializeSidebar() {
   // 깃허브 잔디밭 3D 효과 초기화
   initializeGitHubGraph3D();
   
+  // 깃허브 잔디밭 모달 초기화
+  initializeGitHubModal();
+  
   // 프로필 이미지 동적 로드
   loadProfileImage();
 }
@@ -70,21 +73,15 @@ function initializeProfileModal() {
   const profileImage = document.querySelector('.profile-image-clickable');
   const modal = document.getElementById('profileModal');
   const modalImage = document.getElementById('modalProfileImage');
-  const closeBtn = document.querySelector('.profile-modal-close');
 
-  if (profileImage && modal && modalImage && closeBtn) {
+  if (profileImage && modal && modalImage) {
     // 이미지 클릭 시 모달 열기
     profileImage.addEventListener('click', function(e) {
       e.stopPropagation(); // 3D 효과 이벤트와 충돌 방지
       modalImage.src = profileImage.src;
       modal.style.display = 'block';
       document.body.style.overflow = 'hidden'; // 스크롤 방지
-    });
-
-    // X 버튼 클릭 시 모달 닫기
-    closeBtn.addEventListener('click', function() {
-      modal.style.display = 'none';
-      document.body.style.overflow = 'auto'; // 스크롤 복원
+      window.activeModal = 'profileModal';
     });
 
     // 모달 배경 클릭 시 닫기
@@ -92,14 +89,10 @@ function initializeProfileModal() {
       if (e.target === modal) {
         modal.style.display = 'none';
         document.body.style.overflow = 'auto';
-      }
-    });
-
-    // ESC 키로 모달 닫기
-    document.addEventListener('keydown', function(e) {
-      if (e.key === 'Escape' && modal.style.display === 'block') {
-        modal.style.display = 'none';
-        document.body.style.overflow = 'auto';
+        // 전역 모달 상태 업데이트
+        if (window.activeModal === 'profileModal') {
+          window.activeModal = null;
+        }
       }
     });
 
@@ -145,6 +138,40 @@ function initializeGitHubGraph3D() {
     console.log('GitHub Graph 3D effect initialized');
   } else {
     console.log('GitHub Graph not found');
+  }
+}
+
+// 깃허브 잔디밭 모달 기능
+function initializeGitHubModal() {
+  const githubGraph = document.querySelector('.github-graph');
+  const modal = document.getElementById('githubModal');
+  const modalImage = document.getElementById('modalGitHubImage');
+
+  if (githubGraph && modal && modalImage) {
+    // 깃허브 잔디밭 클릭 시 모달 열기
+    githubGraph.addEventListener('click', function(e) {
+      e.stopPropagation(); // 3D 효과 이벤트와 충돌 방지
+      modalImage.src = githubGraph.querySelector('img').src;
+      modal.style.display = 'block';
+      document.body.style.overflow = 'hidden'; // 스크롤 방지
+      window.activeModal = 'githubModal';
+    });
+
+    // 모달 배경 클릭 시 닫기
+    modal.addEventListener('click', function(e) {
+      if (e.target === modal) {
+        modal.style.display = 'none';
+        document.body.style.overflow = 'auto';
+        // 전역 모달 상태 업데이트
+        if (window.activeModal === 'githubModal') {
+          window.activeModal = null;
+        }
+      }
+    });
+
+    console.log('GitHub modal initialized');
+  } else {
+    console.log('GitHub modal elements not found');
   }
 } 
 

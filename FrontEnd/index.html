@@ -188,8 +188,8 @@
         <!-- GitHub Contribution Graph 섹션 추가 -->
         <section class="github-contributions">
           <h3 class="h3 service-title">GitHub Contributions</h3>
-          <div class="github-graph">
-            <img src="https://ghchart.rshah.org/bf9b30/KwonHalim" alt="KwonHalim's Github chart"/>
+          <div class="github-graph" style="cursor: pointer;">
+            <img src="https://ghchart.rshah.org/bf9b30/KwonHalim" alt="KwonHalim's Github chart" class="github-graph-clickable"/>
           </div>
         </section>
         <br>
@@ -376,8 +376,23 @@
   <!-- 프로필 이미지 모달 -->
   <div id="profileModal" class="profile-modal">
     <div class="profile-modal-content">
-      <span class="profile-modal-close">&times;</span>
       <img id="modalProfileImage" src="" alt="프로필 이미지">
+    </div>
+  </div>
+
+  <!-- 깃허브 잔디밭 모달 -->
+  <div id="githubModal" class="github-modal">
+    <div class="github-modal-content">
+      <h3>GitHub Contributions</h3>
+      <img id="modalGitHubImage" src="" alt="GitHub Contributions">
+    </div>
+  </div>
+
+  <!-- 프로젝트 이미지 모달 -->
+  <div id="projectImageModal" class="project-image-modal">
+    <div class="project-image-modal-content">
+      <img id="modalProjectImage" src="" alt="프로젝트 이미지">
+      <p id="modalProjectImageDescription" class="project-image-description"></p>
     </div>
   </div>
 
@@ -407,6 +422,27 @@
       initializeAllEventListeners();
       initializeTimeline(); // 타임라인 초기화 추가
       initializeChatbot(); // 챗봇 초기화 추가
+      
+      // 전역 ESC 키 이벤트 리스너 직접 등록 (백업)
+      document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && window.activeModal) {
+          if (window.activeModal === 'profileModal') {
+            const modal = document.getElementById('profileModal');
+            if (modal) {
+              modal.style.display = 'none';
+              document.body.style.overflow = 'auto';
+              window.activeModal = null;
+            }
+          } else if (window.activeModal === 'githubModal') {
+            const modal = document.getElementById('githubModal');
+            if (modal) {
+              modal.style.display = 'none';
+              document.body.style.overflow = 'auto';
+              window.activeModal = null;
+            }
+          }
+        }
+      });
     });
   </script>
 
