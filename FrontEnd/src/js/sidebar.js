@@ -162,10 +162,9 @@ function loadProfileImage() {
         profileImage.src = data.result.profile_path;
         profileImage.alt = data.result.name || '권하림';
         
-        // 이미지 로드 실패 시 기본 이미지로 fallback
+        // 이미지 로드 실패 시 이미지 요소 제거
         profileImage.onerror = function() {
-          this.src = './assets/images/my-avatar.png';
-          this.alt = '권하림';
+          this.remove();
         };
       }
     })

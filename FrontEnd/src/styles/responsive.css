@@ -107,9 +107,9 @@
   .info-content .title { padding: 5px 18px; }
 
   .info_more-btn {
-    top: -30px;
-    right: -30px;
-    padding: 10px 15px;
+    top: -15px;
+    right: -15px;
+    padding: 8px 12px;
   }
 
   .info_more-btn span {
@@ -467,7 +467,13 @@
 
   .info-content .title { margin: auto; }
 
-  .info_more-btn { display: none; }
+  .info_more-btn { 
+    display: block;
+    top: -10px;
+    right: -10px;
+    padding: 6px 10px;
+    font-size: 10px;
+  }
 
   .sidebar-info_more {
     opacity: 1;

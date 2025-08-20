@@ -118,6 +118,11 @@ async function loadProfileData() {
                 }
                 profileImage.src = imageSrc;
                 profileImage.alt = profileData.name;
+                
+                // 이미지 로드 실패 시 이미지 요소 제거
+                profileImage.onerror = function() {
+                    this.remove();
+                };
             }
 
             // About 섹션 제목 업데이트
