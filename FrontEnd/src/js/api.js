@@ -111,17 +111,14 @@ async function loadProfileData() {
             // 프로필 이미지 업데이트
             const profileImage = document.getElementById('profileImage');
             if (profileImage && profileData.profile_path) {
-                // 테크스택과 동일하게 API Base URL 조합
-                let imageSrc = profileData.profile_path;
-                if (profileData.profile_path && !profileData.profile_path.startsWith('./assets/') && !profileData.profile_path.startsWith('http')) {
-                    imageSrc = `${window.appConfig.getApiBaseUrl()}/${profileData.profile_path}`;
-                }
+                // 백엔드에서 제공하는 경로를 getApiBaseUrl과 조합
+                const imageSrc = `${window.appConfig.getApiBaseUrl()}/${profileData.profile_path}`;
                 profileImage.src = imageSrc;
                 profileImage.alt = profileData.name;
                 
-                // 이미지 로드 실패 시 이미지 요소 제거
+                // 이미지 로드 실패 시 아무것도 하지 않음 (깨진 상태 유지)
                 profileImage.onerror = function() {
-                    this.remove();
+                    // 이미지 로드 실패 시 아무것도 하지 않음
                 };
             }
 

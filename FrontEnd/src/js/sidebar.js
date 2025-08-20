@@ -158,13 +158,14 @@ function loadProfileImage() {
     .then(response => response.json())
     .then(data => {
       if (data.result && data.result.profile_path) {
-        // api.js와 동일하게 profile_path 사용
-        profileImage.src = data.result.profile_path;
+        // 백엔드에서 제공하는 경로를 getApiBaseUrl과 조합
+        const imageSrc = `${window.appConfig.getApiBaseUrl()}/${data.result.profile_path}`;
+        profileImage.src = imageSrc;
         profileImage.alt = data.result.name || '권하림';
         
-        // 이미지 로드 실패 시 이미지 요소 제거
+        // 이미지 로드 실패 시 아무것도 하지 않음 (깨진 상태 유지)
         profileImage.onerror = function() {
-          this.remove();
+          // 이미지 로드 실패 시 아무것도 하지 않음
         };
       }
     })
