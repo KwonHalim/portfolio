@@ -31,6 +31,7 @@ public class ProfileResponse {
         private final String stack;
         private final String description;
         private final String icon_path;
+        private final String type;
 
         // ProfileTechnology 엔티티로부터 TechInfo DTO를 생성
         public static TechInfo from(ProfileTechnology profileTechnology) {
@@ -38,6 +39,7 @@ public class ProfileResponse {
                     .stack(profileTechnology.getTechnology().getName())
                     .description(profileTechnology.getDescription())
                     .icon_path(profileTechnology.getTechnology().getIconPath())
+                    .type(profileTechnology.getTechnology().getDescription())
                     .build();
         }
     }

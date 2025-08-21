@@ -28,7 +28,6 @@ public class ProfileService {
         Profile profile = profileRepository.findByName("권하림");
         List<ProfileTechnology> techStacks = profileTechnologyRepository.findByProfileId(profile.getId());
 
-        // 2. DTO의 정적 메서드를 호출하여 변환 및 반환 (서비스 로직이 깔끔해짐)
         return ProfileResponse.of(profile, techStacks);
     }
 }
