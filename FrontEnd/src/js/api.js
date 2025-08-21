@@ -223,7 +223,7 @@ function updateTechStack(techInfos) {
         // 스크롤 힌트 추가
         const scrollHint = document.createElement('div');
         scrollHint.className = 'scroll-hint';
-        scrollHint.textContent = '스크롤하여 빠르게 확인이 가능합니다';
+        scrollHint.textContent = '마우스 휠 또는 드래그하여 스크롤 가능합니다';
         scrollHint.style.cssText = `
             text-align: center;
             color: var(--light-gray);
@@ -324,15 +324,65 @@ function initializeTechStackScroll() {
         }
     });
 
+    // 마우스 드래그 이벤트
+    let isDragging = false;
+    let dragStartX = 0;
+    let dragStartScrollPosition = 0;
+
+    techStackContainer.addEventListener('mousedown', function(e) {
+        isDragging = true;
+        isScrolling = true;
+        dragStartX = e.clientX;
+        dragStartScrollPosition = scrollPosition;
+        
+        // 자동 스크롤 일시정지
+        if (autoScrollInterval) {
+            clearInterval(autoScrollInterval);
+            autoScrollInterval = null;
+        }
+        
+        // 커서 스타일 변경
+        techStackContainer.style.cursor = 'grabbing';
+        e.preventDefault();
+    });
+
+    techStackContainer.addEventListener('mousemove', function(e) {
+        if (!isDragging) return;
+        
+        const deltaX = e.clientX - dragStartX;
+        scrollPosition = dragStartScrollPosition + deltaX;
+        
+        // 스크롤 범위 제한
+        const maxScroll = -(techStackTrack.scrollWidth - techStackContainer.clientWidth);
+        if (scrollPosition < maxScroll) {
+            scrollPosition = maxScroll;
+        } else if (scrollPosition > 0) {
+            scrollPosition = 0;
+        }
+        
+        updateScrollPosition();
+    });
+
+    techStackContainer.addEventListener('mouseup', function() {
+        isDragging = false;
+        techStackContainer.style.cursor = 'grab';
+        
+        // 일정 시간 후 자동 스크롤 재시작
+        setTimeout(() => {
+            isScrolling = false;
+        }, 500);
+    });
+
+    techStackContainer.addEventListener('mouseleave', function() {
+        if (isDragging) {
+            isDragging = false;
+            techStackContainer.style.cursor = 'grab';
+        }
+    });
+
     // 터치 이벤트
     let touchStartX = 0;
     let touchStartY = 0;
-
-    techStackContainer.addEventListener('touchstart', function(e) {
-        touchStartX = e.touches[0].clientX;
-        touchStartY = e.touches[0].clientY;
-        isScrolling = true;
-    });
 
     techStackContainer.addEventListener('touchmove', function(e) {
         e.preventDefault();

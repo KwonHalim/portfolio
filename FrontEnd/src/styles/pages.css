@@ -115,6 +115,12 @@
   max-width: 100%;
   border: 1px solid transparent;
   box-sizing: border-box;
+  cursor: grab;
+  user-select: none;
+}
+
+.tech-stack-container:active {
+  cursor: grabbing;
 }
 
 .tech-stack-track {
