@@ -199,7 +199,8 @@ function updateTechStack(techInfos) {
             // 그룹 제목 추가 (전체 너비 차지)
             const groupTitle = document.createElement('h4');
             groupTitle.className = 'tech-group-title';
-            groupTitle.textContent = type;
+            groupTitle.setAttribute('data-replace', type);
+            groupTitle.innerHTML = `<span>${type}</span>`;
             serviceList.appendChild(groupTitle);
 
             // 그룹 내 기술 스택 아이템들 렌더링
