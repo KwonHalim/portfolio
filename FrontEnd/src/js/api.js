@@ -183,33 +183,54 @@ function updateTechStack(techInfos) {
     serviceList.innerHTML = '';
 
     if (techInfos && techInfos.length > 0) {
+        // type을 기준으로 그룹화
+        const groupedTech = {};
         techInfos.forEach(techInfo => {
-            const { stack = '', description = '', icon_path = './assets/images/icon-design.svg' } = techInfo;
-
-            const serviceItem = document.createElement('li');
-            serviceItem.className = 'service-item';
-
-            // API 경로에서 이미지 로드
-            let imageSrc = icon_path;
-            if (icon_path && !icon_path.startsWith('./assets/') && !icon_path.startsWith('http')) {
-                // API 경로가 제공된 경우
-                imageSrc = `${window.appConfig.getApiBaseUrl()}/${icon_path}`;
+            const { type = 'Other', stack = '', description = '', icon_path = './assets/images/icon-design.svg' } = techInfo;
+            
+            if (!groupedTech[type]) {
+                groupedTech[type] = [];
             }
+            groupedTech[type].push({ stack, description, icon_path });
+        });
 
-            // [보안] innerHTML 사용 시 변수 값에 주의해야 하지만, 여기서는 제어된 값이므로 유지합니다.
-            // 더 안전하게 하려면 모든 요소를 createElement로 생성하고 appendChild로 추가하는 것이 좋습니다.
-            serviceItem.innerHTML = `
-                <div class="service-icon-box">
-                    <img src="${imageSrc}" alt="${stack} icon" width="40" onerror="this.src='./assets/images/icon-design.svg';">
-                </div>
-                <div class="service-content-box">
-                    <h4 class="h4 service-item-title">${stack}</h4>
-                    <p class="service-item-text">
-                        ${description}
-                    </p>
-                </div>
-            `;
-            serviceList.appendChild(serviceItem);
+        // 각 그룹별로 렌더링
+        Object.entries(groupedTech).forEach(([type, techItems]) => {
+            // 그룹 제목 추가 (전체 너비 차지)
+            const groupTitle = document.createElement('h4');
+            groupTitle.className = 'tech-group-title';
+            groupTitle.textContent = type;
+            serviceList.appendChild(groupTitle);
+
+            // 그룹 내 기술 스택 아이템들 렌더링
+            techItems.forEach(techInfo => {
+                const { stack, description, icon_path } = techInfo;
+
+                const serviceItem = document.createElement('li');
+                serviceItem.className = 'service-item';
+
+                // API 경로에서 이미지 로드
+                let imageSrc = icon_path;
+                if (icon_path && !icon_path.startsWith('./assets/') && !icon_path.startsWith('http')) {
+                    // API 경로가 제공된 경우
+                    imageSrc = `${window.appConfig.getApiBaseUrl()}/${icon_path}`;
+                }
+
+                // [보안] innerHTML 사용 시 변수 값에 주의해야 하지만, 여기서는 제어된 값이므로 유지합니다.
+                // 더 안전하게 하려면 모든 요소를 createElement로 생성하고 appendChild로 추가하는 것이 좋습니다.
+                serviceItem.innerHTML = `
+                    <div class="service-icon-box">
+                        <img src="${imageSrc}" alt="${stack} icon" width="40" onerror="this.src='./assets/images/icon-design.svg';">
+                    </div>
+                    <div class="service-content-box">
+                        <h4 class="h4 service-item-title">${stack}</h4>
+                        <p class="service-item-text">
+                            ${description}
+                        </p>
+                    </div>
+                `;
+                serviceList.appendChild(serviceItem);
+            });
         });
     }
 }

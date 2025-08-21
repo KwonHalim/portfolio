@@ -80,6 +80,17 @@
   transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1);
 }
 
+/* Tech Stack 그룹 제목 스타일 */
+.tech-group-title {
+  grid-column: 1 / -1;
+  margin: 20px 0 15px 0;
+  font-size: 1.2em;
+  color: var(--white-2);
+  border-bottom: 2px solid var(--orange-yellow-crayola);
+  padding-bottom: 5px;
+  font-weight: var(--fw-500);
+}
+
 /* 3D 회전 효과 */
 .service-item:hover {
   box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5), 
