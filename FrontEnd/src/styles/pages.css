@@ -80,29 +80,75 @@
   transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1);
 }
 
-/* Tech Stack 그룹 제목 스타일 */
+/* 공통 제목 hover 효과 스타일 */
+.tech-group-title {
+  overflow: hidden;
+  position: relative;
+  display: inline-block;
+  border-bottom: 2px solid var(--orange-yellow-crayola);
+  padding-bottom: 5px;
+  transition: border-bottom-color 0.3s ease;
+}
+
+.article-title {
+  overflow: hidden;
+  position: relative;
+  display: inline-block;
+  padding-bottom: 7px;
+}
+
+/* About me 섹션 전용 스타일 */
+.about .article-title {
+  position: relative;
+  padding-bottom: 15px;
+}
+
+.about .article-title::before {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 30px;
+  height: 5px;
+  background: var(--text-gradient-yellow);
+  border-radius: 3px;
+  transition: all 0.3s ease;
+}
+
+.about .article-title::after {
+  content: "About Me";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  color: #54b3d6;
+  opacity: 0;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+/* GitHub Contributions 제목은 hover 효과 제거 */
+.github-contributions .service-title {
+  padding-bottom: 5px;
+}
+
+/* Tech Stack 그룹 제목 전용 스타일 */
 .tech-group-title {
   grid-column: 1 / -1;
   margin: 20px 0 15px 0;
   font-size: 1.2em;
   color: var(--white-2);
-  border-bottom: 2px solid var(--orange-yellow-crayola);
-  padding-bottom: 5px;
   font-weight: var(--fw-500);
   position: relative;
   z-index: 0;
-  transition: border-bottom-color 0.3s ease;
 }
 
-/* Tech Stack 그룹 제목 hover 효과 */
-.tech-group-title {
-  overflow: hidden;
-  position: relative;
-  display: inline-block;
-}
-
+/* 공통 hover 효과 */
 .tech-group-title::before,
-.tech-group-title::after {
+.tech-group-title::after,
+.article-title::before,
+.article-title::after {
   content: '';
   position: absolute;
   width: 100%;
@@ -120,7 +166,8 @@
   z-index: 10;
 }
 
-.tech-group-title::after {
+.tech-group-title::after,
+.article-title::after {
   content: attr(data-replace);
   height: 100%;
   top: 0;
@@ -128,6 +175,8 @@
   transform: translate3d(200%, 0, 0);
   transition: transform .3s cubic-bezier(0.76, 0, 0.24, 1);
   color: #54b3d6;
+  opacity: 0;
+  white-space: nowrap;
 }
 
 .tech-group-title:hover::before {
@@ -135,21 +184,41 @@
   transform: scaleX(1);
 }
 
+/* About me 제목 hover 효과 */
+.about .article-title:hover::before {
+  background: #54b3d6;
+  transform: scaleX(1.2);
+}
+
+.about .article-title:hover::after {
+  opacity: 1;
+}
+
+.about .article-title:hover span {
+  opacity: 0;
+}
+
 .tech-group-title:hover {
   border-bottom-color: #54b3d6;
 }
 
-.tech-group-title:hover::after {
+.tech-group-title:hover::after,
+.article-title:hover::after {
   transform: translate3d(0, 0, 0);
+  opacity: 1;
 }
 
-.tech-group-title span {
+.tech-group-title span,
+.article-title span {
   display: inline-block;
   transition: transform .3s cubic-bezier(0.76, 0, 0.24, 1);
+  opacity: 1;
 }
 
-.tech-group-title:hover span {
+.tech-group-title:hover span,
+.article-title:hover span {
   transform: translate3d(-200%, 0, 0);
+  opacity: 0;
 }
 
 /* 3D 회전 효과 */

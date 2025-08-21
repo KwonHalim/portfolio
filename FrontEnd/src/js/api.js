@@ -125,7 +125,8 @@ async function loadProfileData() {
             // About 섹션 제목 업데이트
             const articleTitle = document.querySelector('.about .article-title');
             if (articleTitle) {
-                articleTitle.textContent = profileData.title;
+                articleTitle.setAttribute('data-replace', 'About Me');
+                articleTitle.innerHTML = `<span>${profileData.title}</span>`;
             }
 
             // About 텍스트 업데이트 (introduction 사용)
@@ -199,7 +200,18 @@ function updateTechStack(techInfos) {
             // 그룹 제목 추가 (전체 너비 차지)
             const groupTitle = document.createElement('h4');
             groupTitle.className = 'tech-group-title';
-            groupTitle.setAttribute('data-replace', type);
+            
+            // hover 시 표시될 텍스트 매핑
+            const hoverTextMap = {
+                'Programming Language': 'Tech Stack',
+                'Framework': 'Tech Stack',
+                'Database': 'Tech Stack',
+                'Skill': 'Tech Stack',
+                'Other': 'Tech Stack'
+            };
+            
+            const hoverText = hoverTextMap[type] || type;
+            groupTitle.setAttribute('data-replace', hoverText);
             groupTitle.innerHTML = `<span>${type}</span>`;
             serviceList.appendChild(groupTitle);
 
