@@ -2,7 +2,7 @@ from typing import Optional, List, Dict, Any
 
 from langchain_core.runnables import Runnable, RunnableConfig
 
-from AI.database.vector.repository import VectorRepository
+from database.vector.repository import VectorRepository
 
 
 class DocumentRetriever(Runnable):

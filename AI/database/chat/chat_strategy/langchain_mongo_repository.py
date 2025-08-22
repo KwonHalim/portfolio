@@ -4,7 +4,7 @@ from typing import Optional, Dict, Any, List
 from pymongo import MongoClient, ASCENDING
 from bson import ObjectId
 
-from AI.database.chat.chat_strategy.chat_store_strategy import ChatStrategy
+from database.chat.chat_strategy.chat_store_strategy import ChatStrategy
 
 
 class MongoChatStrategy(ChatStrategy):

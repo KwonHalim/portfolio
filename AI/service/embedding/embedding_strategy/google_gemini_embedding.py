@@ -3,8 +3,8 @@ from typing import List
 
 from langchain_google_genai import GoogleGenerativeAIEmbeddings
 
-from AI.config import settings
-from AI.service.embedding.embedding_strategy.embedding_strategy import EmbeddingStrategy
+from config import settings
+from service.embedding.embedding_strategy.embedding_strategy import EmbeddingStrategy
 
 
 class GoogleGeminiEmbedding(EmbeddingStrategy):

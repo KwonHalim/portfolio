@@ -4,8 +4,8 @@ from xml.dom.minidom import Document
 
 from langchain_community.vectorstores import PGVector
 
-from AI.database.vector.vector_strategy.vector_store_strategy import VectorStoreStrategy
-from AI.service.embedding.embedding_strategy.embedding_strategy import EmbeddingStrategy
+from database.vector.vector_strategy.vector_store_strategy import VectorStoreStrategy
+from service.embedding.embedding_strategy.embedding_strategy import EmbeddingStrategy
 
 
 class PGVectorStore(VectorStoreStrategy):

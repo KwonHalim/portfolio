@@ -6,25 +6,25 @@ from langchain_core.language_models import BaseLanguageModel
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_google_genai import ChatGoogleGenerativeAI
 
-from AI.config import settings
-from AI.database.chat.chat_strategy.chat_store_strategy import ChatStrategy
-from AI.database.chat.chat_strategy.langchain_mongo_repository import MongoChatStrategy
-from AI.database.chat.repository import ChatRepository
-from AI.database.vector.repository import VectorRepository
-from AI.database.vector.vector_strategy.chroma_vector_store import ChromaVectorStore
-from AI.database.vector.vector_strategy.pg_vector_store import PGVectorStore
-from AI.database.vector.vector_strategy.vector_store_strategy import VectorStoreStrategy
-from AI.service.chat_service import ChatService
-from AI.service.chunk.chunk_strategy.chunk_strategy import ChunkStrategy
-from AI.service.chunk.chunk_strategy.recursive_character_splitter import RecursiveCharacterSplitter
-from AI.service.chunk.service import ChunkService
-from AI.service.embedding.embedding_strategy.embedding_strategy import EmbeddingStrategy
-from AI.service.embedding.embedding_strategy.google_gemini_embedding import GoogleGeminiEmbedding
-from AI.service.embedding.service import EmbeddingService
-from AI.service.langchain.document_retriever import DocumentRetriever
-from AI.service.langchain.prompt import create_prompt
-from AI.service.data.data_processor import DataProcessor
-from AI.service.rag_service import RAGService
+from config import settings
+from database.chat.chat_strategy.chat_store_strategy import ChatStrategy
+from database.chat.chat_strategy.langchain_mongo_repository import MongoChatStrategy
+from database.chat.repository import ChatRepository
+from database.vector.repository import VectorRepository
+from database.vector.vector_strategy.chroma_vector_store import ChromaVectorStore
+from database.vector.vector_strategy.pg_vector_store import PGVectorStore
+from database.vector.vector_strategy.vector_store_strategy import VectorStoreStrategy
+from service.chat_service import ChatService
+from service.chunk.chunk_strategy.chunk_strategy import ChunkStrategy
+from service.chunk.chunk_strategy.recursive_character_splitter import RecursiveCharacterSplitter
+from service.chunk.service import ChunkService
+from service.embedding.embedding_strategy.embedding_strategy import EmbeddingStrategy
+from service.embedding.embedding_strategy.google_gemini_embedding import GoogleGeminiEmbedding
+from service.embedding.service import EmbeddingService
+from service.langchain.document_retriever import DocumentRetriever
+from service.langchain.prompt import create_prompt
+from service.data.data_processor import DataProcessor
+from service.rag_service import RAGService
 
 
 # ----------------------------------------------------------------

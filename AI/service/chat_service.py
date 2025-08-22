@@ -7,8 +7,8 @@ from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import ChatPromptTemplate
 
 # 기존에 정의한 Repository와 Retriever를 사용합니다.
-from AI.database.chat.repository import ChatRepository
-from AI.service.langchain.document_retriever import DocumentRetriever
+from database.chat.repository import ChatRepository
+from service.langchain.document_retriever import DocumentRetriever
 
 
 class ChatService:

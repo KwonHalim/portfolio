@@ -1,5 +1,7 @@
 from typing import List
-from AI.service.embedding.embedding_strategy.embedding_strategy import EmbeddingStrategy
+
+from service.embedding.embedding_strategy.embedding_strategy import EmbeddingStrategy
+
 
 # 만약 임베딩에서 해야하는 추가적인 로직이 있다면(특정 모델에만 적용되는 것이 아닌) 여기에다가 작성
 

@@ -4,7 +4,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 
-import AI.container.dependency as deps
+import container.dependency as deps
 
 
 @asynccontextmanager

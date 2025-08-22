@@ -1,4 +1,4 @@
-from AI.database.chat.chat_strategy.chat_store_strategy import ChatStrategy
+from database.chat.chat_strategy.chat_store_strategy import ChatStrategy
 
 
 class ChatRepository:

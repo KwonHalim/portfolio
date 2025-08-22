@@ -1,10 +1,10 @@
 # routes/chat.py
 from fastapi import APIRouter, Depends, Request
 
-from AI.api_model.ChatDTO import RequestMessageDTO, RequestFeedbackDTO
-from AI.api_model.response_models import SuccessResponse
-from AI.container.dependency import get_singleton_chat_service
-from AI.service.chat_service import ChatService
+from api_model.ChatDTO import RequestMessageDTO, RequestFeedbackDTO
+from api_model.response_models import SuccessResponse
+from container.dependency import get_singleton_chat_service
+from service.chat_service import ChatService
 from fastapi.logger import logger
 
 chat_router = APIRouter(prefix="/chat", tags=["chat"])

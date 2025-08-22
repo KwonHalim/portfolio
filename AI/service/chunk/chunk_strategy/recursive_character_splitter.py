@@ -3,7 +3,7 @@ from typing import List
 
 from langchain_core.documents import Document
 from langchain_text_splitters import RecursiveCharacterTextSplitter
-from AI.service.chunk.chunk_strategy.chunk_strategy import ChunkStrategy
+from service.chunk.chunk_strategy.chunk_strategy import ChunkStrategy
 
 
 class RecursiveCharacterSplitter(ChunkStrategy):

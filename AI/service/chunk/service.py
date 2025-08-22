@@ -2,7 +2,7 @@ from typing import List
 
 from langchain_core.documents import Document
 
-from AI.service.chunk.chunk_strategy.chunk_strategy import ChunkStrategy
+from service.chunk.chunk_strategy.chunk_strategy import ChunkStrategy
 
 
 class ChunkService:

@@ -1,9 +1,9 @@
 import json
 
-from AI.database.vector.repository import VectorRepository
-from AI.service.chunk.service import ChunkService
-from AI.service.embedding.service import EmbeddingService
-from AI.service.data.data_processor import DataProcessor
+from database.vector.repository import VectorRepository
+from service.chunk.service import ChunkService
+from service.embedding.service import EmbeddingService
+from service.data.data_processor import DataProcessor
 
 
 class RAGService:

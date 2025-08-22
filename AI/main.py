@@ -1,10 +1,10 @@
 from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
 
-from AI.lifespan import lifespan
-from AI.routes.chat.chat import chat_router
-from AI.routes.document.document import document_router
-from AI.utils.log_config import setup_logging
+from lifespan import lifespan
+from routes.chat.chat import chat_router
+from routes.document.document import document_router
+from utils.log_config import setup_logging
 
 # 로깅 설정
 setup_logging()

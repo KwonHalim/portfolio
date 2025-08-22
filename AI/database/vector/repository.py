@@ -1,4 +1,4 @@
-from AI.database.vector.vector_strategy.vector_store_strategy import VectorStoreStrategy
+from database.vector.vector_strategy.vector_store_strategy import VectorStoreStrategy
 
 
 class VectorRepository:
