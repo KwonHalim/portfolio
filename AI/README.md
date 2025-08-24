@@ -46,7 +46,7 @@ class VectorStoreStrategy(ABC):
 ```
 
 **구현체:**
-- `ChromaVectorStore`: ChromaDB 기반 벡터 스토어
+- `ChromaVector`: ChromaDB 기반 벡터 스토어
 - `PGVectorStore`: PostgreSQL 기반 벡터 스토어
 
 #### 청킹 전략
