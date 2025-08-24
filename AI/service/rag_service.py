@@ -2,8 +2,8 @@ import json
 
 from database.vector.repository import VectorRepository
 from service.chunk.service import ChunkService
-from service.embedding.service import EmbeddingService
 from service.data.data_processor import DataProcessor
+from service.embedding.service import EmbeddingService
 
 
 class RAGService:
@@ -35,9 +35,9 @@ class RAGService:
             ))
         print(f"--- 문단 데이터 변환 완료 ---")
         print(f"--- 변환된 문단 데이터 개수: {len(docs)} ---")
-        qa_data = [json.loads(line) for line in qa_data.strip().split('\n')]
         print(f"--- Q&A 데이터 변환 시작 ---")
         print(f"--- Q&A 데이터 개수: {len(qa_data)} ---")
+        qa_data = [json.loads(line) for line in qa_data.strip().split('\n')]
         docs.extend(self.data_processor.process_qa_json(qa_data=qa_data, source_identifier=qa_file_name))
         print(f"--- 문서 변환 완료 ---")
         print(f"--- 변환된 문서 개수: {len(docs)} ---")
