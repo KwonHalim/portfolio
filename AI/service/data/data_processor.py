@@ -1,8 +1,8 @@
 import json
 import os
 from typing import List, Dict
-import pandas as pd
 
+import pandas as pd
 from langchain_core.documents import Document
 
 
@@ -23,8 +23,7 @@ class DataProcessor:
                 metadata={
                     "source_type": "paragraph",
                     # ✨ 수정된 부분: 소스 식별자를 ID에 포함시켜 고유성을 보장합니다.
-                    "source_id": f"{source_identifier}::p::{i}",
-                    "source_name": source_identifier, # ✨ 추가된 부분: 원본 소스 이름을 메타데이터에 명시적으로 저장
+                    "source_id": f"{source_identifier}::{i}",
                     "likes": 0,
                     "dislikes": 0,
                 },
@@ -46,9 +45,7 @@ class DataProcessor:
                 metadata={
                     "source_type": "qa",
                     "retrieved_content": item["answer"],
-                    # ✨ 수정된 부분: 소스 식별자를 ID에 포함시켜 고유성을 보장합니다.
-                    "source_id": f"{source_identifier}::qa::{i}",
-                    "source_name": source_identifier,  # ✨ 추가된 부분: 원본 소스 이름을 메타데이터에 명시적으로 저장
+                    "source_id": f"{source_identifier}::{i}",
                     "likes": 0,
                     "dislikes": 0,
                 },
@@ -68,7 +65,6 @@ class DataProcessor:
         이 함수를 통해 생성된 jsonl 파일을 읽은 후,
         위의 process_qa_json 메서드를 호출할 때 파일명을 source_identifier로 넘겨주면 됩니다.
         """
-        # (기존 코드와 동일)
         if not os.path.exists(input_file_path):
             raise FileNotFoundError(f"입력 파일을 찾을 수 없습니다: {input_file_path}")
 
@@ -86,8 +82,8 @@ class DataProcessor:
                     f"지원하지 않는 파일 형식입니다: {file_extension}. (.xlsx 또는 .csv 파일만 지원)"
                 )
         except Exception as e:
-            print(f"파일을 읽는 중 오류가 발생했습니다: {e}")
-            return 0
+            # 구체적인 오류를 로깅하거나 처리할 수 있습니다.
+            raise RuntimeError(f"파일을 읽는 중 오류가 발생했습니다: {e}")
 
         if question_column not in df.columns or answer_column not in df.columns:
             raise ValueError(
@@ -113,7 +109,6 @@ class DataProcessor:
                 for entry in jsonl_data:
                     f.write(json.dumps(entry, ensure_ascii=False) + "\n")
         except IOError as e:
-            print(f"파일을 저장하는 중 오류가 발생했습니다: {e}")
-            return 0
+            raise RuntimeError(f"파일을 저장하는 중 오류가 발생했습니다: {e}")
 
         return len(jsonl_data)
