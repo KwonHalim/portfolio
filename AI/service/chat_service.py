@@ -36,18 +36,17 @@ class ChatService:
         """
         if len(question) > 200:
             return {"answer": "질문이 너무 깁니다. 200자 이하로 줄여주세요.", "message_id": None}
-
         logger.info(f"--- 🗣️ 질문: {question} (Chat Session: {session_id}) ---")
-
+        ###############문서 검색 시작###############
         retriever_output = self.retriever.invoke(question)
         context = retriever_output["context"]
+        ###############문서 검색 완료###############
         source_docs = retriever_output["source_docs"]
         source_ids = [doc.metadata.get("source_id") for doc in source_docs if "source_id" in doc.metadata]
         chain = self.prompt | self.llm | StrOutputParser()
-
+        ###############AI 질문###############
         answer = chain.invoke({
             "context": context,
-            # "chat_history": recent_history,
             "question": question
         })
 
