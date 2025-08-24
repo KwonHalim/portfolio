@@ -23,7 +23,9 @@ async def lifespan(app: FastAPI):
     vector_repository = await deps.get_vector_repository(vector_store_strategy)
     chat_repository = deps.get_chat_repository(chat_db_strategy)
     embedding_service = await deps.get_embedding_service(embedding_strategy)
-    retriever = await deps.get_document_retriever(vector_repository)
+    bm_25_retriever = await deps.get_bm25_retriever(vector_repository)
+    retriever = await deps.get_document_retriever(vector_repository, bm_25_retriever)
+
 
     # 3. 캐싱된 가벼운 객체들도 가져오기
     chunk_service = deps.get_chunk_service(deps.get_chunk_strategy())

@@ -2,6 +2,7 @@ from functools import lru_cache
 
 from fastapi import Depends, Request
 from langchain_community.llms.huggingface_endpoint import HuggingFaceEndpoint
+from langchain_community.retrievers import BM25Retriever
 from langchain_core.language_models import BaseLanguageModel
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_google_genai import ChatGoogleGenerativeAI
@@ -11,19 +12,19 @@ from database.chat.chat_strategy.chat_store_strategy import ChatStrategy
 from database.chat.chat_strategy.langchain_mongo_repository import MongoChatStrategy
 from database.chat.repository import ChatRepository
 from database.vector.repository import VectorRepository
-from database.vector.vector_strategy.chroma_vector_store import ChromaVectorStore
+from database.vector.vector_strategy.chroma_vector import ChromaVector
 from database.vector.vector_strategy.pg_vector_store import PGVectorStore
 from database.vector.vector_strategy.vector_store_strategy import VectorStoreStrategy
 from service.chat_service import ChatService
 from service.chunk.chunk_strategy.chunk_strategy import ChunkStrategy
 from service.chunk.chunk_strategy.recursive_character_splitter import RecursiveCharacterSplitter
 from service.chunk.service import ChunkService
+from service.data.data_processor import DataProcessor
 from service.embedding.embedding_strategy.embedding_strategy import EmbeddingStrategy
 from service.embedding.embedding_strategy.google_gemini_embedding import GoogleGeminiEmbedding
 from service.embedding.service import EmbeddingService
 from service.langchain.document_retriever import DocumentRetriever
 from service.langchain.prompt import create_prompt
-from service.data.data_processor import DataProcessor
 from service.rag_service import RAGService
 
 
@@ -65,7 +66,7 @@ async def get_vector_store_strategy(
     if settings.VECTOR_DB_TYPE == "pgvector":
         return PGVectorStore(connection_string=settings.PGVECTOR_DB_URL, embedding_strategy=embedding_strategy)
     elif settings.VECTOR_DB_TYPE == "chroma":
-        return ChromaVectorStore(host=settings.CHROMA_HOST, port=settings.CHROMA_PORT, embedding_strategy=embedding_strategy)
+        return ChromaVector(host=settings.CHROMA_HOST, port=settings.CHROMA_PORT, embedding_strategy=embedding_strategy)
     else:
         raise ValueError(f"지원하지 않는 DB 타입입니다: {settings.VECTOR_DB_TYPE}")
 
@@ -109,11 +110,31 @@ async def get_embedding_service(
 # 4. LangChain RAG 구성 요소 생성
 # ----------------------------------------------------------------
 
-async def get_document_retriever(
-    vector_repository: VectorRepository = Depends(get_vector_repository)
-) -> DocumentRetriever:
-    return DocumentRetriever(vector_repository=vector_repository)
+async def get_bm25_retriever(
+        vector_repository: VectorRepository = Depends(get_vector_repository)
+) -> BM25Retriever:
+    """
+     DB에 있는 모든 문서를 가져와 BM25Retriever를 생성합니다.
+     애플리케이션 시작 시 한 번만 호출됩니다.
+     """
+    print("--- BM25 Retriever 생성을 시작합니다. 모든 문서를 로드합니다... ---")
+    all_docs = vector_repository.get_all_documents()
+    if not all_docs:
+        # 문서가 없을 경우, LangChain이 오류를 내지 않도록 빈 리스트 삽입
+        print("문서가 비어있습니다.")
+        return None
 
+    retriever = BM25Retriever.from_documents(all_docs)
+    print(f"--- ✅ BM25 Retriever 생성 완료. 총 {len(all_docs)}개의 문서로 인덱싱됨 ---")
+    return retriever
+
+
+async def get_document_retriever(
+    vector_repository: VectorRepository = Depends(get_vector_repository),
+        bm25_retriever: BM25Retriever = Depends(get_bm25_retriever)
+
+) -> DocumentRetriever:
+    return DocumentRetriever(vector_repository=vector_repository, bm25_retriever=bm25_retriever)
 
 @lru_cache()
 def get_prompt() -> ChatPromptTemplate:
