@@ -1,6 +1,8 @@
 from abc import ABC, abstractmethod
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
+
 from langchain_core.documents import Document
+
 
 class VectorStoreStrategy(ABC):
     @abstractmethod
@@ -9,6 +11,10 @@ class VectorStoreStrategy(ABC):
         pass
 
     @abstractmethod
-    def query(self, query_text: str, k: int = 3) -> List[Dict[str, Any]]:
+    def query(self, query_text: str, k: int = 3, source_type: Optional[str] = None) -> List[Dict[str, Any]]:
         """쿼리로 유사 문서를 검색합니다."""
+        pass
+
+    @abstractmethod
+    def get_all_documents(self) -> List[Document]:
         pass
