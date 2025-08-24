@@ -1,7 +1,13 @@
-from fastapi import APIRouter, Depends, UploadFile, File, HTTPException
+import os
+import shutil
+import tempfile
+
+from fastapi import APIRouter, Depends, UploadFile, File, HTTPException, BackgroundTasks
+from starlette.responses import FileResponse
 
 from api_model.response_models import SuccessResponse
-from container.dependency import get_singleton_rag_service
+from container.dependency import get_singleton_rag_service, get_data_processor
+from service.data.data_processor import DataProcessor
 from service.rag_service import RAGService
 
 document_router = APIRouter(prefix="/documents", tags=["documents"])
@@ -57,3 +63,65 @@ async def process_documents(
     )
 
     return SuccessResponse(result=result)
+
+def cleanup_files(*paths):
+    """백그라운드에서 임시 파일들을 삭제하는 함수"""
+    for path in paths:
+        if path and os.path.exists(path):
+            os.remove(path)
+
+
+@document_router.post("/upload", summary="QA 파일을 JSONL로 변환하여 다운로드")
+async def to_jsonl(
+        file: UploadFile = File(..., description=".xlsx 또는 .csv 형식의 QA 파일"),
+        background_tasks: BackgroundTasks = None,
+        data_processor: DataProcessor = Depends(get_data_processor),
+):
+    """
+    업로드된 QA 파일(Excel 또는 CSV)을 JSONL 형식으로 변환하고,
+    변환된 파일을 즉시 다운로드합니다.
+    """
+    file_extension = os.path.splitext(file.filename)[1]
+    if file_extension.lower() not in ['.xlsx', '.csv']:
+        raise HTTPException(
+            status_code=400,
+            detail="잘못된 파일 형식입니다. .xlsx 또는 .csv 파일만 업로드할 수 있습니다."
+        )
+
+    tmp_input_file_path = None
+    tmp_output_file_path = None
+
+    try:
+        # 1. 업로드된 파일을 서버에 임시 저장
+        with tempfile.NamedTemporaryFile(delete=False, suffix=file_extension) as tmp_input_file:
+            shutil.copyfileobj(file.file, tmp_input_file)
+            tmp_input_file_path = tmp_input_file.name
+
+        # 2. 출력 파일 경로 설정
+        tmp_output_file_path = f"{tmp_input_file_path}.jsonl"
+
+        # 3. 데이터 처리 함수 호출
+        data_processor.qa_to_jsonl(
+            input_file_path=tmp_input_file_path,
+            output_file_path=tmp_output_file_path
+        )
+
+        # 4. 응답이 완료된 후 임시 파일들을 삭제하도록 백그라운드 작업 추가
+        background_tasks.add_task(cleanup_files, tmp_input_file_path, tmp_output_file_path)
+
+        # 5. 생성된 파일을 FileResponse로 반환하여 다운로드
+        download_filename = f"{os.path.splitext(file.filename)[0]}.jsonl"
+        return FileResponse(
+            path=tmp_output_file_path,
+            filename=download_filename,
+            media_type='application/octet-stream'  # 브라우저가 파일 다운로드로 인식하도록 설정
+        )
+
+    except (FileNotFoundError, ValueError, RuntimeError) as e:
+        # 오류 발생 시 생성되었을 수 있는 임시 파일 정리
+        cleanup_files(tmp_input_file_path, tmp_output_file_path)
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        # 예상치 못한 오류 발생 시에도 임시 파일 정리
+        cleanup_files(tmp_input_file_path, tmp_output_file_path)
+        raise HTTPException(status_code=500, detail=f"서버 내부 오류가 발생했습니다: {str(e)}")
