@@ -18,3 +18,7 @@ class VectorStoreStrategy(ABC):
     @abstractmethod
     def get_all_documents(self) -> List[Document]:
         pass
+
+    @abstractmethod
+    def find_by_source_id(self, source_ids: List[str], is_good: bool):
+        pass

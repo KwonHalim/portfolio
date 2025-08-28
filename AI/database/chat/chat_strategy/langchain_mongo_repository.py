@@ -1,8 +1,8 @@
 from datetime import timezone, datetime
 from typing import Optional, Dict, Any, List
 
-from pymongo import MongoClient, ASCENDING
 from bson import ObjectId
+from pymongo import MongoClient, ASCENDING
 
 from database.chat.chat_strategy.chat_store_strategy import ChatStrategy
 
@@ -83,17 +83,29 @@ class MongoChatStrategy(ChatStrategy):
             history.append(msg)
         return history
 
-    def update_feedback(self, chat_id: str, is_good: bool):
+    # 이 메서드는 ChatRepository 클래스 안에 있다고 가정합니다.
+    def update_feedback(self, chat_id: str, is_good: bool) -> dict:
         """
-        채팅 메시지에 대한 피드백을 업데이트합니다.
+        채팅 메시지에 대한 피드백을 업데이트하고, 업데이트된 문서 전체를 반환합니다.
         :param chat_id: 채팅 메시지 ID
         :param is_good: 피드백 (좋은 답변이면 True, 그렇지 않으면 False)
+        :return: 업데이트된 채팅 문서(dict) 또는 문서가 없을 경우 None
         """
         feedback = "good" if is_good else "bad"
-        self.messages_collection.update_one(
-            {"_id": ObjectId(chat_id)},
-            {"$set": {"feedback": feedback}}
-        )
-        print(f"✅ 채팅 ID {chat_id}에 대한 피드백 '{feedback}' 저장 완료.")
-        return chat_id
 
+        updated_document = self.messages_collection.find_one_and_update(
+            {"_id": ObjectId(chat_id)},
+            {"$set": {"feedback": feedback}},
+            )
+
+        return updated_document
+
+    def find_chat_history(self, chat_id:str):
+        """
+        특정 채팅 문서를 한개 가져옵니다.
+        :param chat_id:
+        :type chat_id:
+        :return:
+        :rtype:
+        """
+        return self.messages_collection.find_one({"_id": ObjectId(chat_id)})

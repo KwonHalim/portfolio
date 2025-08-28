@@ -42,7 +42,8 @@ async def lifespan(app: FastAPI):
         retriever=retriever,
         prompt=prompt,
         llm=llm,
-        chat_repository=chat_repository
+        chat_repository=chat_repository,
+        vector_repository=vector_repository,
     )
 
     print("--- ✅ 싱글톤 객체 생성 완료 ---")

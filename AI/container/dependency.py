@@ -149,9 +149,10 @@ async def get_chat_service(
     retriever: DocumentRetriever = Depends(get_document_retriever),
     prompt: ChatPromptTemplate = Depends(get_prompt),
     llm: BaseLanguageModel = Depends(get_llm),
-    chat_repository: ChatRepository = Depends(get_chat_repository)
+    chat_repository: ChatRepository = Depends(get_chat_repository),
+    vector_repository: VectorRepository = Depends(get_vector_repository),
 ) -> ChatService:
-    return ChatService(retriever=retriever, prompt=prompt, llm=llm, chat_repository=chat_repository)
+    return ChatService(retriever=retriever, prompt=prompt, llm=llm, chat_repository=chat_repository, vector_repository=vector_repository)
 
 async def get_rag_service(
     chunk_service: ChunkService = Depends(get_chunk_service),

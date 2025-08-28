@@ -8,6 +8,7 @@ from langchain_core.prompts import ChatPromptTemplate
 
 # 기존에 정의한 Repository와 Retriever를 사용합니다.
 from database.chat.repository import ChatRepository
+from database.vector.repository import VectorRepository
 from service.langchain.document_retriever import DocumentRetriever
 
 
@@ -23,11 +24,13 @@ class ChatService:
         prompt: ChatPromptTemplate,
         llm: BaseLanguageModel,
         chat_repository: ChatRepository,
+        vector_repository: VectorRepository,
     ):
         self.retriever = retriever
         self.prompt = prompt
         self.llm = llm
-        self.repository = chat_repository
+        self.chat_repository = chat_repository
+        self.vector_repository = vector_repository
         print("✅ ChatService 초기화 (Langchain 메모리 사용)")
 
     def ask(self, question: str, session_id: str) -> Dict[str, str]:
@@ -50,20 +53,25 @@ class ChatService:
             "question": question
         })
 
+        # 여기 부분에서 MongoDB에 원본 소스를 어떻게 저장할지 결정.
+        # 현재는 DB의 metadata에 출처 retrieved_Source_ids만 dic:List[str] 형태로 저장
         metadata = {
-            "retrieved_source_ids": source_ids,
-            "retrieved_documents": [doc.to_json() for doc in source_docs],
+            "retrieved_source_ids": source_ids
         }
 
-        chat_id = self.repository.save_chat(answer, question, session_id, metadata)
+        chat_id = self.chat_repository.save_chat(answer, question, session_id, metadata)
 
         return {"llm_answer" : answer,"chat_id": chat_id}
 
-    def feedback(self, chat_id: str, is_good: bool):
+    def feedback(self, chat_id: str, is_good: bool) -> bool:
         """
         채팅 메시지에 대한 피드백을 저장합니다.
         :param chat_repository: 채팅 레포지토리 인스턴스
         :param chat_id: 피드백을 남길 채팅 메시지 ID
         :param is_good: 피드백이 긍정적인지 여부 (True/False)
         """
-        return self.repository.update_feedback(chat_id, is_good)
+
+        updated_chat_document = self.chat_repository.update_feedback(chat_id, is_good)
+        source = updated_chat_document["metadata"]["retrieved_source_ids"]
+        self.vector_repository.find_by_source_id(source_id=source, is_good = is_good)
+        return True

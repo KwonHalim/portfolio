@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, List
 
 from database.vector.vector_strategy.vector_store_strategy import VectorStoreStrategy
 
@@ -55,3 +55,10 @@ class VectorRepository:
             print(f"  - VectorDB: 청크 '{chunk_id}'의 '{feedback}' 카운트 업데이트 완료.")
         except Exception as e:
             print(f"🚨 VectorDB 메타데이터 업데이트 실패 (ID: {chunk_id}): {e}")
+
+
+    def find_by_source_id(self, source_id: List[str], is_good: bool):
+        try:
+            self.vector_db.find_by_source_id(source_ids=source_id, is_good=is_good)
+        except Exception as e:
+            return
