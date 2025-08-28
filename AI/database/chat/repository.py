@@ -38,3 +38,13 @@ class ChatRepository:
         """
         print(f"--- 채팅 ID {chat_id}에 대한 피드백 업데이트 시작 ---")
         return self.chat_repository.update_feedback(chat_id, is_good)
+
+    def find_chat_history(self, chat_id:str):
+        """
+        채팅 내역을 한개 가져옵니다.
+        :param chat_id:
+        :type chat_id:
+        :return:
+        :rtype:
+        """
+        return self.chat_repository.find_chat_history(chat_id)
