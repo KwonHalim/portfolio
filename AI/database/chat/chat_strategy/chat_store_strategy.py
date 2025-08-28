@@ -71,3 +71,14 @@ class ChatStrategy(ABC):
             is_good (bool): 피드백 값 (좋은 답변이면 True, 그렇지 않으면 False).
         """
         pass
+
+    @abstractmethod
+    def find_chat_history(self, chat_id:str):
+        """
+        채팅 한개를 가져옵니다.
+        :param chat_id:
+        :type chat_id:
+        :return:
+        :rtype:
+        """
+        pass
