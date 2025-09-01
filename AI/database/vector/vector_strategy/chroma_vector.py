@@ -86,4 +86,4 @@ class ChromaVector(VectorStoreStrategy):
                 ids=[doc_id],
                 metadatas=[current_metadata]
             )
-            print("  ✅ 업데이트 완료!")
+            print("✅ 업데이트 완료!")

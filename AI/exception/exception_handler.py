@@ -1,8 +1,8 @@
 from urllib.request import Request
 
-from AI.exception.model.base_exception_model import ErrorResponse, ErrorDetail
-from AI.exception.model.exceptions import CustomException
-from AI.main import app
+from exception.model.base_exception_model import ErrorResponse, ErrorDetail
+from exception.model.exceptions import CustomException
+from main import app
 
 
 @app.exception_handler(CustomException)

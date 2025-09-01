@@ -1,7 +1,7 @@
 from datetime import datetime
+from typing import Optional, Any
 
 from pydantic import BaseModel, Field
-from typing import Optional, Any
 
 
 # 모든 응답의 기본이 되는 모델, 예외처리에서도 사용
@@ -15,6 +15,6 @@ class BaseResponse(BaseModel):
 # result 필드는 Any 타입으로, Optional로 없을 수도 있도록 함
 class SuccessResponse(BaseResponse):
     success: bool = Field(True, description="요청 성공")
-    message: str = Field("요청에 성공했습니다.", description="응답 메시지")
+    message: str = Field("요청에 성공했습니다.", description="응답 성공 메시지")
     code: int = Field(200, description="HTTP 상태 코드")
     result: Optional[Any] = Field(None, description="요청 처리 결과 데이터 (선택 사항)")

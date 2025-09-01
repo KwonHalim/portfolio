@@ -1,7 +1,8 @@
 from typing import Optional
+
 from pydantic import BaseModel, Field
 
-from AI.api_model.response_models import BaseResponse
+from api_model.response_models import BaseResponse
 
 
 class ErrorDetail(BaseModel):
@@ -13,5 +14,5 @@ class ErrorDetail(BaseModel):
 class ErrorResponse(BaseResponse):
     success: bool = Field(False, description="요청 실패")
     message: str = Field("요청에 실패했습니다.", description="응답 메시지")
-    code: int = Field(400, description="HTTP 상태 코드")
+    code: int = Field(500, description="HTTP 상태 코드")
     error: Optional[ErrorDetail] = Field(None, description="오류 상세 정보 (선택 사항)")

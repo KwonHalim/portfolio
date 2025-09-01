@@ -7,12 +7,28 @@ from service.embedding.service import EmbeddingService
 
 
 class RAGService:
+    """
+    문서 수집(Ingestion) 파이프라인을 총괄하는 서비스 클래스입니다.
+
+    원본 텍스트와 QA 데이터를 입력받아 파싱, 청킹, 임베딩 단계를 거쳐
+    최종적으로 벡터 데이터베이스에 저장하는 전체 과정을 관리합니다.
+    """
     def __init__(self,
                  chunk_service: ChunkService,
                  embedding_service: EmbeddingService,
                  data_processor: DataProcessor,
                  vector_repository: VectorRepository,
                  ):
+        """
+        RAGService를 초기화합니다.
+
+        Args:
+            chunk_service (ChunkService): 문서를 청크 단위로 분할하는 서비스.
+            embedding_service (EmbeddingService): 텍스트를 벡터로 변환하는 서비스 (현재는 VectorRepository에서 처리).
+            data_processor (DataProcessor): 원본 데이터(텍스트, JSONL)를 LangChain Document 객체로 파싱하는 서비스.
+            vector_repository (VectorRepository): 청크와 임베딩 벡터를 Vector DB에 저장하는 레포지토리.
+
+        """
         self.chunk_service = chunk_service
         self.embedding_service = embedding_service
         self.data_processor = data_processor
@@ -20,6 +36,17 @@ class RAGService:
         print("✅ RAGService 초기화 완료")
 
     def process(self, paragraph_data: str, paragraph_file_name: str, qa_data: str, qa_file_name: str):
+        """
+
+        Args:
+            paragraph_data (str): 문단 데이터 입니다. 파일에 있는 모든 문자열 자체가 입력됩니다.
+            paragraph_file_name (str): 입력되는 파일의 이름입니다.
+            qa_data (str): QA파일의 질문과 대답의 문자열입니다.
+            qa_file_name (str): QA파일의 파일 이름입니다.
+
+        Returns:
+
+        """
         # 1. TXT(자기소개) 데이터와 Q&A(질의응답) 데이터를 받아서 langchain Document 객체로 변환합니다.
         print("--- 문서 변환 시작 ---")
         docs = []
