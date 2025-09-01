@@ -333,9 +333,10 @@ class ProjectManager {
 
         this.modalTitle.textContent = project.title || '제목 없음';
         this.modalCategory.textContent = project.category || '카테고리 없음';
-        const sanitizedDescription = (project.description || '상세 설명이 없습니다.').replace(/\n/g, '<br>');
-        this.modalDescription.innerHTML = sanitizedDescription;
-        
+
+        // description에 마크업이 포함되어 있다면 그대로 innerHTML에 할당
+        this.modalDescription.innerHTML = project.description || '상세 설명이 없습니다.';
+
         // 기술 스택
         this.modalTechList.innerHTML = '';
         if (project.technologies && project.technologies.length > 0) {
@@ -619,24 +620,17 @@ class ProjectManager {
     
     // 캐시된 데이터로 프로젝트 렌더링 (애니메이션 포함, API 요청 없음)
     renderProjectsFromCache(data) {
-        const projects = data.result || data || [];
-        
-        if (projects.length > 0) {
-            // 기존 프로젝트 제거
+        const projects = data.result || data;
+        if (projects && projects.length > 0) {
             this.resetProjects();
-            
-            // 카테고리 추출 (최초 한 번만)
-            if (!this.categoriesRendered) {
-                this.extractCategoriesFromProjects(projects);
+            this.extractCategoriesFromProjects(projects);
+            // emphasized가 true인 프로젝트들의 ID를 저장 (참고용)
+            if (this.currentCategory === 'all' && this.featuredProjectIds.length === 0) {
+                this.featuredProjectIds = projects
+                    .filter(project => project.emphasized === true)
+                    .map(project => project.id);
             }
-            
-            // 프로젝트 렌더링 (애니메이션 포함)
             this.renderProjects(projects);
-            
-            // 애니메이션 재실행
-            this.replayProjectAnimations();
-        } else {
-            this.showNoProjectsMessage();
         }
     }
     
