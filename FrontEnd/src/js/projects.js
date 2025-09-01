@@ -333,7 +333,8 @@ class ProjectManager {
 
         this.modalTitle.textContent = project.title || '제목 없음';
         this.modalCategory.textContent = project.category || '카테고리 없음';
-        this.modalDescription.innerHTML = project.description || '상세 설명이 없습니다.';
+        const sanitizedDescription = (project.description || '상세 설명이 없습니다.').replace(/\n/g, '<br>');
+        this.modalDescription.innerHTML = sanitizedDescription;
         
         // 기술 스택
         this.modalTechList.innerHTML = '';
