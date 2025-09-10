@@ -1,6 +1,7 @@
 package portfolio.backend.entity;
 
 import jakarta.persistence.*;
+import jdk.jfr.Label;
 import lombok.*;
 import org.springframework.core.annotation.Order;
 
@@ -45,8 +46,9 @@ public class Profile extends BaseEntity{
     
     @Column
     private String profileImagePath;
-    
-    @Column
+
+    @Lob
+    @Column(columnDefinition = "TEXT")
     private String aboutText;
 
     @OneToMany(mappedBy = "profile", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
