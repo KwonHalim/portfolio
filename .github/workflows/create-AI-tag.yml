@@ -1,0 +1,22 @@
+name: Create New Version Tag
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'AI/**'
+
+jobs:
+  tag:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # Git 태그를 푸시하기 위한 쓰기 권한
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Bump version and push tag
+        uses: mathieudutour/github-tag-action@v6.2
+        with:
+          github_token: ${{ secrets.MY_PAT }}

@@ -1,0 +1,30 @@
+# Git 관련 파일
+.git
+.gitignore
+
+# Docker 관련 파일
+Dockerfile
+.dockerignore
+
+# Python 가상환경
+.venv
+venv
+
+# Python 캐시 파일
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+.env
+# IDE 및 에디터 설정
+.vscode/
+.idea/
+
+# 로컬 데이터 및 테스트 파일 (이미지에 포함될 필요 없는 파일)
+my_paragraph_data.txt
+my_qa_data.jsonl
+my_qa_data.xlsx
+test_main.httpx
+chroma_check.py
+README.md

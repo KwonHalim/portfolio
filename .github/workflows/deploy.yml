@@ -1,24 +1,16 @@
-name: CI/CD Pipeline
+name: Build and Deploy on Tag
 
 on:
-  push:
-    branches:
-      - main
+  create:
+    tags:
+      - 'v*'
 
 jobs:
-  tag-build-deploy:
+  build:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
     steps:
       - name: Checkout source
         uses: actions/checkout@v4
-
-      - name: Bump version and push tag
-        id: tag_version
-        uses: mathieudutour/github-tag-action@v6.2
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Log in to DockerHub
         uses: docker/login-action@v2
@@ -28,19 +20,26 @@ jobs:
 
       - name: Build and push Docker image
         run: |
-          IMAGE_TAG=${{ steps.tag_version.outputs.new_tag }}
+          IMAGE_TAG=${{ github.ref_name }}
           IMAGE_NAME=${{ secrets.DOCKERHUB_USERNAME }}/harimdev-ai
-          docker build -t $IMAGE_NAME:$IMAGE_TAG .
+#          AI폴더 빌드
+          docker build -t $IMAGE_NAME:$IMAGE_TAG ./AI
           docker push $IMAGE_NAME:$IMAGE_TAG
 
+  deploy:
+    needs: build
+    runs-on: self-hosted
+    steps:
       - name: Deploy to AI Chat Server via SSH
-        uses: appleboy/ssh-action@v1
+        uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.AI_SERVER_HOST }}
           username: ${{ secrets.AI_SERVER_USERNAME }}
+          # 추후 SSH 변경 예정
           password: ${{ secrets.AI_SERVER_PASSWORD }}
           script: |
-            IMAGE_TAG=${{ steps.tag_version.outputs.new_tag }}
+            # github.ref_name 변수로 태그 이름을 가져옴
+            IMAGE_TAG=${{ github.ref_name }}
             IMAGE_NAME=${{ secrets.DOCKERHUB_USERNAME }}/harimdev-ai
 
             docker stop harimdev-ai || true
@@ -48,5 +47,5 @@ jobs:
             docker pull $IMAGE_NAME:$IMAGE_TAG
             docker run -d --name harimdev-ai -p 8000:8000 \
             --network dev-network \
-            --env-file /home/halim7753/env/harimdev-ai.env \
+            --env-file /home/halim/portfolio/AI/.env \
             $IMAGE_NAME:$IMAGE_TAG
