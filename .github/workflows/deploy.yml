@@ -1,7 +1,7 @@
 name: Build and Deploy on Tag
 
 on:
-  create:
+  push:
     tags:
       - 'v*'
 
