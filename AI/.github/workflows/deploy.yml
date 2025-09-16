@@ -23,7 +23,6 @@ jobs:
           # ${{ github.ref_name }} 변수로 생성된 태그 이름(v1.2.3)을 가져올 수 있음
           IMAGE_TAG=${{ github.ref_name }}
           IMAGE_NAME=${{ secrets.DOCKERHUB_USERNAME }}/harimdev-ai
-          
           docker build -t $IMAGE_NAME:$IMAGE_TAG .
           docker push $IMAGE_NAME:$IMAGE_TAG
 
