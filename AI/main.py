@@ -35,6 +35,5 @@ app.add_middleware(
     allow_headers=["*"],    # 모든 HTTP 헤더를 허용합니다.
 )
 
-# 라우터를 앱에 포함시킵니다.
 app.include_router(router=document_router)
 app.include_router(router=chat_router)
