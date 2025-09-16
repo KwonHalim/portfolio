@@ -1,0 +1,52 @@
+name: Build and Deploy on Tag
+
+on:
+  create:
+    tags:
+      - 'v*'
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Log in to DockerHub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_PASSWORD }}
+
+      - name: Build and push Docker image
+        run: |
+          # ${{ github.ref_name }} 변수로 생성된 태그 이름(v1.2.3)을 가져올 수 있음
+          IMAGE_TAG=${{ github.ref_name }}
+          IMAGE_NAME=${{ secrets.DOCKERHUB_USERNAME }}/harimdev-ai
+          
+          docker build -t $IMAGE_NAME:$IMAGE_TAG .
+          docker push $IMAGE_NAME:$IMAGE_TAG
+
+  deploy:
+    needs: build-and-push
+    runs-on: self-hosted
+    steps:
+      - name: Deploy to AI Chat Server via SSH
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.AI_SERVER_HOST }}
+          username: ${{ secrets.AI_SERVER_USERNAME }}
+#          추후 SSH 연결로 변경
+          password: ${{ secrets.AI_SERVER_PASSWORD }}
+
+          script: |
+            IMAGE_TAG=${{ github.ref_name }}
+            IMAGE_NAME=${{ secrets.DOCKERHUB_USERNAME }}/harimdev-ai
+  
+            docker stop harimdev-ai || true
+            docker rm harimdev-ai || true
+            docker pull $IMAGE_NAME:$IMAGE_TAG
+            docker run -d --name harimdev-ai -p 8000:8000 \
+            --network dev-network \
+            --env-file /home/halim7753/env/harimdev-ai.env \
+            $IMAGE_NAME:$IMAGE_TAG
