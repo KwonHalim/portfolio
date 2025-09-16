@@ -1,33 +1,54 @@
-name: Build and Deploy on Tag
+name: AI CI/CD Pipeline
 
 on:
-  create:
-    tags:
-      - 'v*'
+  push:
+    branches:
+      - main
+    paths:
+      - 'AI/**'
 
 jobs:
-  build:
+  tag_and_build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    outputs:
+      new_tag: ${{ steps.tag_version.outputs.new_tag }}
+
     steps:
       - name: Checkout source
         uses: actions/checkout@v4
 
+      - name: Bump version and push tag
+        id: tag_version
+        uses: mathieudutour/github-tag-action@v6.2
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Print new tag
+        if: ${{ steps.tag_version.outputs.new_tag != '' }}
+        run: |
+          echo "New tag created: ${{ steps.tag_version.outputs.new_tag }}"
+
       - name: Log in to DockerHub
+        if: ${{ steps.tag_version.outputs.new_tag != '' }}
         uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
 
       - name: Build and push Docker image
+        if: ${{ steps.tag_version.outputs.new_tag != '' }}
         run: |
-          IMAGE_TAG=${{ github.ref_name }}
+          IMAGE_TAG=${{ steps.tag_version.outputs.new_tag }}
           IMAGE_NAME=${{ secrets.DOCKERHUB_USERNAME }}/harimdev-ai
-#          AI폴더 빌드
+          
           docker build -t $IMAGE_NAME:$IMAGE_TAG ./AI
           docker push $IMAGE_NAME:$IMAGE_TAG
 
   deploy:
-    needs: build
+    needs: tag_and_build
+    if: ${{ needs.tag_and_build.outputs.new_tag != '' }}
     runs-on: self-hosted
     steps:
       - name: Deploy to AI Chat Server via SSH
@@ -35,17 +56,18 @@ jobs:
         with:
           host: ${{ secrets.AI_SERVER_HOST }}
           username: ${{ secrets.AI_SERVER_USERNAME }}
-          # 추후 SSH 변경 예정
-          password: ${{ secrets.AI_SERVER_PASSWORD }}
+          password: ${{ secrets.AI_SERVER_PASSWORD }} # 추후 SSH Key로 교체
           script: |
-            # github.ref_name 변수로 태그 이름을 가져옴
-            IMAGE_TAG=${{ github.ref_name }}
+            IMAGE_TAG=${{ needs.tag_and_build.outputs.new_tag }}
             IMAGE_NAME=${{ secrets.DOCKERHUB_USERNAME }}/harimdev-ai
 
             docker stop harimdev-ai || true
             docker rm harimdev-ai || true
             docker pull $IMAGE_NAME:$IMAGE_TAG
             docker run -d --name harimdev-ai -p 8000:8000 \
-            --network dev-network \
-            --env-file /home/halim/portfolio/AI/.env \
-            $IMAGE_NAME:$IMAGE_TAG
+              --network ai-network \
+              --env-file /home/halim/portfolio/AI/.env \
+              $IMAGE_NAME:$IMAGE_TAG
+
+            echo "===== Running containers ====="
+            docker ps -a | grep harimdev-ai
