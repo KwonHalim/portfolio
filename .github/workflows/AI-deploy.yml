@@ -29,22 +29,32 @@ jobs:
         if: ${{ steps.tag_version.outputs.new_tag != '' }}
         run: |
           echo "New tag created: ${{ steps.tag_version.outputs.new_tag }}"
+#          깃허브 액션 서버는 amd64,내 서버는 arm64이므로 환경 호환이 안되므로 빌드 환경을 수정해야 한다.
+      # 1. QEMU 설정 (다른 아키텍처 에뮬레이션)
+      - name: Set up QEMU
+        if: ${{ steps.tag_version.outputs.new_tag != '' }}
+        uses: docker/setup-qemu-action@v3
+
+      # 2. Docker Buildx 설정 (멀티플랫폼 빌드 도구)
+      - name: Set up Docker Buildx
+        if: ${{ steps.tag_version.outputs.new_tag != '' }}
+        uses: docker/setup-buildx-action@v3
 
       - name: Log in to DockerHub
         if: ${{ steps.tag_version.outputs.new_tag != '' }}
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
 
-      - name: Build and push Docker image
+      # 4. ARM64용 이미지 빌드 및 푸시
+      - name: Build and push Docker image for ARM64
         if: ${{ steps.tag_version.outputs.new_tag != '' }}
         run: |
           IMAGE_TAG=${{ steps.tag_version.outputs.new_tag }}
           IMAGE_NAME=${{ secrets.DOCKERHUB_USERNAME }}/harimdev-ai
-          
-          docker build -t $IMAGE_NAME:$IMAGE_TAG ./AI
-          docker push $IMAGE_NAME:$IMAGE_TAG
+          docker buildx build --platform linux/arm64 -t $IMAGE_NAME:$IMAGE_TAG --push ./AI
+
 
   deploy:
     needs: tag_and_build
