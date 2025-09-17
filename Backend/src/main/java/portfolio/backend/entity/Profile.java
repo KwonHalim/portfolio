@@ -1,20 +1,19 @@
 package portfolio.backend.entity;
 
 import jakarta.persistence.*;
-import jdk.jfr.Label;
 import lombok.*;
-import org.springframework.core.annotation.Order;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Getter @Setter
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Profile extends BaseEntity{
+public class Profile extends BaseEntity {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -47,7 +46,6 @@ public class Profile extends BaseEntity{
     @Column
     private String profileImagePath;
 
-    @Lob
     @Column(columnDefinition = "TEXT")
     private String aboutText;
 

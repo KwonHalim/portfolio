@@ -18,7 +18,7 @@ public class ProjectImage extends BaseEntity{
     private String imagePath;
 
     @Column(nullable = false)
-     private int displayOrder;
+    private int displayOrder;
 
     @Column(columnDefinition = "TEXT")
     private String description;
