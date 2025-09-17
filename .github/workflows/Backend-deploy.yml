@@ -1,0 +1,80 @@
+name: Backend CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'Backend/**'
+
+jobs:
+  tag_and_build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    outputs:
+      new_tag: ${{ steps.tag_version.outputs.new_tag }}
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Bump version and push tag
+        id: tag_version
+        uses: mathieudutour/github-tag-action@v6.2
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          tag_prefix: 'BACKEND-'
+
+
+      - name: Print new tag
+        if: ${{ steps.tag_version.outputs.new_tag != '' }}
+        run: |
+          echo "New tag created: ${{ steps.tag_version.outputs.new_tag }}"
+
+      - name: Set up Docker Buildx
+        if: ${{ steps.tag_version.outputs.new_tag != '' }}
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to DockerHub
+        if: ${{ steps.tag_version.outputs.new_tag != '' }}
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_PASSWORD }}
+
+      - name: Build and push Docker image for AMD64
+        if: ${{ steps.tag_version.outputs.new_tag != '' }}
+        run: |
+          IMAGE_TAG=${{ steps.tag_version.outputs.new_tag }}
+          IMAGE_NAME=${{ secrets.DOCKERHUB_USERNAME }}/harimdev-backend
+          docker buildx build --platform linux/amd64 -t $IMAGE_NAME:$IMAGE_TAG --push ./Backend
+
+
+  deploy:
+    needs: tag_and_build
+    if: ${{ needs.tag_and_build.outputs.new_tag != '' }}
+    runs-on: self-hosted
+    steps:
+      - name: Deploy to Backend Server via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.BACKEND_SERVER_HOST }}
+          username: ${{ secrets.BACKEND_SERVER_USERNAME }}
+          password: ${{ secrets.BACKEND_SERVER_PASSWORD }} # 추후 SSH Key로 교체
+          script: |
+            IMAGE_TAG=${{ needs.tag_and_build.outputs.new_tag }}
+            IMAGE_NAME=${{ secrets.DOCKERHUB_USERNAME }}/harimdev-backend
+          
+            docker stop harimdev-backend || true
+            docker rm harimdev-backend || true
+            docker pull $IMAGE_NAME:$IMAGE_TAG
+            
+            # docker run 명령어 수정
+            docker run -d --name harimdev-backend -p 8080:8080 \
+              --network dev-network \
+              -v /home/halim/portfolio/Backend/src/main/resources/application.yml:/app/application.yml \
+              $IMAGE_NAME:$IMAGE_TAG
+          
+            echo "===== Running containers ====="
+            docker ps -a | grep harimdev-backend

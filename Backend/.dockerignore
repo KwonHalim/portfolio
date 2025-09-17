@@ -1,0 +1,22 @@
+# .dockerignore
+
+# Gradle
+.gradle
+build
+!build/libs/*.jar
+
+# IDE
+.idea
+*.iml
+
+# Log files
+*.log
+
+# Git
+.git
+.gitignore
+
+# OS generated files
+.DS_Store
+
+src/main/resources/application.yml
