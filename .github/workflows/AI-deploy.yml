@@ -24,6 +24,8 @@ jobs:
         uses: mathieudutour/github-tag-action@v6.2
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
+          tag_prefix: 'AI-'
+
 
       - name: Print new tag
         if: ${{ steps.tag_version.outputs.new_tag != '' }}
