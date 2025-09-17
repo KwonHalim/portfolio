@@ -74,6 +74,7 @@ jobs:
             docker run -d --name harimdev-backend -p 8080:8080 \
               --network backend-network \
               -v /home/halim/portfolio/Backend/src/main/resources/application.yml:/app/application.yml \
+              -v /home/halim/portfolio/Backend/static-resources:/app/external-static \
               $IMAGE_NAME:$IMAGE_TAG
           
             echo "===== Running containers ====="

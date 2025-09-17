@@ -13,6 +13,13 @@ module.exports = {
     'subject-empty': [2, 'never'],
     // 헤더(첫 줄)의 최대 길이는 100자입니다.
     'header-max-length': [2, 'always', 100],
+
+      // Intellij 커밋이 안되서 설정 변경
+      'body-leading-blank': [0, 'always'], // 본문 시작 전 빈 줄 규칙 비활성화
+      'footer-leading-blank': [0, 'always'], // 꼬리말 시작 전 빈 줄 규칙 비활성화
+      'body-max-line-length': [0, 'always', Infinity], // 본문 줄 길이 제한 없음
+      'footer-max-line-length': [0, 'always', Infinity], // 꼬리말 줄 길이 제한 없음
+      'subject-case': [0, 'never'], // 제목의 케이스(대소문자) 규칙 비활성화
   },
 };
 
