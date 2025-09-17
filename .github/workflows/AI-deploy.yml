@@ -8,7 +8,7 @@ on:
       - 'AI/**'
 
 jobs:
-  tag_and_build:
+  ai_tag_and_build:
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -58,9 +58,9 @@ jobs:
           docker buildx build --platform linux/arm64 -t $IMAGE_NAME:$IMAGE_TAG --push ./AI
 
 
-  deploy:
-    needs: tag_and_build
-    if: ${{ needs.tag_and_build.outputs.new_tag != '' }}
+  ai_deploy:
+    needs: ai_tag_and_build
+    if: ${{ needs.ai_tag_and_build.outputs.new_tag != '' }}
     runs-on: self-hosted
     steps:
       - name: Deploy to AI Chat Server via SSH
@@ -70,7 +70,7 @@ jobs:
           username: ${{ secrets.AI_SERVER_USERNAME }}
           password: ${{ secrets.AI_SERVER_PASSWORD }} # 추후 SSH Key로 교체
           script: |
-            IMAGE_TAG=${{ needs.tag_and_build.outputs.new_tag }}
+            IMAGE_TAG=${{ needs.ai_tag_and_build.outputs.new_tag }}
             IMAGE_NAME=${{ secrets.DOCKERHUB_USERNAME }}/harimdev-ai
 
             docker stop harimdev-ai || true

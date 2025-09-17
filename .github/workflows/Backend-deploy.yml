@@ -8,7 +8,7 @@ on:
       - 'Backend/**'
 
 jobs:
-  tag_and_build:
+  backend_tag_and_build:
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -51,9 +51,9 @@ jobs:
           docker buildx build --platform linux/amd64 -t $IMAGE_NAME:$IMAGE_TAG --push ./Backend
 
 
-  deploy:
-    needs: tag_and_build
-    if: ${{ needs.tag_and_build.outputs.new_tag != '' }}
+  backend_deploy:
+    needs: backend_tag_and_build
+    if: ${{ needs.backend_tag_and_build.outputs.new_tag != '' }}
     runs-on: self-hosted
     steps:
       - name: Deploy to Backend Server via SSH
@@ -63,7 +63,7 @@ jobs:
           username: ${{ secrets.BACKEND_SERVER_USERNAME }}
           password: ${{ secrets.BACKEND_SERVER_PASSWORD }} # 추후 SSH Key로 교체
           script: |
-            IMAGE_TAG=${{ needs.tag_and_build.outputs.new_tag }}
+            IMAGE_TAG=${{ needs.backend_tag_and_build.outputs.new_tag }}
             IMAGE_NAME=${{ secrets.DOCKERHUB_USERNAME }}/harimdev-backend
           
             docker stop harimdev-backend || true
@@ -72,7 +72,7 @@ jobs:
             
             # docker run 명령어 수정
             docker run -d --name harimdev-backend -p 8080:8080 \
-              --network dev-network \
+              --network backend-network \
               -v /home/halim/portfolio/Backend/src/main/resources/application.yml:/app/application.yml \
               $IMAGE_NAME:$IMAGE_TAG
           
