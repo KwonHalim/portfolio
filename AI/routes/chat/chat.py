@@ -30,7 +30,7 @@ async def chat_message(
     """
     logger.info(f"Client IP: {request.client.host}")
 
-    result = chat_service.ask(question=message_data.message, session_id=message_data.sessionId)
+    result = await chat_service.ask(question=message_data.message, session_id=message_data.sessionId)
 
     if result:
         return SuccessResponse(result=result)

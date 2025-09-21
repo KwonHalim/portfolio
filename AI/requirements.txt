@@ -121,3 +121,4 @@ pymongo
 pandas
 python-multipart
 loguru
+redis

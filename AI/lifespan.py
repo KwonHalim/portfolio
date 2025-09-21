@@ -14,6 +14,7 @@ async def lifespan(app: FastAPI):
 
     # 1. 독립적인 무거운 객체들 먼저 생성
     embedding_strategy = await deps.get_embedding_strategy()
+    cache = deps.get_redis()
     llm = deps.get_llm()
     chat_db_strategy = deps.get_chat_db_strategy()
     prompt = deps.get_prompt() # 캐싱되므로 여기서 호출해도 무방
@@ -25,6 +26,8 @@ async def lifespan(app: FastAPI):
     embedding_service = await deps.get_embedding_service(embedding_strategy)
     bm_25_retriever = await deps.get_bm25_retriever(vector_repository)
     retriever = await deps.get_document_retriever(vector_repository, bm_25_retriever)
+    cache_strategy = deps.get_cache_strategy(cache, embedding_strategy)
+
 
 
     # 3. 캐싱된 가벼운 객체들도 가져오기
@@ -44,6 +47,7 @@ async def lifespan(app: FastAPI):
         llm=llm,
         chat_repository=chat_repository,
         vector_repository=vector_repository,
+        cache_strategy=cache_strategy,
     )
 
     print("--- ✅ 싱글톤 객체 생성 완료 ---")

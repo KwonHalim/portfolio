@@ -1,11 +1,14 @@
 from functools import lru_cache
 
+import redis
 from fastapi import Depends, Request
 from langchain_community.llms.huggingface_endpoint import HuggingFaceEndpoint
 from langchain_community.retrievers import BM25Retriever
 from langchain_core.language_models import BaseLanguageModel
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_google_genai import ChatGoogleGenerativeAI
+from redis.commands.search.field import TextField, VectorField
+from redis.commands.search.index_definition import IndexDefinition, IndexType
 
 from config import settings
 from database.chat.chat_strategy.chat_store_strategy import ChatStrategy
@@ -15,6 +18,8 @@ from database.vector.repository import VectorRepository
 from database.vector.vector_strategy.chroma_vector import ChromaVector
 from database.vector.vector_strategy.pg_vector_store import PGVectorStore
 from database.vector.vector_strategy.vector_store_strategy import VectorStoreStrategy
+from service.cache.cache_strategy import CacheStrategy
+from service.cache.redis_semantic_cache import RedisSemanticCache
 from service.chat_service import ChatService
 from service.chunk.chunk_strategy.chunk_strategy import ChunkStrategy
 from service.chunk.chunk_strategy.recursive_character_splitter import RecursiveCharacterSplitter
@@ -57,6 +62,10 @@ def get_llm() -> BaseLanguageModel:
     else:
         raise ValueError(f"지원하지 않는 LLM 타입입니다: {settings.LLM_TYPE}")
 
+def get_redis() -> redis.Redis:
+    return redis.Redis(host=settings.REDIS_HOST, port=settings.REDIS_PORT, decode_responses=False)
+
+
 def get_chat_db_strategy() -> ChatStrategy:
     return MongoChatStrategy(mongo_uri=settings.MONGO_DB_URL)
 
@@ -70,6 +79,56 @@ async def get_vector_store_strategy(
     else:
         raise ValueError(f"지원하지 않는 DB 타입입니다: {settings.VECTOR_DB_TYPE}")
 
+
+def get_cache_strategy(
+        cache_client: redis.Redis = Depends(get_redis),
+        embedding_model: EmbeddingStrategy = Depends(get_embedding_strategy)
+) -> CacheStrategy:
+    """
+    설정에 따라 캐시 전략 객체를 생성하고, 필요한 인프라(인덱스)를 설정합니다.
+    """
+    if settings.CACHE_TYPE == "redis_semantic":
+        # 1. 인덱스 생성을 위한 정보 준비
+        test_embedding = embedding_model.embed_query("test")
+        embedding_dim = len(test_embedding)
+        # 모델 임베딩을 자동으로 변환하기 위한 과정 Gemini embedding의 경우 3072이므로 3072입력하면 되듯이 간단한 임베딩 테스트를 통한 차원 확인
+
+        index_name = "llm_rag_cache_idx"
+        doc_prefix = "rag_cache:"
+        # 레디스에 삽입할 인덱스의 이름과 키의 접두사를 미리 설정
+
+        # 2. 인덱스 존재 여부 확인 및 생성
+        try:
+            cache_client.ft(index_name).info()
+        #     llg_rag_cache_idx인덱스 정보를 요청한다.
+        except redis.exceptions.ResponseError:
+            print(f"--- Redis 시맨틱 캐시 인덱스 '{index_name}' 생성을 시작합니다.(캐시 인덱스 정보 존재하지 않음) ---")
+            schema = (
+                TextField("question", as_name="question"),
+                TextField("answer", as_name="answer"),
+                VectorField("question_vector", "HNSW", {
+                    "TYPE": "FLOAT32",
+                    "DIM": embedding_dim,
+                    "DISTANCE_METRIC": "COSINE",
+                }),
+            )
+            # 스키마 정의
+            # question과 answer는 텍스트 필드, question_vector는 HNSW를 사용하는 알고리즘이라고 명시
+            # HNSW는 데이터를 찾는 데 사용되는 효율적 알고리즘
+            definition = IndexDefinition(prefix=[doc_prefix], index_type=IndexType.HASH)
+            # 해당 인덱스가 rag_cache: 로 시작하는 것만 관리하도록 한정
+            cache_client.ft(index_name).create_index(fields=schema, definition=definition)
+            print(f"✅ Redis 시맨틱 캐시 인덱스 '{index_name}' 생성 완료")
+
+        # 3. 준비된 인프라를 바탕으로 캐시 전략 객체 반환
+        return RedisSemanticCache(
+            redis_client=cache_client,
+            embedding_model=embedding_model,
+            embedding_dim=embedding_dim,
+            similarity_threshold = 0.95, #코사인 유사도 값
+        )
+    else:
+        raise ValueError(f"지원하지 않는 캐시 타입입니다: {settings.CACHE_TYPE}")
 
 # ----------------------------------------------------------------
 # 2. 데이터 접근 계층 (Repository) 생성
@@ -151,8 +210,15 @@ async def get_chat_service(
     llm: BaseLanguageModel = Depends(get_llm),
     chat_repository: ChatRepository = Depends(get_chat_repository),
     vector_repository: VectorRepository = Depends(get_vector_repository),
+    cache_strategy: CacheStrategy = Depends(get_cache_strategy),
 ) -> ChatService:
-    return ChatService(retriever=retriever, prompt=prompt, llm=llm, chat_repository=chat_repository, vector_repository=vector_repository)
+    return ChatService(
+        retriever=retriever,
+        prompt=prompt,
+        llm=llm,
+        chat_repository=chat_repository,
+        vector_repository=vector_repository,
+        cache_strategy=cache_strategy)
 
 async def get_rag_service(
     chunk_service: ChunkService = Depends(get_chunk_service),
