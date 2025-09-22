@@ -9,6 +9,7 @@ from langchain_core.prompts import ChatPromptTemplate
 from langchain_google_genai import ChatGoogleGenerativeAI
 from redis.commands.search.field import TextField, VectorField
 from redis.commands.search.index_definition import IndexDefinition, IndexType
+from redis.lock import Lock
 
 from config import settings
 from database.chat.chat_strategy.chat_store_strategy import ChatStrategy
@@ -18,6 +19,7 @@ from database.vector.repository import VectorRepository
 from database.vector.vector_strategy.chroma_vector import ChromaVector
 from database.vector.vector_strategy.pg_vector_store import PGVectorStore
 from database.vector.vector_strategy.vector_store_strategy import VectorStoreStrategy
+from exception.model.exceptions import CustomException
 from service.cache.cache_strategy import CacheStrategy
 from service.cache.redis_semantic_cache import RedisSemanticCache
 from service.chat_service import ChatService
@@ -86,6 +88,7 @@ def get_cache_strategy(
 ) -> CacheStrategy:
     """
     설정에 따라 캐시 전략 객체를 생성하고, 필요한 인프라(인덱스)를 설정합니다.
+    여러 워커가 동시에 인덱스를 생성하는 문제를 방지하기 위해 Lock을 사용합니다.
     """
     if settings.CACHE_TYPE == "redis_semantic":
         # 1. 인덱스 생성을 위한 정보 준비
@@ -97,28 +100,36 @@ def get_cache_strategy(
         doc_prefix = "rag_cache:"
         # 레디스에 삽입할 인덱스의 이름과 키의 접두사를 미리 설정
 
-        # 2. 인덱스 존재 여부 확인 및 생성
+
+        # 분산 락 설정
+        lock_name = "llm_rag_cache_lock"
         try:
-            cache_client.ft(index_name).info()
-        #     llg_rag_cache_idx인덱스 정보를 요청한다.
-        except redis.exceptions.ResponseError:
-            print(f"--- Redis 시맨틱 캐시 인덱스 '{index_name}' 생성을 시작합니다.(캐시 인덱스 정보 존재하지 않음) ---")
-            schema = (
-                TextField("question", as_name="question"),
-                TextField("answer", as_name="answer"),
-                VectorField("question_vector", "HNSW", {
-                    "TYPE": "FLOAT32",
-                    "DIM": embedding_dim,
-                    "DISTANCE_METRIC": "COSINE",
-                }),
-            )
-            # 스키마 정의
-            # question과 answer는 텍스트 필드, question_vector는 HNSW를 사용하는 알고리즘이라고 명시
-            # HNSW는 데이터를 찾는 데 사용되는 효율적 알고리즘
-            definition = IndexDefinition(prefix=[doc_prefix], index_type=IndexType.HASH)
-            # 해당 인덱스가 rag_cache: 로 시작하는 것만 관리하도록 한정
-            cache_client.ft(index_name).create_index(fields=schema, definition=definition)
-            print(f"✅ Redis 시맨틱 캐시 인덱스 '{index_name}' 생성 완료")
+            with Lock(cache_client, lock_name, timeout=15): #Lock을 획득한 경우에만 캐시 생성이 가능
+                # 2. 인덱스 존재 여부 확인 및 생성
+                try:
+                    cache_client.ft(index_name).info()
+                #     llg_rag_cache_idx인덱스 정보를 요청한다.
+                except redis.exceptions.ResponseError:
+                    print(f"--- Redis 시맨틱 캐시 인덱스 '{index_name}' 생성을 시작합니다.(캐시 인덱스 정보 존재하지 않음) ---")
+                    schema = (
+                        TextField("question", as_name="question"),
+                        TextField("answer", as_name="answer"),
+                        VectorField("question_vector", "HNSW", {
+                            "TYPE": "FLOAT32",
+                            "DIM": embedding_dim,
+                            "DISTANCE_METRIC": "COSINE",
+                        }),
+                    )
+                    # 스키마 정의
+                    # question과 answer는 텍스트 필드, question_vector는 HNSW를 사용하는 알고리즘이라고 명시
+                    # HNSW는 데이터를 찾는 데 사용되는 효율적 알고리즘
+                    definition = IndexDefinition(prefix=[doc_prefix], index_type=IndexType.HASH)
+                    # 해당 인덱스가 rag_cache: 로 시작하는 것만 관리하도록 한정
+                    cache_client.ft(index_name).create_index(fields=schema, definition=definition)
+                    print(f"✅ Redis 시맨틱 캐시 인덱스 '{index_name}' 생성 완료")
+        except Exception as e:
+            print(f"락 획득 또는 인덱스 생성 중 오류 발생: {e}")
+            raise CustomException(status_code=501, message=str(e), reason="레디스 생성 오류", field="redis")
 
         # 3. 준비된 인프라를 바탕으로 캐시 전략 객체 반환
         return RedisSemanticCache(
