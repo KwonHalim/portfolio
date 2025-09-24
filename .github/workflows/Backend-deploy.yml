@@ -75,6 +75,7 @@ jobs:
               --network backend-network \
               -v /home/halim/portfolio/Backend/src/main/resources/application.yml:/app/application.yml \
               -v /home/halim/portfolio/Backend/static-resources:/app/external-static \
+              -v /home/halim/logs:/root/spring/logs \
               $IMAGE_NAME:$IMAGE_TAG
           
             echo "===== Running containers ====="

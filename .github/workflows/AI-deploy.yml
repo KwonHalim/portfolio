@@ -79,6 +79,7 @@ jobs:
             docker run -d --name harimdev-ai -p 8000:8000 \
               --network ai-network \
               --env-file /home/halim/portfolio/AI/.env \
+              -v /home/halim/logs:AI_logs \
               $IMAGE_NAME:$IMAGE_TAG
 
             echo "===== Running containers ====="
