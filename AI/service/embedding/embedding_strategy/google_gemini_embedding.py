@@ -1,6 +1,7 @@
 import time
 from typing import List
 
+from fastapi.logger import logger
 from langchain_google_genai import GoogleGenerativeAIEmbeddings
 
 from service.embedding.embedding_strategy.embedding_strategy import EmbeddingStrategy
@@ -40,14 +41,14 @@ class GoogleGeminiEmbedding(EmbeddingStrategy):
             List[List[float]]: 각 텍스트에 대한 임베딩 벡터의 리스트.
         """
 
-        print(f"--- Google Gemini로 {len(texts)}개 문서 임베딩 중 ---")
+        logger.info(f"--- Google Gemini로 {len(texts)}개 문서 임베딩 중 ---")
         batch_size = 15
         all_embeddings = []
-        print(f"배치사이즈: {batch_size}로 진행합니다.")
+        logger.info(f"배치사이즈: {batch_size}로 진행합니다.")
         for i in range(0, len(texts), batch_size):
 
             batch_texts = texts[i:i + batch_size]
-            print(f"--- 임베딩 처리 중: {i + 1} ~ {i + len(batch_texts)} / {len(texts)} ---")
+            logger.info(f"--- 임베딩 처리 중: {i + 1} ~ {i + len(batch_texts)} / {len(texts)} ---")
 
             batch_embeddings = self._engine.embed_documents(batch_texts)
             all_embeddings.extend(batch_embeddings)
@@ -70,5 +71,5 @@ class GoogleGeminiEmbedding(EmbeddingStrategy):
         Returns:
             List[float]: 입력된 텍스트에 대한 임베딩 벡터.
         """
-        print(f"--- Google Gemini로 쿼리 임베딩 중: '{text}' ---")
+        logger.info(f"--- Google Gemini로 쿼리 임베딩 중: '{text}' ---")
         return self._engine.embed_query(text)
