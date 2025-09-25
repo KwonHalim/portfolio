@@ -24,6 +24,7 @@ dependencies {
 //    implementation 'mysql:mysql-connector-java:8.0.33'
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
     implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.springframework.boot:spring-boot-starter-mail'
     // PostgreSQL
     runtimeOnly 'org.postgresql:postgresql'
 

@@ -11,13 +11,16 @@ import portfolio.backend.repository.FeedBackRepository;
 @RequiredArgsConstructor
 public class FeedBackService {
     private final FeedBackRepository feedBackRepository;
+    private final EmailService emailService;
 
-    public Boolean saveFeedBack(String feedback, String session) {
-        Feedback save = feedBackRepository.save(Feedback.builder()
-                        .session(session)
-                        .feedback(feedback)
-                        .build());
+    public Feedback saveFeedBack(String feedback, String session) {
+        Feedback feedbackEntity = Feedback.builder()
+                .session(session)
+                .feedback(feedback)
+                .build();
 
-        return !save.getFeedback().isEmpty();
+        emailService.sendEmail(feedback);
+
+        return feedBackRepository.save(feedbackEntity);
     }
 }
