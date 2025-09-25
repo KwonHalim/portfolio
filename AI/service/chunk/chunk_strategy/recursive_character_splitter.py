@@ -16,7 +16,7 @@ class RecursiveCharacterSplitter(ChunkStrategy):
     점점 더 작은 단위(예: '\n', ' ')로 재귀적으로 분할을 진행합니다.
     """
 
-    def __init__(self, chunk_size: int = 500, chunk_overlap: int = 100):
+    def __init__(self, chunk_size: int = 1000, chunk_overlap: int = 100):
         """
         RecursiveCharacterSplitter 전략을 초기화합니다.
 
