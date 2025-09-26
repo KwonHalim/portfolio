@@ -4,6 +4,7 @@ from starlette.middleware.cors import CORSMiddleware
 from lifespan import lifespan
 from routes.chat.chat import chat_router
 from routes.document.document import document_router
+from routes.health import health
 from utils.log_config import setup_logging
 
 # 로깅 설정
@@ -37,3 +38,4 @@ app.add_middleware(
 
 app.include_router(router=document_router)
 app.include_router(router=chat_router)
+app.include_router(router=health)
