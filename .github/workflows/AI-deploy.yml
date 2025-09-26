@@ -8,59 +8,48 @@ on:
       - 'AI/**'
 
 jobs:
-  ai_tag_and_build:
+  ai_build:
     runs-on: ubuntu-latest
     permissions:
       contents: write
     outputs:
-      new_tag: ${{ steps.tag_version.outputs.new_tag }}
+      image_tag: ${{ steps.set_tag.outputs.image_tag }}
 
     steps:
       - name: Checkout source
         uses: actions/checkout@v4
 
-      - name: Bump version and push tag
-        id: tag_version
-        uses: mathieudutour/github-tag-action@v6.2
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          tag_prefix: 'AI-'
-
-
-      - name: Print new tag
-        if: ${{ steps.tag_version.outputs.new_tag != '' }}
+      - name: Set temp image tag
+        id: set_tag
         run: |
-          echo "New tag created: ${{ steps.tag_version.outputs.new_tag }}"
-#          깃허브 액션 서버는 amd64,내 서버는 arm64이므로 환경 호환이 안되므로 빌드 환경을 수정해야 한다.
-      # 1. QEMU 설정 (다른 아키텍처 에뮬레이션)
+          echo "image_tag=temp-${GITHUB_SHA::7}" >> $GITHUB_ENV
+          echo "image_tag=temp-${GITHUB_SHA::7}" >> $GITHUB_OUTPUT
+
+        # 깃허브 액션 서버는 amd64,내 서버는 arm64이므로 환경 호환이 안되므로 빌드 환경을 수정해야 한다.
+        # 1. QEMU 설정 (다른 아키텍처 에뮬레이션)
       - name: Set up QEMU
-        if: ${{ steps.tag_version.outputs.new_tag != '' }}
         uses: docker/setup-qemu-action@v3
 
-      # 2. Docker Buildx 설정 (멀티플랫폼 빌드 도구)
+        # 2. Docker Buildx 설정 (멀티플랫폼 빌드 도구)
       - name: Set up Docker Buildx
-        if: ${{ steps.tag_version.outputs.new_tag != '' }}
         uses: docker/setup-buildx-action@v3
 
       - name: Log in to DockerHub
-        if: ${{ steps.tag_version.outputs.new_tag != '' }}
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
 
-      # 4. ARM64용 이미지 빌드 및 푸시
-      - name: Build and push Docker image for ARM64
-        if: ${{ steps.tag_version.outputs.new_tag != '' }}
+        # 4. ARM64용 이미지 빌드 및 푸시
+      - name: Build and push Docker image for ARM64 (temp tag)
         run: |
-          IMAGE_TAG=${{ steps.tag_version.outputs.new_tag }}
+          IMAGE_TAG=${{ steps.set_tag.outputs.image_tag }}
           IMAGE_NAME=${{ secrets.DOCKERHUB_USERNAME }}/harimdev-ai
           docker buildx build --platform linux/arm64 -t $IMAGE_NAME:$IMAGE_TAG --push ./AI
 
 
-  ai_deploy:
-    needs: ai_tag_and_build
-    if: ${{ needs.ai_tag_and_build.outputs.new_tag != '' }}
+  ai_deploy_and_tag:
+    needs: ai_build
     runs-on: self-hosted
     steps:
       - name: Deploy to AI Chat Server via SSH
@@ -68,9 +57,9 @@ jobs:
         with:
           host: ${{ secrets.AI_SERVER_HOST }}
           username: ${{ secrets.AI_SERVER_USERNAME }}
-          password: ${{ secrets.AI_SERVER_PASSWORD }} # 추후 SSH Key로 교체
+          password: ${{ secrets.AI_SERVER_PASSWORD }}
           script: |
-            IMAGE_TAG=${{ needs.ai_tag_and_build.outputs.new_tag }}
+            IMAGE_TAG=${{ needs.ai_build.outputs.image_tag }}
             IMAGE_NAME=${{ secrets.DOCKERHUB_USERNAME }}/harimdev-ai
 
             docker stop harimdev-ai || true
@@ -81,7 +70,52 @@ jobs:
               --env-file /home/halim/portfolio/AI/.env \
               -v /home/halim/logs:/AI_logs \
               $IMAGE_NAME:$IMAGE_TAG
-              
 
             echo "===== Running containers ====="
             docker ps -a | grep harimdev-ai
+
+      - name: Wait for server health check
+        run: |
+          for i in {1..10}; do
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://${{ secrets.AI_SERVER_HOST }}:8000/health || true)
+            echo "Health check status: $STATUS"
+            if [ "$STATUS" = "200" ]; then
+              echo "Health check passed"
+              exit 0
+            fi
+            sleep 5
+          done
+          echo "Health check failed"
+          exit 1
+
+      - name: Bump version and push tag (only if health check passed)
+        id: tag_version
+        uses: mathieudutour/github-tag-action@v6.2
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          tag_prefix: 'AI-'
+
+      - name: Re-tag & Push Docker image with new tag
+        if: ${{ steps.tag_version.outputs.new_tag != '' }}
+        run: |
+          IMAGE_NAME=${{ secrets.DOCKERHUB_USERNAME }}/harimdev-ai
+          TEMP_TAG=${{ needs.ai_build.outputs.image_tag }}
+          NEW_TAG=${{ steps.tag_version.outputs.new_tag }}
+
+          docker pull $IMAGE_NAME:$TEMP_TAG
+          docker tag $IMAGE_NAME:$TEMP_TAG $IMAGE_NAME:$NEW_TAG
+          docker push $IMAGE_NAME:$NEW_TAG
+
+      - name: Delete temp tag from Docker Hub (always)
+        if: always()   # 성공/실패 상관없이 실행
+        run: | #마지막의 true는 에러가 발생해도 무시하고 성공으로 처리 ->워크플로우 중지 안되도록
+          DOCKER_USER=${{ secrets.DOCKERHUB_USERNAME }}
+          DOCKER_PASS=${{ secrets.DOCKERHUB_PASSWORD }}
+          TEMP_TAG=${{ needs.ai_build.outputs.image_tag }}
+          TOKEN=$(curl -s -H "Content-Type: application/json" \
+            -X POST -d "{\"username\":\"$DOCKER_USER\",\"password\":\"$DOCKER_PASS\"}" \
+            https://hub.docker.com/v2/users/login/ | jq -r .token)
+          curl -s -X DELETE \
+            -H "Authorization: JWT $TOKEN" \
+            https://hub.docker.com/v2/repositories/$DOCKER_USER/harimdev-ai/tags/$TEMP_TAG/ \
+            || truecurl 
