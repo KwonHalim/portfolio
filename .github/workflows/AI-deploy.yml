@@ -1,4 +1,6 @@
 name: AI CI/CD Pipeline
+permissions:
+    contents: write
 
 on:
   push:
@@ -10,8 +12,6 @@ on:
 jobs:
   ai_build:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
     outputs:
       image_tag: ${{ steps.set_tag.outputs.image_tag }}
 
