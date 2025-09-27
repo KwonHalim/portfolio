@@ -34,7 +34,7 @@ public class SecurityConfig {
                                 "/videos/**"
                         ).permitAll()
                         // 헬스체크/기본 페이지
-                        .requestMatchers(HttpMethod.GET, "/", "/health", ":8080/favicon.ico").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/", "/actuator/health", "/favicon.ico").permitAll()
                         // API 공개 (프론트에서 호출)
                         .requestMatchers("/api/**").permitAll()
                         .requestMatchers("/error").permitAll()
