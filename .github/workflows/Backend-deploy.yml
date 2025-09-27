@@ -107,7 +107,7 @@ jobs:
           docker push $IMAGE_NAME:$NEW_TAG
 
       - name: Delete temp tag from Docker Hub (always)
-        if: always()
+        if: success()
         run: |
           DOCKER_USER=${{ secrets.DOCKERHUB_USERNAME }}
           DOCKER_PASS=${{ secrets.DOCKERHUB_PASSWORD }}
