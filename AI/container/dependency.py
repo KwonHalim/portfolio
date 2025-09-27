@@ -44,7 +44,7 @@ def get_chunk_strategy() -> ChunkStrategy:
     return RecursiveCharacterSplitter(chunk_size=500, chunk_overlap=100)
 
 async def get_embedding_strategy() -> EmbeddingStrategy:
-    return GoogleGeminiEmbedding(model_name="gemini-embedding-001", api_key=settings.GENAI_API_KEY)
+    return GoogleGeminiEmbedding(model_name=settings.EMBEDDING_MODEL, api_key=settings.GENAI_API_KEY)
 
 def get_llm() -> BaseLanguageModel:
     """설정에 따라 적절한 LLM을 생성하여 반환합니다."""
@@ -58,7 +58,7 @@ def get_llm() -> BaseLanguageModel:
         )
     elif settings.LLM_TYPE == "google":
         return ChatGoogleGenerativeAI(
-            model="gemini-1.5-flash",
+            model=settings.LLM_MODEL,
             google_api_key=settings.GENAI_API_KEY
         )
     else:

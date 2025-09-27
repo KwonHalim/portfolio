@@ -24,6 +24,8 @@ class Settings(BaseSettings):
     REDIS_HOST:str
     REDIS_PORT: int
     CACHE_TYPE:str
+    LLM_MODEL:str
+    EMBEDDING_MODEL:str
 
 # 설정 객체 생성 (다른 파일에서 import하여 사용)
 settings = Settings()
