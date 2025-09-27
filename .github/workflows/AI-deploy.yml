@@ -123,3 +123,19 @@ jobs:
             -H "Authorization: JWT $TOKEN" \
             https://hub.docker.com/v2/repositories/$DOCKER_USER/harimdev-ai/tags/$TEMP_TAG/ \
             || true
+      - name: Clean up temp Docker image on server
+        if: success()
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.AI_SERVER_HOST }}
+          username: ${{ secrets.AI_SERVER_USERNAME }}
+          password: ${{ secrets.AI_SERVER_PASSWORD }}
+          script: |
+            IMAGE_TAG=${{ needs.ai_build.outputs.image_tag }}
+            IMAGE_NAME=${{ secrets.DOCKERHUB_USERNAME }}/harimdev-ai
+            
+            echo "Removing temp Docker image from server (container stays running)..."
+            docker rmi $IMAGE_NAME:$IMAGE_TAG || true
+            
+            echo "Pruning dangling images..."
+            docker image prune -f || true
