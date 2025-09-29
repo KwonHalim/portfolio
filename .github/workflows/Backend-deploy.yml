@@ -95,16 +95,22 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
 
-      - name: Re-tag & Push Docker image with new tag
+      - name: Re-tag & Push Docker image with new tag (on server)
         if: ${{ steps.tag_version.outputs.new_tag != '' }}
-        run: |
-          IMAGE_NAME=${{ secrets.DOCKERHUB_USERNAME }}/harimdev-backend
-          TEMP_TAG=${{ needs.backend_build.outputs.image_tag }}
-          NEW_TAG=${{ steps.tag_version.outputs.new_tag }}
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.BACKEND_SERVER_HOST }}
+          username: ${{ secrets.BACKEND_SERVER_USERNAME }}
+          password: ${{ secrets.BACKEND_SERVER_PASSWORD }}
+          script: |
+            IMAGE_NAME=${{ secrets.DOCKERHUB_USERNAME }}/harimdev-backend
+            TEMP_TAG=${{ needs.backend_build.outputs.image_tag }}
+            NEW_TAG=${{ steps.tag_version.outputs.new_tag }}
 
-          docker pull $IMAGE_NAME:$TEMP_TAG
-          docker tag $IMAGE_NAME:$TEMP_TAG $IMAGE_NAME:$NEW_TAG
-          docker push $IMAGE_NAME:$NEW_TAG
+            docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_PASSWORD }}
+            docker pull $IMAGE_NAME:$TEMP_TAG
+            docker tag $IMAGE_NAME:$TEMP_TAG $IMAGE_NAME:$NEW_TAG
+            docker push $IMAGE_NAME:$NEW_TAG
 
       - name: Delete temp tag from Docker Hub (always)
         if: success()
