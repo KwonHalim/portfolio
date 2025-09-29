@@ -136,9 +136,14 @@ jobs:
           script: |
             IMAGE_TAG=${{ needs.backend_build.outputs.image_tag }}
             IMAGE_NAME=${{ secrets.DOCKERHUB_USERNAME }}/harimdev-backend
+            NEW_TAG=${{ steps.tag_version.outputs.new_tag }}
 
             echo "Removing temp Docker image from server (container stays running)..."
             docker rmi $IMAGE_NAME:$IMAGE_TAG || true
+
+            echo "Removing tag Docker image from server (optional)..."
+            docker rmi $IMAGE_NAME:$NEW_TAG || true
+
 
             echo "Pruning dangling images..."
             docker image prune -f || true

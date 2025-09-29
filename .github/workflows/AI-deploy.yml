@@ -133,9 +133,14 @@ jobs:
           script: |
             IMAGE_TAG=${{ needs.ai_build.outputs.image_tag }}
             IMAGE_NAME=${{ secrets.DOCKERHUB_USERNAME }}/harimdev-ai
+            NEW_TAG=${{ steps.tag_version.outputs.new_tag }}
+
             
             echo "Removing temp Docker image from server (container stays running)..."
             docker rmi $IMAGE_NAME:$IMAGE_TAG || true
+
+            echo "Removing tag Docker image from server ..."
+            docker rmi $IMAGE_NAME:$NEW_TAG || true
             
             echo "Pruning dangling images..."
             docker image prune -f || true
