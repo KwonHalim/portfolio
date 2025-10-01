@@ -1,5 +1,6 @@
 from typing import List
 
+from fastapi.logger import logger
 from langchain_core.documents import Document
 
 from service.chunk.chunk_strategy.chunk_strategy import ChunkStrategy
@@ -29,6 +30,6 @@ class ChunkService:
         Returns:
             List[Document]: 분할된 청크(Document 객체)의 리스트.
         """
-        print("--- 문서 처리 및 청킹 시작 ---")
+        logger.info("--- 문서 처리 및 청킹 시작 ---")
         chunks = self.chunk_strategy.split_documents(documents)
         return chunks

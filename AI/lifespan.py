@@ -3,6 +3,7 @@
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
+from fastapi.logger import logger
 
 import container.dependency as deps
 
@@ -10,7 +11,7 @@ import container.dependency as deps
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # --- ⚙️ 애플리케이션 시작 시 실행 ---
-    print("--- 애플리케이션 시작: 싱글톤 객체 생성 ---")
+    logger.info("--- 애플리케이션 시작: 싱글톤 객체 생성 ---")
 
     # 1. 독립적인 무거운 객체들 먼저 생성
     embedding_strategy = await deps.get_embedding_strategy()
@@ -50,7 +51,7 @@ async def lifespan(app: FastAPI):
         cache_strategy=cache_strategy,
     )
 
-    print("--- ✅ 싱글톤 객체 생성 완료 ---")
+    logger.info("--- ✅ 싱글톤 객체 생성 완료 ---")
     yield
     # --- 🔌 애플리케이션 종료 시 실행 ---
-    print("--- 애플리케이션 종료 ---")
+    logger.info("--- 애플리케이션 종료 ---")

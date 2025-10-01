@@ -3,6 +3,7 @@ import shutil
 import tempfile
 
 from fastapi import APIRouter, Depends, UploadFile, File, HTTPException, BackgroundTasks
+from fastapi.logger import logger
 from starlette.responses import FileResponse
 
 from api_model.response_models import SuccessResponse
@@ -42,7 +43,7 @@ async def process_documents(
 
         qa_content_bytes = await qa_file.read()
         qa_content_str = qa_content_bytes.decode('utf-8')
-        print(f"QA 파일 읽기 완료: {qa_file.filename}")
+        logger.info(f"QA 파일 읽기 완료: {qa_file.filename}")
 
     if paragraph_file:
         if not paragraph_file.filename.endswith(('.txt', '.md')):
@@ -50,7 +51,7 @@ async def process_documents(
 
         paragraph_content_bytes = await paragraph_file.read()
         paragraph_content_str = paragraph_content_bytes.decode('utf-8')
-        print(f"문단 파일 읽기 완료: {paragraph_file.filename}")
+        logger.info(f"문단 파일 읽기 완료: {paragraph_file.filename}")
 
     # 최소 하나의 파일은 제공되어야 함
     if not qa_content_str and not paragraph_content_str:

@@ -1,5 +1,6 @@
 import numpy as np
 import redis
+from fastapi.logger import logger
 from langchain_core.embeddings import Embeddings
 from redis.commands.search.query import Query
 
@@ -56,16 +57,16 @@ class RedisSemanticCache(CacheStrategy):
                 # 0에 가까울수록 유사한 것이기에(KNN알고리즘) 유사도로 변환하기 위해 1로 변환
 
                 if score > self.similarity_threshold:
-                    print(f"✅ Cache Hit! (유사도: {score:.4f})")
+                    logger.info(f"✅ Cache Hit! (유사도: {score:.4f})")
                     return {
                         "answer": most_similar.answer,
                         "original_question": most_similar.question,
                         "score": score
                     }
         except Exception as e:
-            print(f"Redis 캐시 검색 오류: {e}")
+            logger.info(f"Redis 캐시 검색 오류: {e}")
 
-        print("❌ Cache Miss!")
+        logger.info("❌ Cache Miss!")
         return None
 
     async def add_to_cache(self, question: str, answer: str):
@@ -80,4 +81,4 @@ class RedisSemanticCache(CacheStrategy):
             "question_vector": question_vector
         }
         self.r.hset(key, mapping=item)
-        print(f"새로운 Q&A를 Redis 캐시에 추가했습니다. (Key: {key})")
+        logger.info(f"새로운 Q&A를 Redis 캐시에 추가했습니다. (Key: {key})")

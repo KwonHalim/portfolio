@@ -2,6 +2,7 @@ from functools import lru_cache
 
 import redis
 from fastapi import Depends, Request
+from fastapi.logger import logger
 from langchain_community.llms.huggingface_endpoint import HuggingFaceEndpoint
 from langchain_community.retrievers import BM25Retriever
 from langchain_core.language_models import BaseLanguageModel
@@ -110,7 +111,7 @@ def get_cache_strategy(
                     cache_client.ft(index_name).info()
                 #     llg_rag_cache_idx인덱스 정보를 요청한다.
                 except redis.exceptions.ResponseError:
-                    print(f"--- Redis 시맨틱 캐시 인덱스 '{index_name}' 생성을 시작합니다.(캐시 인덱스 정보 존재하지 않음) ---")
+                    logger.info(f"--- Redis 시맨틱 캐시 인덱스 '{index_name}' 생성을 시작합니다.(캐시 인덱스 정보 존재하지 않음) ---")
                     schema = (
                         TextField("question", as_name="question"),
                         TextField("answer", as_name="answer"),
@@ -126,9 +127,9 @@ def get_cache_strategy(
                     definition = IndexDefinition(prefix=[doc_prefix], index_type=IndexType.HASH)
                     # 해당 인덱스가 rag_cache: 로 시작하는 것만 관리하도록 한정
                     cache_client.ft(index_name).create_index(fields=schema, definition=definition)
-                    print(f"✅ Redis 시맨틱 캐시 인덱스 '{index_name}' 생성 완료")
+                    logger.info(f"✅ Redis 시맨틱 캐시 인덱스 '{index_name}' 생성 완료")
         except Exception as e:
-            print(f"락 획득 또는 인덱스 생성 중 오류 발생: {e}")
+            logger.info(f"락 획득 또는 인덱스 생성 중 오류 발생: {e}")
             raise CustomException(status_code=501, message=str(e), reason="레디스 생성 오류", field="redis")
 
         # 3. 준비된 인프라를 바탕으로 캐시 전략 객체 반환
@@ -136,7 +137,7 @@ def get_cache_strategy(
             redis_client=cache_client,
             embedding_model=embedding_model,
             embedding_dim=embedding_dim,
-            similarity_threshold = 0.95, #코사인 유사도 값
+            similarity_threshold = 0.97, #코사인 유사도 값
         )
     else:
         raise ValueError(f"지원하지 않는 캐시 타입입니다: {settings.CACHE_TYPE}")
@@ -187,15 +188,15 @@ async def get_bm25_retriever(
      DB에 있는 모든 문서를 가져와 BM25Retriever를 생성합니다.
      애플리케이션 시작 시 한 번만 호출됩니다.
      """
-    print("--- BM25 Retriever 생성을 시작합니다. 모든 문서를 로드합니다... ---")
+    logger.info("--- BM25 Retriever 생성을 시작합니다. 모든 문서를 로드합니다... ---")
     all_docs = vector_repository.get_all_documents()
     if not all_docs:
         # 문서가 없을 경우, LangChain이 오류를 내지 않도록 빈 리스트 삽입
-        print("문서가 비어있습니다.")
+        logger.info("문서가 비어있습니다.")
         return None
 
     retriever = BM25Retriever.from_documents(all_docs)
-    print(f"--- ✅ BM25 Retriever 생성 완료. 총 {len(all_docs)}개의 문서로 인덱싱됨 ---")
+    logger.info(f"--- ✅ BM25 Retriever 생성 완료. 총 {len(all_docs)}개의 문서로 인덱싱됨 ---")
     return retriever
 
 

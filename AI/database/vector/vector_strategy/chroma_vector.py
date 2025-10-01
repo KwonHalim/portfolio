@@ -2,6 +2,7 @@
 from typing import List, Optional
 
 import chromadb
+from fastapi.logger import logger
 from langchain_chroma import Chroma
 from langchain_core.documents import Document
 
@@ -30,14 +31,14 @@ class ChromaVector(VectorStoreStrategy):
         문서를 ChromaDB에 저장합니다.
         """
         self.vectorstore.add_documents(documents=chunks)
-        print(f"💾 {len(chunks)}개의 문서를 ChromaDB에 저장 완료")
+        logger.info(f"💾 {len(chunks)}개의 문서를 ChromaDB에 저장 완료")
 
     def query(self, query_text: str, k: int = 3, source_type: Optional[str] = None) -> list[tuple[Document, float]]:
         """유사도 검색을 수행하고 (문서, 점수) 튜플 리스트를 반환합니다."""
         # 기본 조건으로 Document.page_content의 유사도를 계산하여 반환합니다.
         if source_type:
             results = self.vectorstore.similarity_search_with_relevance_scores(query_text, k=k, source_type=source_type)
-        # print(f"🔍 '{query_text}' 쿼리로 유사 문서 검색 완료")
+        # logger.info(f"🔍 '{query_text}' 쿼리로 유사 문서 검색 완료")
         else:
             results = self.vectorstore.similarity_search_with_relevance_scores(query_text, k=k)
         return results
@@ -76,14 +77,14 @@ class ChromaVector(VectorStoreStrategy):
             if is_good:
                 # 좋아요 필드 증가
                 current_metadata['likes'] = current_metadata.get('likes', 0) + 1
-                print(f"  - ID '{doc_id}'의 'likes'를 {current_metadata['likes']}로 변경합니다.")
+                logger.info(f"  - ID '{doc_id}'의 'likes'를 {current_metadata['likes']}로 변경합니다.")
             elif not is_good:
                 # 싫어요
                 current_metadata['dislikes'] = current_metadata.get('dislikes', 0) + 1
-                print(f"  - ID '{doc_id}'의 'dislikes'를 {current_metadata['dislikes']}로 변경합니다.")
+                logger.info(f"  - ID '{doc_id}'의 'dislikes'를 {current_metadata['dislikes']}로 변경합니다.")
             # 업데이트 수행
             collection.update(
                 ids=[doc_id],
                 metadatas=[current_metadata]
             )
-            print("✅ 업데이트 완료!")
+            logger.info("✅ 업데이트 완료!")

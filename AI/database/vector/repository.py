@@ -1,5 +1,7 @@
 from typing import Optional, List
 
+from fastapi.logger import logger
+
 from database.vector.vector_strategy.vector_store_strategy import VectorStoreStrategy
 
 
@@ -15,9 +17,9 @@ class VectorRepository:
         벡터 스토어에 문서를 추가합니다.
         :param documents: 추가할 문서들
         """
-        print("--- 벡터 스토어에 문서 추가 시작 ---")
+        logger.info("--- 벡터 스토어에 문서 추가 시작 ---")
         self.vector_db.add_documents(documents)
-        print("--- 벡터 스토어에 문서 추가 완료 ---")
+        logger.info("--- 벡터 스토어에 문서 추가 완료 ---")
 
     def query(self, query_text: str, top_k: int = 5, source_type: Optional[str] = None):
         """
@@ -28,12 +30,12 @@ class VectorRepository:
         :return: 유사한 문서의 데이터
 
         """
-        # print(f"--- 벡터 스토어에서 '{query_text}' 쿼리로 유사 문서 검색 시작 ---")
+        # logger.info(f"--- 벡터 스토어에서 '{query_text}' 쿼리로 유사 문서 검색 시작 ---")
         results = self.vector_db.query(query_text, k=top_k, source_type = source_type)
-        # print(f"--- 벡터 스토어에서 '{query_text}' 쿼리로 유사 문서 검색 완료 ---")
+        # logger.info(f"--- 벡터 스토어에서 '{query_text}' 쿼리로 유사 문서 검색 완료 ---")
         # for i, (doc, score) in enumerate(results):
-        #     print(f"  - 검색결과 {i+1}: {doc.page_content},... (유사도: {score:.4f})")
-        #     print(f"    메타데이터: {doc.metadata}")
+        #     logger.info(f"  - 검색결과 {i+1}: {doc.page_content},... (유사도: {score:.4f})")
+        #     logger.info(f"    메타데이터: {doc.metadata}")
         return results
 
     def get_all_documents(self):
@@ -52,9 +54,9 @@ class VectorRepository:
                 current_meta["dislikes"] = current_meta.get("dislikes") + 1
 
             self.vector_db.update(ids=[chunk_id], metadatas=[current_meta])
-            print(f"  - VectorDB: 청크 '{chunk_id}'의 '{feedback}' 카운트 업데이트 완료.")
+            logger.info(f"  - VectorDB: 청크 '{chunk_id}'의 '{feedback}' 카운트 업데이트 완료.")
         except Exception as e:
-            print(f"🚨 VectorDB 메타데이터 업데이트 실패 (ID: {chunk_id}): {e}")
+            logger.info(f"🚨 VectorDB 메타데이터 업데이트 실패 (ID: {chunk_id}): {e}")
 
 
     def find_by_source_id(self, source_id: List[str], is_good: bool):

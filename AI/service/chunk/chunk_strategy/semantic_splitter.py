@@ -1,5 +1,6 @@
 from typing import List
 
+from fastapi.logger import logger
 from langchain_core.documents import Document
 
 from service.chunk.chunk_strategy.chunk_strategy import ChunkStrategy
@@ -14,7 +15,7 @@ class SemanticSplitter(ChunkStrategy):
             model_name (str): HuggingFace의 의미기반 청킹 모델 이름입니다.
         """
         self._model_name = model_name
-        print(f"✅ SemanticSplitter 초기화 완료 (사용 모델: {self._model_name})")
+        logger.info(f"✅ SemanticSplitter 초기화 완료 (사용 모델: {self._model_name})")
 
     def split_documents(self, documents: List[Document]) -> List[Document]:
         """
@@ -26,7 +27,7 @@ class SemanticSplitter(ChunkStrategy):
         Returns:
             List[Document]: 청킹된 데이터 리스트를 반환합니다.
         """
-        print("--- Semantic(의미 기반) 분할 실행 ---")
+        logger.info("--- Semantic(의미 기반) 분할 실행 ---")
         all_chunks = []
         for doc in documents:
             chunks = doc.page_content.split('\n\n') # 문단으로 분리

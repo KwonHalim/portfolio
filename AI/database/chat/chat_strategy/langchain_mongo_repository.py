@@ -2,6 +2,7 @@ from datetime import timezone, datetime
 from typing import Optional, Dict, Any, List
 
 from bson import ObjectId
+from fastapi.logger import logger
 from pymongo import MongoClient, ASCENDING
 
 from database.chat.chat_strategy.chat_store_strategy import ChatStrategy
@@ -23,7 +24,7 @@ class MongoChatStrategy(ChatStrategy):
         # URI에 명시된 default database 자동 추출
         self.db = self.client.get_default_database()
         self.messages_collection = self.db["chats"]
-        print(f"✅ MongoDB Chat Store 초기화 완료 (DB: {self.db.name})")
+        logger.info(f"✅ MongoDB Chat Store 초기화 완료 (DB: {self.db.name})")
 
     def get_or_create_session(self, user_identifier: str) -> str:
         """
