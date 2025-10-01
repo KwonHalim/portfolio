@@ -45,7 +45,7 @@ class ChatService:
         self.chat_repository = chat_repository
         self.vector_repository = vector_repository
         self.cache_strategy = cache_strategy
-        print("✅ ChatService 초기화 완료")
+        logger.info("✅ ChatService 초기화 완료")
 
     async def ask(self, question: str, session_id: str) -> Dict[str, str]:
         """

@@ -1,6 +1,7 @@
 #RecursiveCharacterTextSplitter를 사용하는 전략
 from typing import List
 
+from fastapi.logger import logger
 from langchain_core.documents import Document
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 
@@ -40,5 +41,5 @@ class RecursiveCharacterSplitter(ChunkStrategy):
         Returns:
             List[Document]: 분할된 청크(Document 객체)의 리스트.
         """
-        print("--- Recursive Character 분할 실행 ---")
+        logger.info("--- Recursive Character 분할 실행 ---")
         return self.splitter.split_documents(documents)

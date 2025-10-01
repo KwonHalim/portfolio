@@ -1,3 +1,5 @@
+from fastapi.logger import logger
+
 from database.chat.chat_strategy.chat_store_strategy import ChatStrategy
 
 
@@ -36,7 +38,7 @@ class ChatRepository:
         :param chat_id: 채팅 메시지 ID
         :param is_good: 피드백 (좋은 답변이면 True, 그렇지 않으면 False)
         """
-        print(f"--- 채팅 ID {chat_id}에 대한 피드백 업데이트 시작 ---")
+        logger.info(f"--- 채팅 ID {chat_id}에 대한 피드백 업데이트 시작 ---")
         return self.chat_repository.update_feedback(chat_id, is_good)
 
     def find_chat_history(self, chat_id:str):

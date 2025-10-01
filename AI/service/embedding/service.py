@@ -1,5 +1,7 @@
 from typing import List
 
+from fastapi.logger import logger
+
 from service.embedding.embedding_strategy.embedding_strategy import EmbeddingStrategy
 
 
@@ -15,7 +17,7 @@ class EmbeddingService:
                                                  (예: GoogleGeminiEmbedding)
         """
         self.embedding_model = embedding_model
-        print(f"✅ EmbeddingService 초기화 완료 (모델: {embedding_model.__class__.__name__})")
+        logger.info(f"✅ EmbeddingService 초기화 완료 (모델: {embedding_model.__class__.__name__})")
 
     def embed_documents(self, texts: List[str]) -> List[List[float]]:
         """

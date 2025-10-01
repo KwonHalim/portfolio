@@ -1,5 +1,6 @@
 from typing import Optional, Dict, Any, List
 
+from fastapi.logger import logger
 from langchain_community.retrievers import BM25Retriever
 from langchain_core.documents import Document
 from langchain_core.runnables import Runnable, RunnableConfig
@@ -46,8 +47,12 @@ class DocumentRetriever(Runnable):
                             - source_docs (List[Document]): RRF로 재순위화된 상위 Document 객체 리스트.
         """
         # 1. 각 검색기로부터 결과 가져오기
+        # 벡터 검색기
         cosine_results = self.vector_repository.query(input, top_k=4)
+        # BM25 알고리즘 검색기
         bm25_results: List[Document] = self.bm25_retriever.invoke(input)
+        logger.info(f"bm_results: {bm25_results}")
+
 
         cosine_docs = [doc for doc, score in cosine_results]
 
