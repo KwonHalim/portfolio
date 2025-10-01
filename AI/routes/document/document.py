@@ -7,7 +7,7 @@ from fastapi.logger import logger
 from starlette.responses import FileResponse
 
 from api_model.response_models import SuccessResponse
-from container.dependency import get_singleton_rag_service, get_data_processor
+from container.dependency import get_singleton_rag_service, get_data_processor, get_bm25_manager
 from service.data.data_processor import DataProcessor
 from service.rag_service import RAGService
 
@@ -19,6 +19,7 @@ async def process_documents(
         qa_file: UploadFile = File(None),
         paragraph_file: UploadFile = File(None),
         rag_service: RAGService = Depends(get_singleton_rag_service),
+        bm25_retriever = Depends(get_bm25_manager),
 ):
     """
     RAG 시 참고할 데이터를 입력받습니다. 두 파일 모두 필수는 아니지만, 적어도 하나의 파일은 존재해야 합니다.
@@ -30,6 +31,7 @@ async def process_documents(
         rag_service (RAGService): 파일 처리 관련 로직이 들어있는 객체, dependency를 통해 주입받음
 
     Returns:
+
         SuccessResponse | ErrorResponse: 피드백 성공 여부를 반환합니다.
 
     """
@@ -64,6 +66,8 @@ async def process_documents(
         qa_data=qa_content_str,
         qa_file_name = qa_file.filename
     )
+
+    await bm25_retriever.update_retriever()
 
     return SuccessResponse()
 

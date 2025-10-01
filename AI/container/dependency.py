@@ -2,6 +2,7 @@ from functools import lru_cache
 
 import redis
 from fastapi import Depends, Request
+from fastapi import HTTPException
 from fastapi.logger import logger
 from langchain_community.llms.huggingface_endpoint import HuggingFaceEndpoint
 from langchain_community.retrievers import BM25Retriever
@@ -31,9 +32,10 @@ from service.data.data_processor import DataProcessor
 from service.embedding.embedding_strategy.embedding_strategy import EmbeddingStrategy
 from service.embedding.embedding_strategy.google_gemini_embedding import GoogleGeminiEmbedding
 from service.embedding.service import EmbeddingService
-from service.langchain.document_retriever import DocumentRetriever
 from service.langchain.prompt import create_prompt
 from service.rag_service import RAGService
+from service.retriever.bm25_manager import BM25Manager
+from service.retriever.document_retriever import DocumentRetriever
 
 
 # ----------------------------------------------------------------
@@ -176,36 +178,36 @@ async def get_embedding_service(
 ) -> EmbeddingService:
     return EmbeddingService(embedding_model=embedding_strategy)
 
+def get_bm25_manager(request: Request) -> BM25Manager:
+    """
+    lifespan에서 생성된 싱글톤 BM25Manager 인스턴스를 반환합니다. BM25는 미리 생성하여 가져옵니다.
+    """
+    return request.app.state.bm25_manager
+
 
 # ----------------------------------------------------------------
 # 4. LangChain RAG 구성 요소 생성
 # ----------------------------------------------------------------
 
 async def get_bm25_retriever(
-        vector_repository: VectorRepository = Depends(get_vector_repository)
+    bm25_manager: BM25Manager = Depends(get_bm25_manager)
 ) -> BM25Retriever:
-    """
-     DB에 있는 모든 문서를 가져와 BM25Retriever를 생성합니다.
-     애플리케이션 시작 시 한 번만 호출됩니다.
-     """
-    logger.info("--- BM25 Retriever 생성을 시작합니다. 모든 문서를 로드합니다... ---")
-    all_docs = vector_repository.get_all_documents()
-    if not all_docs:
-        # 문서가 없을 경우, LangChain이 오류를 내지 않도록 빈 리스트 삽입
-        logger.info("문서가 비어있습니다.")
-        return None
-
-    retriever = BM25Retriever.from_documents(all_docs)
-    logger.info(f"--- ✅ BM25 Retriever 생성 완료. 총 {len(all_docs)}개의 문서로 인덱싱됨 ---")
+    retriever = bm25_manager.retriever
+    if retriever is None:
+        # 문서가 없어 retriever가 생성되지 않았을 경우의 예외 처리
+        raise HTTPException(
+            status_code=503,
+            detail="BM25 Retriever is not available. No documents are indexed."
+        )
     return retriever
+
 
 
 async def get_document_retriever(
     vector_repository: VectorRepository = Depends(get_vector_repository),
-        bm25_retriever: BM25Retriever = Depends(get_bm25_retriever)
-
+        bm25_manager: BM25Manager = Depends(get_bm25_manager)
 ) -> DocumentRetriever:
-    return DocumentRetriever(vector_repository=vector_repository, bm25_retriever=bm25_retriever)
+    return DocumentRetriever(vector_repository=vector_repository, bm25_manager=bm25_manager)
 
 @lru_cache()
 def get_prompt() -> ChatPromptTemplate:
@@ -255,3 +257,6 @@ def get_singleton_chat_service(request: Request) -> ChatService:
 
 def get_singleton_rag_service(request: Request) -> RAGService:
     return request.app.state.rag_service
+
+def get_bm25_manager(request: Request) -> BM25Manager:
+    return request.app.state.bm25_manager

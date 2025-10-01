@@ -6,6 +6,7 @@ from fastapi import FastAPI
 from fastapi.logger import logger
 
 import container.dependency as deps
+from service.retriever.bm25_manager import BM25Manager
 
 
 @asynccontextmanager
@@ -23,12 +24,18 @@ async def lifespan(app: FastAPI):
     # 2. 위에서 만든 객체에 의존하는 객체들 생성
     vector_store_strategy = await deps.get_vector_store_strategy(embedding_strategy)
     vector_repository = await deps.get_vector_repository(vector_store_strategy)
+
+    #BM25객체 생성
+    bm25_manager = BM25Manager(vector_repository)
+    await bm25_manager.update_retriever()
+
+
     chat_repository = deps.get_chat_repository(chat_db_strategy)
     embedding_service = await deps.get_embedding_service(embedding_strategy)
-    bm_25_retriever = await deps.get_bm25_retriever(vector_repository)
-    retriever = await deps.get_document_retriever(vector_repository, bm_25_retriever)
-    cache_strategy = deps.get_cache_strategy(cache, embedding_strategy)
 
+
+    retriever = await deps.get_document_retriever(vector_repository, bm25_manager)
+    cache_strategy = deps.get_cache_strategy(cache, embedding_strategy)
 
 
     # 3. 캐싱된 가벼운 객체들도 가져오기
@@ -36,6 +43,8 @@ async def lifespan(app: FastAPI):
     data_processor = deps.get_data_processor()
 
     # 4. 최종 서비스 객체들 생성 및 app.state에 저장
+    app.state.bm25_manager = bm25_manager
+
     app.state.rag_service = await deps.get_rag_service(
         chunk_service=chunk_service,
         embedding_service=embedding_service,
