@@ -8,7 +8,7 @@ from langchain_core.prompts import ChatPromptTemplate
 from database.chat.repository import ChatRepository
 from database.vector.repository import VectorRepository
 from service.cache.cache_strategy import CacheStrategy
-from service.langchain.document_retriever import DocumentRetriever
+from service.retriever.document_retriever import DocumentRetriever
 
 
 class ChatService:

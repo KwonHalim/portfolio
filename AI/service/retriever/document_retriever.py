@@ -6,6 +6,7 @@ from langchain_core.documents import Document
 from langchain_core.runnables import Runnable, RunnableConfig
 
 from database.vector.repository import VectorRepository
+from service.retriever.bm25_manager import BM25Manager
 
 
 class DocumentRetriever(Runnable):
@@ -16,18 +17,16 @@ class DocumentRetriever(Runnable):
     두 검색 결과는 Reciprocal Rank Fusion (RRF) 알고리즘을 통해 순위를 다시 결정하여 관련이 제일 높은 문서만을 반환합니다.
     """
 
-    def __init__(self, vector_repository: VectorRepository, bm25_retriever: BM25Retriever):
+    def __init__(self, vector_repository: VectorRepository, bm25_manager: BM25Manager):
         """
         DocumentRetriever를 초기화합니다.
 
         Args:
             vector_repository (VectorRepository): 벡터 유사도 검색을 수행하는 레포지토리 객체.
-            bm25_retriever (BM25Retriever): BM25 알고리즘을 사용하는 키워드 리트리버 객체. (BM_25로 가져오는 문서의 개수는 4개입니다.) -> bm25_retriever.k
+            bm25_retriever (BM25Retriever): BM25 알고리즘을 사용하는 키워드 리트리버 객체.
         """
         self.vector_repository = vector_repository
-        self.bm25_retriever = bm25_retriever
-        if self.bm25_retriever:
-            self.bm25_retriever.k = 4  # BM25로 검색하여 가져올 문서의 개수를 결정하는 변수
+        self.bm25_manager = bm25_manager
 
     def invoke(self, input: str, config: Optional[RunnableConfig] = None) -> Dict[str, Any]:
         """
@@ -50,7 +49,7 @@ class DocumentRetriever(Runnable):
         # 벡터 검색기
         cosine_results = self.vector_repository.query(input, top_k=4)
         # BM25 알고리즘 검색기
-        bm25_results: List[Document] = self.bm25_retriever.invoke(input)
+        bm25_results: List[Document] = self.bm25_manager.retriever.invoke(input)
         logger.info(f"bm_results: {bm25_results}")
 
 
