@@ -27,8 +27,8 @@ public class Experience extends BaseEntity{
     
     @Column
     private LocalDate endDate;
-    
-    @Column
+
+    @Column(columnDefinition = "TEXT")
     private String DetailDescription;
 
     @Column
