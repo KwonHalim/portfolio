@@ -139,6 +139,7 @@ public class ExceptionAdvice {
 - **Spring Data JPA**: 데이터 접근 계층
 - **Spring Web**: REST API 구현
 - **Spring Validation**: 데이터 검증
+- **Spring Security**: 허용되지 않은 API 보호
 
 ### 데이터베이스
 - **PostgreSQL**: 메인 관계형 데이터베이스
@@ -186,7 +187,6 @@ public class ExceptionAdvice {
 - **문서화**: 코드 주석 및 API 문서
 
 ### 4. 성능 최적화
-- **JPA 최적화**: N+1 문제 방지
 - **지연 로딩**: 필요시에만 데이터 로드
 - **인덱싱**: 적절한 데이터베이스 인덱스 설정
 

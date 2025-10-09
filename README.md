@@ -1,7 +1,7 @@
-# 🚀 Interactive Portfolio Project
+# 🚀 Portfolio Project
 
-> 최신 기술 스택을 활용하여 제작된 **인터랙티브 포트폴리오 웹사이트**입니다.  
-> 단순히 결과물을 보여주는 것을 넘어, 사용자와 상호작용하는 AI 챗봇, 동적 데이터 로딩, 자동화된 CI/CD 파이프라인 등 개발자의 기술적 역량을 종합적으로 보여주는 데 중점을 두었습니다.
+> 최신 기술 스택을 활용하여 제작된 포트폴리오 웹사이트입니다.  
+> 개발했던 여러 프로젝트들을 소개하는 부분과 저에 대해 물어볼 수 있는 챗봇이 있습니다.
 
 ---
 
@@ -12,21 +12,24 @@
 ![CSS3](https://img.shields.io/badge/CSS3-1572B6?style=for-the-badge&logo=css3&logoColor=white)
 ![JavaScript](https://img.shields.io/badge/JavaScript-ES6+-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black)
 
-### Backend
-![Spring Boot](https://img.shields.io/badge/Spring%20Boot-6DB33F?style=for-the-badge&logo=springboot&logoColor=white)
-![PostgreSQL](https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white)
+### 🧩 Backend
+![Spring Boot](https://img.shields.io/badge/Spring%20Boot-6DB33F?style=for-the-badge&logo=spring-boot&logoColor=white)
+![Spring Security](https://img.shields.io/badge/Spring%20Security-6DB33F?style=for-the-badge&logo=spring-boot&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1?style=for-the-badge&logo=postgresql&logoColor=white)
 
-### AI
+### 🤖 AI / LLM
 ![FastAPI](https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white)
-![LangChain](https://img.shields.io/badge/LangChain-RAG-green?style=for-the-badge)
-![Redis](https://img.shields.io/badge/Redis-Semantic%20Cache-DC382D?style=for-the-badge&logo=redis&logoColor=white)
-![ChromaDB](https://img.shields.io/badge/ChromaDB-VectorStore-blueviolet?style=for-the-badge)
-![MongoDB](https://img.shields.io/badge/MongoDB-Chat%20History-47A248?style=for-the-badge&logo=mongodb&logoColor=white)
+![Langchain](https://img.shields.io/badge/Langchain-1C3C3C?style=for-the-badge&logo=langchain&logoColor=white)
+![Redis](https://img.shields.io/badge/redis-%23DD0031.svg?style=for-the-badge&logo=redis&logoColor=white)
+![ChromaDB](https://img.shields.io/badge/ChromaDB-8A2BE2?style=for-the-badge)
+![MongoDB](https://img.shields.io/badge/MongoDB-%234ea94b.svg?style=for-the-badge&logo=mongodb&logoColor=white)
+![Google Gemini](https://img.shields.io/badge/google%20gemini-8E75B2?style=for-the-badge&logo=google%20gemini&logoColor=white)
 
-### DevOps
+### ⚙️ DevOps / Infra
 ![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)
-![GitHub Actions](https://img.shields.io/badge/GitHub%20Actions-CI%2FCD-2088FF?style=for-the-badge&logo=githubactions&logoColor=white)
-![Cloudflare](https://img.shields.io/badge/Cloudflare-CDN-F38020?style=for-the-badge&logo=cloudflare&logoColor=white)
+![GitHub Actions](https://img.shields.io/badge/GitHub%20Actions-2088FF?style=for-the-badge&logo=githubactions&logoColor=white)
+![Cloudflare](https://img.shields.io/badge/Cloudflare-F38020?style=for-the-badge&logo=cloudflare&logoColor=white)
+
 
 ---
 
@@ -41,28 +44,10 @@
 
 ## 🏗 시스템 아키텍처
 
-이 프로젝트는 명확하게 분리된 3개의 핵심 서비스(FrontEnd, Backend, AI)가 유기적으로 연동되는 **마이크로서비스 아키텍처(MSA)**를 기반으로 설계되었습니다.  
-각 서비스는 독립적으로 개발, 배포 및 확장이 가능하여 유지보수성과 확장성을 극대화했습니다.
+각 서비스는 독립적으로 개발, 배포 및 확장이 가능하여 유지보수성과 확장성에 신경썻습니다. 각 레포지토리에 들어가면 더 자세한 설명을 보실 수 있습니다.
+
 
 ---
-
-## 🔄 워크플로우
-
-### 사용자 접속
-- 사용자는 **Cloudflare**를 통해 프론트엔드 웹사이트에 접속합니다.
-
-### 데이터 요청
-- 프론트엔드(Vanilla JS)는 필요한 **프로필**, **프로젝트**, **타임라인** 등의 데이터를 백엔드(Spring Boot) API 서버에 **비동기적으로 요청**합니다.
-
-### 데이터 응답
-- 백엔드 서버는 **PostgreSQL** 데이터베이스에서 해당 정보를 조회하여 **표준화된 JSON** 형식으로 프론트엔드에 전달합니다.
-
-### AI 챗봇 상호작용
-1. 사용자가 챗봇에 질문 → **AI(FastAPI)** 서버로 전송
-2. **Redis 시맨틱 캐시 확인** → 없으면 **벡터 변환 후 ChromaDB 검색(RAG)** 
-3. 검색된 문서 + 질문을 **Google Gemini LLM**에 전달 → 최종 답변 생성
-4. 대화 내용은 **MongoDB**에 저장하여 **채팅 히스토리 관리** ### 피드백 루프
-- 사용자 피드백을 **ChromaDB**에 반영해 RAG 시스템 **정확도 점진 개선** ---
 
 ## ⚙️ DevOps
 
