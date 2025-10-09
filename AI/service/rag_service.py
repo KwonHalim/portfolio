@@ -49,6 +49,11 @@ class RAGService:
         Returns:
 
         """
+
+        # 이미 chroma에 데이터가 존재하는지 확인하고 만약 존재한다면 해당 데이터를 삭제합니다. 그리고 해당 컬렉션까지 재생성합니다.
+        self.repository.reset()
+
+
         # 1. TXT(자기소개) 데이터와 Q&A(질의응답) 데이터를 받아서 langchain Document 객체로 변환합니다.
         logger.info("--- 문서 변환 시작 ---")
         docs = []

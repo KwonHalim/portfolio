@@ -67,6 +67,7 @@ async def process_documents(
         qa_file_name = qa_file.filename
     )
 
+    # BM25객체 새로운 문서로 업데이트
     await bm25_retriever.update_retriever()
 
     return SuccessResponse()
