@@ -64,3 +64,6 @@ class VectorRepository:
             self.vector_db.find_by_source_id(source_ids=source_id, is_good=is_good)
         except Exception as e:
             return
+
+    def reset(self):
+        self.vector_db.reset()

@@ -2,6 +2,7 @@
 from typing import List, Optional
 
 import chromadb
+from chromadb.errors import NotFoundError
 from fastapi.logger import logger
 from langchain_chroma import Chroma
 from langchain_core.documents import Document
@@ -16,14 +17,19 @@ class ChromaVector(VectorStoreStrategy):
         ChromaDB 서버에 연결하고 LangChain Chroma 래퍼를 초기화합니다.
         피드백 업데이트를 위해 네이티브 컬렉션 객체에도 접근합니다.
         """
+        # 콜렉션 이름
+        self.collection_name = "langchain" #기본값 그대로 사용
         # LangChain 래퍼가 사용할 클라이언트
         self.client = chromadb.HttpClient(host=host, port=port)
+        
+        # 임베딩 전략
+        self.embedding_strategy = embedding_strategy
 
         # LangChain의 Chroma 벡터스토어 래퍼 초기화
         self.vectorstore = Chroma(
             client=self.client,
             embedding_function=embedding_strategy,
-            collection_name= "langchain" #기본값 그대로 사용예정
+            collection_name= self.collection_name
         )
 
     def add_documents(self, chunks: List[Document]):
@@ -47,7 +53,7 @@ class ChromaVector(VectorStoreStrategy):
         """
         ChromaDB 컬렉션에 저장된 모든 문서를 LangChain Document 객체 리스트로 반환합니다.
         """
-        self.collection = self.client.get_collection(name="langchain")
+        self.collection = self.client.get_collection(name=self.collection_name)
 
         count = self.collection.count()
         data = self.collection.get(
@@ -88,3 +94,26 @@ class ChromaVector(VectorStoreStrategy):
                 metadatas=[current_metadata]
             )
             logger.info("✅ 업데이트 완료!")
+
+    def reset(self):
+        """
+        기존 컬렉션을 삭제하고 초기화하는 함수
+
+        """
+        logger.info(f"컬렉션 {self.collection}을 삭제합니다.")
+        try:
+            self.client.delete_collection(name=self.collection_name)
+            logger.info(f"기존 컬렉션 '{self.collection_name}'을(를) 성공적으로 삭제했습니다.")
+        except NotFoundError:
+            # 컬렉션이 존재하지 않을 때 발생하는 오류는 정상적인 상황이므로 경고만 로깅합니다.
+            logger.info(f"❗️ 정보: 컬렉션 '{self.collection}'이 존재하지 않습니다. 삭제하지 않고 건너뜁니다.")
+        except Exception as e:
+            logger.error(f"컬렉션 삭제 중 오류 발생: {e}")
+            raise
+
+        self.vectorstore = Chroma(
+            client=self.client,
+            embedding_function=self.embedding_strategy,
+            collection_name=self.collection_name
+        )
+        logger.info(f"컬렉션 '{self.collection}이 재생성되었습니다.")

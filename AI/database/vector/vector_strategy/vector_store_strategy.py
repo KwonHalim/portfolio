@@ -22,3 +22,7 @@ class VectorStoreStrategy(ABC):
     @abstractmethod
     def find_by_source_id(self, source_ids: List[str], is_good: bool):
         pass
+
+    @abstractmethod
+    def reset(self):
+        pass
