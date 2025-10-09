@@ -62,5 +62,5 @@ async def lifespan(app: FastAPI):
 
     logger.info("--- ✅ 싱글톤 객체 생성 완료 ---")
     yield
-    # --- 🔌 애플리케이션 종료 시 실행 ---
+    # ---  애플리케이션 종료 시 실행 ---
     logger.info("--- 애플리케이션 종료 ---")
