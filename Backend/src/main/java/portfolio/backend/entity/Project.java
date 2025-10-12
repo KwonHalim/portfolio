@@ -47,6 +47,7 @@ public class Project extends BaseEntity{
 
     @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @OrderBy("displayOrder DESC")
+    @Builder.Default
     private List<ProjectImage> images = new ArrayList<>();
 
     @ManyToMany
@@ -55,6 +56,7 @@ public class Project extends BaseEntity{
             joinColumns = @JoinColumn(name = "project_id"),
             inverseJoinColumns = @JoinColumn(name = "technology_id") // Technology 테이블의 ID 참조
     )
+    @Builder.Default
     private Set<Technology> technologies = new HashSet<>();
 
     @Column
