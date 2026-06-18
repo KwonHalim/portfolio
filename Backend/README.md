@@ -234,3 +234,6 @@ Content-Type: application/json
 - **캐싱**: Redis를 활용한 응답 캐싱
 - **API 문서**: Swagger/OpenAPI 문서화
 - **테스트**: 단위/통합 테스트 추가
+
+
+(기존에는 MSA방식으로 AI서버와 분리 운영했으나, 하나의 서버로 통합)
