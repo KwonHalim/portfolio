@@ -20,7 +20,7 @@ public class CorsConfig {
 //        Options는 실제 데이터 요청하기 전 웹 서버가 지원하는 HTTP 요청 방식을 확인하는 데에 사용된다.
         cfg.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
         cfg.setAllowedHeaders(List.of("*"));
-//        쿠키나 인증 헤더같은 인증 정보 사용 안함,
+//        allowCredentials(true): 프론트의 fetch credentials:'include' 설정과 쌍을 이룸
         cfg.setAllowCredentials(true);
 //        사전 요청 캐시 기간, 이 기간동안은 Options에 대한 요청을 보내지 않고
 //         PUT, DELETE 등을 요청한다.

@@ -23,6 +23,8 @@ async function fetchApi(url, options = {}) {
 
     const requestPromise = (async () => {
         try {
+            // credentials: 'include' 없이는 cross-origin 요청에 쿠키가 실리지 않아
+            // 백엔드가 매 요청을 새 방문자로 판단하는 문제가 있었음
             const response = await fetch(url, {
                 credentials: 'include',
                 ...options,
