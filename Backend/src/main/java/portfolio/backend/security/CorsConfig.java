@@ -21,7 +21,7 @@ public class CorsConfig {
         cfg.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
         cfg.setAllowedHeaders(List.of("*"));
 //        allowCredentials(true): 프론트의 fetch credentials:'include' 설정과 쌍을 이룸
-        cfg.setAllowCredentials(true);
+        cfg.setAllowCredentials(false);
 //        사전 요청 캐시 기간, 이 기간동안은 Options에 대한 요청을 보내지 않고
 //         PUT, DELETE 등을 요청한다.
         cfg.setMaxAge(3600L);
