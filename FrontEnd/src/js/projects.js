@@ -84,7 +84,7 @@ class ProjectManager {
                 url += `?category=${encodeURIComponent(this.currentCategory)}`;
             }
             
-            const response = await fetch(url);
+            const response = await fetch(url, { credentials: 'include' });
             
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
@@ -304,7 +304,7 @@ class ProjectManager {
         
         try {
             const projectDetailUrl = window.appConfig.getProjectDetailApiUrl(projectId);
-            const response = await fetch(projectDetailUrl);
+            const response = await fetch(projectDetailUrl, { credentials: 'include' });
             
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);

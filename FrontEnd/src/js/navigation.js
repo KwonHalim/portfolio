@@ -101,7 +101,7 @@ async function loadPageData(page) {
 
   try {
     const apiUrl = `${window.appConfig.getApiBaseUrl()}/api/${page}`;
-    const response = await fetch(apiUrl);
+    const response = await fetch(apiUrl, { credentials: 'include' });
     const data = await response.json();
 
     // 캐시 업데이트

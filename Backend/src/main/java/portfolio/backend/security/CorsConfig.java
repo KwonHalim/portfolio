@@ -21,7 +21,7 @@ public class CorsConfig {
         cfg.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
         cfg.setAllowedHeaders(List.of("*"));
 //        쿠키나 인증 헤더같은 인증 정보 사용 안함,
-        cfg.setAllowCredentials(false);
+        cfg.setAllowCredentials(true);
 //        사전 요청 캐시 기간, 이 기간동안은 Options에 대한 요청을 보내지 않고
 //         PUT, DELETE 등을 요청한다.
         cfg.setMaxAge(3600L);

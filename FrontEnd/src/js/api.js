@@ -24,6 +24,7 @@ async function fetchApi(url, options = {}) {
     const requestPromise = (async () => {
         try {
             const response = await fetch(url, {
+                credentials: 'include',
                 ...options,
                 headers: {
                     'Content-Type': 'application/json',
