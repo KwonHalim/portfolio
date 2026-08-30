@@ -84,8 +84,6 @@ class ProjectManager {
                 url += `?category=${encodeURIComponent(this.currentCategory)}`;
             }
             
-            // credentials: 'include' : 쿠키를 요청에 포함시켜 백엔드가 기존 세션을 인식하도록 함
-            const response = await fetch(url, { credentials: 'include' });
             
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
@@ -305,8 +303,6 @@ class ProjectManager {
         
         try {
             const projectDetailUrl = window.appConfig.getProjectDetailApiUrl(projectId);
-            // credentials: 'include' : 쿠키를 요청에 포함시켜 백엔드가 기존 세션을 인식하도록 함
-            const response = await fetch(projectDetailUrl, { credentials: 'include' });
             
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
