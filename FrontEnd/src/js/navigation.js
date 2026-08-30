@@ -79,40 +79,37 @@ function debounce(func, delay) {
 
 // 페이지 데이터 로드 (백그라운드) - 상태 기반 제어 적용
 async function loadPageData(page) {
+  // about·timeline은 api.js의 DOMContentLoaded 핸들러에서 fetchApi를 통해 로드하므로
+  // 여기서 중복 호출하지 않습니다. (fetchApi의 pendingRequests가 중복을 막지만,
+  // 불필요한 요청 자체를 아예 시작하지 않는 것이 더 명확합니다.)
+  if (page === 'about' || page === 'timeline') {
+    return;
+  }
+
   // 해당 페이지의 요청 상태 확인
   if (pageRequestStates[page]) {
     return;
   }
-  
+
   // 캐시가 유효하면 API 요청하지 않음
   if (isCacheValid(page)) {
     return;
   }
-  
+
   // 요청 시작 - 상태 설정
   pageRequestStates[page] = true;
-  
+
   try {
-    // 여기서 실제 API 호출을 수행
-    // 예: 프로젝트 데이터, 블로그 데이터 등
-    let apiUrl;
-    if (page === 'about') {
-      apiUrl = window.appConfig.getAboutApiUrl();
-    } else if (page === 'timeline') {
-      apiUrl = window.appConfig.getTimelineApiUrl();
-    } else {
-      apiUrl = `${window.appConfig.getApiBaseUrl()}/api/${page}`;
-    }
-    
+    const apiUrl = `${window.appConfig.getApiBaseUrl()}/api/${page}`;
     const response = await fetch(apiUrl);
     const data = await response.json();
-    
+
     // 캐시 업데이트
     saveToCache(page, data);
-    
+
     // 데이터가 변경되었는지 확인하고 필요시 화면 업데이트
     updatePageIfNeeded(page, data);
-    
+
   } catch (error) {
     // 페이지: API 요청 실패
   } finally {

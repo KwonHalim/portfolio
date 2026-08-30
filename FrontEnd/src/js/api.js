@@ -9,29 +9,50 @@ const API_BASE_URL = `${window.appConfig.getApiBaseUrl()}/api`;
  * @param {object} options - fetch 함수에 전달할 옵션
  * @returns {Promise<any>} - API 응답의 result 필드
  */
+// 진행 중인 GET 요청을 저장하는 Map (URL → Promise)
+// 동일 URL에 대한 중복 HTTP 요청을 방지합니다.
+const pendingRequests = new Map();
+
 async function fetchApi(url, options = {}) {
-    try {
-        const response = await fetch(url, {
-            ...options,
-            headers: {
-                'Content-Type': 'application/json',
-                ...options.headers,
-            },
-        });
+    const isGet = !options.method || options.method.toUpperCase() === 'GET';
 
-        if (!response.ok) {
-            // 서버에서 받은 에러 메시지를 포함하여 에러를 throw합니다.
-            const errorData = await response.json().catch(() => ({})); // JSON 파싱 실패 시 빈 객체 반환
-            const errorMessage = errorData.message || `HTTP error! status: ${response.status}`;
-            throw new Error(errorMessage);
-        }
-
-        const data = await response.json();
-        return data.result; // 공통적으로 result 필드를 반환합니다.
-
-    } catch (error) {
-        // API 요청 중 오류가 발생했습니다
+    // 동일 URL의 GET 요청이 이미 진행 중이면 같은 Promise를 반환합니다.
+    if (isGet && pendingRequests.has(url)) {
+        return pendingRequests.get(url);
     }
+
+    const requestPromise = (async () => {
+        try {
+            const response = await fetch(url, {
+                ...options,
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...options.headers,
+                },
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                const errorMessage = errorData.message || `HTTP error! status: ${response.status}`;
+                throw new Error(errorMessage);
+            }
+
+            const data = await response.json();
+            return data.result;
+
+        } catch (error) {
+            // API 요청 중 오류가 발생했습니다
+        } finally {
+            // 요청 완료 후 Map에서 제거 (성공/실패 무관)
+            pendingRequests.delete(url);
+        }
+    })();
+
+    if (isGet) {
+        pendingRequests.set(url, requestPromise);
+    }
+
+    return requestPromise;
 }
 
 /**
