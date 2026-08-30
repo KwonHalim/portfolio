@@ -32,8 +32,6 @@ function initializeSidebar() {
   // 깃허브 잔디밭 모달 초기화
   initializeGitHubModal();
   
-  // 프로필 이미지 동적 로드
-  loadProfileImage();
 }
 
 // 3D Avatar 효과 함수
@@ -173,33 +171,4 @@ function initializeGitHubModal() {
   } else {
     console.log('GitHub modal elements not found');
   }
-} 
-
-// 프로필 이미지 동적 로드 함수
-function loadProfileImage() {
-  const profileImage = document.querySelector('.avatar-card img');
-  if (!profileImage) return;
-
-  // API에서 프로필 데이터 가져오기
-  fetch(window.appConfig.getAboutApiUrl())
-    .then(response => response.json())
-    .then(data => {
-      if (data.result && data.result.profile_path) {
-        // 백엔드에서 제공하는 경로를 getApiBaseUrl과 조합
-        const imageSrc = `${window.appConfig.getApiBaseUrl()}/${data.result.profile_path}`;
-        profileImage.src = imageSrc;
-        profileImage.alt = data.result.name || '권하림';
-        
-        // 이미지 로드 실패 시 아무것도 하지 않음 (깨진 상태 유지)
-        profileImage.onerror = function() {
-          // 이미지 로드 실패 시 아무것도 하지 않음
-        };
-      }
-    })
-    .catch(error => {
-      console.log('프로필 이미지 로드 실패:', error);
-      // 에러 시 기본 이미지 사용
-      profileImage.src = './assets/images/my-avatar.png';
-      profileImage.alt = '권하림';
-    });
 } 
