@@ -1,6 +1,4 @@
 name: AI CI/CD Pipeline
-permissions:
-  contents: write
 
 on:
   push:
@@ -12,18 +10,10 @@ on:
 jobs:
   ai_build:
     runs-on: ubuntu-latest
-    outputs:
-      image_tag: ${{ steps.set_tag.outputs.image_tag }}
 
     steps:
       - name: Checkout source
         uses: actions/checkout@v4
-
-      - name: Set temp image tag
-        id: set_tag
-        run: |
-          echo "image_tag=temp-${GITHUB_SHA::7}" >> $GITHUB_ENV
-          echo "image_tag=temp-${GITHUB_SHA::7}" >> $GITHUB_OUTPUT
 
       # QEMU 설정 (다른 아키텍처 에뮬레이션)
       - name: Set up QEMU
@@ -39,14 +29,13 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
 
-      # ARM64용 이미지 빌드 및 푸시 (임시 태그)
-      - name: Build and push Docker image for ARM64 (temp tag)
+      # ARM64용 이미지 빌드 및 푸시
+      - name: Build and push Docker image for ARM64
         run: |
-          IMAGE_TAG=${{ steps.set_tag.outputs.image_tag }}
           IMAGE_NAME=${{ secrets.DOCKERHUB_USERNAME }}/harimdev-ai
-          docker buildx build --platform linux/arm64 -t $IMAGE_NAME:$IMAGE_TAG --push ./AI
+          docker buildx build --platform linux/arm64 -t $IMAGE_NAME:latest --push ./AI
 
-  ai_deploy_and_tag:
+  ai_deploy:
     needs: ai_build
     runs-on: self-hosted
     steps:
@@ -57,20 +46,21 @@ jobs:
           username: ${{ secrets.AI_SERVER_USERNAME }}
           password: ${{ secrets.AI_SERVER_PASSWORD }}
           script: |
-            IMAGE_TAG=${{ needs.ai_build.outputs.image_tag }}
             IMAGE_NAME=${{ secrets.DOCKERHUB_USERNAME }}/harimdev-ai
 
             docker stop harimdev-ai || true
             docker rm harimdev-ai || true
-            docker pull $IMAGE_NAME:$IMAGE_TAG
+            docker pull $IMAGE_NAME:latest
             docker run -d --name harimdev-ai -p 8000:8000 \
               --network ai-network \
               --env-file /home/halim/portfolio/AI/.env \
               -v /home/halim/logs:/AI_logs \
-              $IMAGE_NAME:$IMAGE_TAG
+              $IMAGE_NAME:latest
 
             echo "===== Running containers ====="
             docker ps -a | grep harimdev-ai
+
+            docker image prune -f || true
 
       - name: Wait for server health check
         run: |
@@ -85,62 +75,3 @@ jobs:
           done
           echo "Health check failed"
           exit 1
-
-      - name: Bump version and push tag (only if health check passed)
-        id: tag_version
-        uses: mathieudutour/github-tag-action@v6.2
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          tag_prefix: 'AI-'
-
-      - name: Log in to DockerHub on self-hosted runner
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_PASSWORD }}
-
-      - name: Re-tag & Push Docker image with new tag
-        if: ${{ steps.tag_version.outputs.new_tag != '' }}
-        run: |
-          IMAGE_NAME=${{ secrets.DOCKERHUB_USERNAME }}/harimdev-ai
-          TEMP_TAG=${{ needs.ai_build.outputs.image_tag }}
-          NEW_TAG=${{ steps.tag_version.outputs.new_tag }}
-
-          docker pull $IMAGE_NAME:$TEMP_TAG
-          docker tag $IMAGE_NAME:$TEMP_TAG $IMAGE_NAME:$NEW_TAG
-          docker push $IMAGE_NAME:$NEW_TAG
-
-      - name: Delete temp tag from Docker Hub (always)
-        if: always()   # 성공/실패 상관없이 실행
-        run: |
-          DOCKER_USER=${{ secrets.DOCKERHUB_USERNAME }}
-          DOCKER_PASS=${{ secrets.DOCKERHUB_PASSWORD }}
-          TEMP_TAG=${{ needs.ai_build.outputs.image_tag }}
-          TOKEN=$(curl -s -H "Content-Type: application/json" \
-            -X POST -d "{\"username\":\"$DOCKER_USER\",\"password\":\"$DOCKER_PASS\"}" \
-            https://hub.docker.com/v2/users/login/ | jq -r .token)
-          curl -s -X DELETE \
-            -H "Authorization: JWT $TOKEN" \
-            https://hub.docker.com/v2/repositories/$DOCKER_USER/harimdev-ai/tags/$TEMP_TAG/ \
-            || true
-      - name: Clean up temp Docker image on server
-        if: success()
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.AI_SERVER_HOST }}
-          username: ${{ secrets.AI_SERVER_USERNAME }}
-          password: ${{ secrets.AI_SERVER_PASSWORD }}
-          script: |
-            IMAGE_TAG=${{ needs.ai_build.outputs.image_tag }}
-            IMAGE_NAME=${{ secrets.DOCKERHUB_USERNAME }}/harimdev-ai
-            NEW_TAG=${{ steps.tag_version.outputs.new_tag }}
-
-            
-            echo "Removing temp Docker image from server (container stays running)..."
-            docker rmi $IMAGE_NAME:$IMAGE_TAG || true
-
-            echo "Removing tag Docker image from server ..."
-            docker rmi $IMAGE_NAME:$NEW_TAG || true
-            
-            echo "Pruning dangling images..."
-            docker image prune -f || true
